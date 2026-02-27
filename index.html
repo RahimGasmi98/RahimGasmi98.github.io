@@ -25,6 +25,8 @@ body { margin:0; padding:0; font-family: Arial, sans-serif; }
     width: 28px; height: 28px;
     background-color: #16a34a;
     box-shadow: 0 0 6px #64bb50;
+    /* الثبات عند التكبير/التصغير */
+    transform: translate(-14px, -28px) scale(1);
 }
 </style>
 </head>
@@ -56,36 +58,18 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 // =======================
-// 3️⃣ حدود مدينة سكيكدة
-// Polygon لتقييد الماركرات
-// =======================
-var skikdaBounds = [
-    [36.885, 6.895], // شمال غرب
-    [36.885, 6.920], // شمال شرق
-    [36.870, 6.920], // جنوب شرق
-    [36.870, 6.895]  // جنوب غرب
-];
-
-var cityPolygon = L.polygon(skikdaBounds, {
-    color: "#64bb50",
-    fillColor: "#64bb50",
-    fillOpacity: 0.05,
-    weight: 2
-}).addTo(map);
-
-// =======================
-// 4️⃣ أيقونات Marker كرتونية
+// 3️⃣ أيقونات Marker كرتونية (ثابتة الحجم)
 // =======================
 var CartoonIcon = L.DivIcon.extend({
     options: {
         className: 'cartoon-marker',
         iconSize: [28,28],
-        iconAnchor: [14,28]
+        iconAnchor: [14,28] // تثبيت مركز الماركر
     }
 });
 
 // =======================
-// 5️⃣ إضافة ماركرات داخل حدود المدينة
+// 4️⃣ إضافة ماركرات داخل المدينة
 // =======================
 var restaurants = [
     {lat:36.878, lng:6.898, name:"مطعم الريف", rating:9.0},
@@ -102,7 +86,7 @@ restaurants.forEach(function(res){
 });
 
 // =======================
-// 6️⃣ سلاسة وتحريك سلس
+// 5️⃣ سلاسة وتحريك سلس
 // =======================
 map.options.fadeAnimation = true;
 map.options.zoomAnimation = true;
