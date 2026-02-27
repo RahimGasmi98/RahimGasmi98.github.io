@@ -3,40 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>خريطة J3an</title>
+<title>خريطة J3an - سكيكدة</title>
 
-<!-- Mapbox CSS -->
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.20.0/mapbox-gl.css" rel="stylesheet" />
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
-body { margin:0; padding:0; }
-#map { position:absolute; top:0; bottom:0; width:100%; }
+body { margin:0; padding:0; font-family: Arial, sans-serif; }
+#map { height:100vh; width:100%; }
+
+/* Popup style */
+.leaflet-popup-content-wrapper {
+    background: #111; color:white; border-radius: 12px;
+    font-size: 14px;
+}
+.leaflet-popup-tip { background: #111; }
+
+/* Marker bounce animation */
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+.bounce-marker { animation: bounce 1s infinite; }
 </style>
 </head>
 <body>
 
 <div id="map"></div>
 
-<!-- Mapbox JS -->
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.20.0/mapbox-gl.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-mapboxgl.accessToken = 'PUT_YOUR_API_KEY_HERE';
-
-var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/dark-v11', // ستايل افتراضي
-    center: [7, 28], // إحداثيات وسط الجزائر
-    zoom: 6
+// =======================
+// 1️⃣ إنشاء الخريطة
+// =======================
+var map = L.map('map', {
+    center: [36.8796, 6.9065], // وسط ولاية سكيكدة
+    zoom: 12,
+    zoomControl: true,
+    scrollWheelZoom: true
 });
 
-// =====================
-// 2️⃣ إضافة Style JSON
-// =====================
-map.on('load', function () {
-    map.setPaintProperty('road', 'visibility', 'none'); // مثال على إخفاء الطرق
-    map.setPaintProperty('poi-label', 'visibility', 'none'); // إخفاء POI
-    // يمكنك إضافة أي تعديلات حسب JSON الذي جهزناه
+// =======================
+// 2️⃣ إضافة Tile Layer داكنة للحفاظ على أسماء المدن والشوارع فقط
+// =======================
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    subdomains: 'abcd',
+    maxZoom: 20
+}).addTo(map);
+
+// =======================
+// 3️⃣ أيقونة الماركر الأخضر
+// =======================
+var greenIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    className: 'bounce-marker' // إضافة انيميشن خفيف
 });
+
+// =======================
+// 4️⃣ إضافة ماركرات لمطاعم في سكيكدة
+// =======================
+var restaurants = [
+    {lat:36.876, lng:6.906, name:"مطعم الريف", rating:9.0},
+    {lat:36.882, lng:6.911, name:"مطعم البهجة", rating:8.5},
+    {lat:36.879, lng:6.920, name:"مطعم الزهراء", rating:8.8},
+    {lat:36.885, lng:6.900, name:"مطعم سكيكدة المركزي", rating:9.2},
+    {lat:36.870, lng:6.915, name:"مطعم البحر", rating:8.7}
+];
+
+restaurants.forEach(function(res){
+    L.marker([res.lat, res.lng], {icon: greenIcon})
+     .addTo(map)
+     .bindPopup(`<b>${res.name}</b><br>تقييم: ${res.rating}/10`);
+});
+
+// =======================
+// 5️⃣ خريطة سلسة عند التكبير والتحريك
+// Leaflet افتراضي سلس جدًا، لكن يمكن زيادة smoothness
+// =======================
+map.options.fadeAnimation = true;
+map.options.zoomAnimation = true;
+
 </script>
 
 </body>
