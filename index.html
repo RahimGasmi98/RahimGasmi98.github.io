@@ -9,43 +9,39 @@
 <style>
 body {
     margin:0;
-    background:#0f0f0f;
+    background:#0e1411;
     font-family: Arial, sans-serif;
 }
 
-/* الخريطة */
 #map {
     height:100vh;
 }
 
-/* تخصيص الـ popup */
+/* طبقة خضراء خفيفة فوق الخريطة */
+.leaflet-container {
+    filter: hue-rotate(60deg) saturate(1.2);
+}
+
+/* Popup احترافي */
 .leaflet-popup-content-wrapper {
     background:#111;
     color:#eaeaea;
     border-radius:12px;
-    border:1px solid #0f3d2e;
+    border:1px solid #14532d;
 }
 
 .leaflet-popup-tip {
     background:#111;
 }
 
-/* عنوان المطعم */
-.popup-title {
-    color:#00c853; /* أخضر غامق جميل */
-    font-weight:bold;
-    font-size:16px;
-}
-
-/* زرار التكبير */
+/* تكبير/تصغير */
 .leaflet-control-zoom a {
     background:#111 !important;
-    color:#00c853 !important;
+    color:#16a34a !important;
     border:none !important;
 }
-
 .leaflet-control-zoom a:hover {
-    background:#0f3d2e !important;
+    background:#14532d !important;
 }
 </style>
 
@@ -59,33 +55,31 @@ body {
 <script>
 var map = L.map('map').setView([36.7538, 3.0588], 13);
 
-// خريطة داكنة
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+// خريطة داكنة لكن أوضح
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap & Carto',
     maxZoom: 19
 }).addTo(map);
 
-// أيقونة دائرية خضراء احترافية
-var greenIcon = L.divIcon({
-    className: '',
-    html: `<div style="
-        background:#00c853;
-        width:18px;
-        height:18px;
-        border-radius:50%;
-        box-shadow:0 0 12px #00c853;
-        border:2px solid #0f0f0f;
-    "></div>`,
-    iconSize: [18, 18]
+// طبقة أسماء الشوارع (حتى تكون واضحة)
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap & Carto',
+    maxZoom: 19
+}).addTo(map);
+
+// أيقونة Pin خضراء احترافية
+var greenPin = L.icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+    iconSize: [35, 35],
+    iconAnchor: [17, 35],
+    popupAnchor: [0, -35]
 });
 
 // إضافة مطعم
-L.marker([36.7538, 3.0588], {icon: greenIcon})
+L.marker([36.7538, 3.0588], {icon: greenPin})
 .addTo(map)
-.bindPopup(`
-    <div class="popup-title">J3an Restaurant</div>
-    تقييم: ⭐ 8.5 / 10
-`);
+.bindPopup("<b style='color:#16a34a'>J3an Restaurant</b><br>⭐ 8.5 / 10");
+
 </script>
 
 </body>
