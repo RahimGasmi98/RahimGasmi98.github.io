@@ -18,13 +18,14 @@ body { margin:0; padding:0; font-family: Arial, sans-serif; }
 }
 .leaflet-popup-tip { background: #111; }
 
-/* Marker bounce animation */
-@keyframes bounce {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
+/* Marker كرتوني */
+.cartoon-marker {
+    border: 2px solid #64bb50;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    background-color: #16a34a;
+    box-shadow: 0 0 6px #64bb50;
 }
-.bounce-marker { animation: bounce 1s infinite; }
 </style>
 </head>
 <body>
@@ -39,14 +40,14 @@ body { margin:0; padding:0; font-family: Arial, sans-serif; }
 // 1️⃣ إنشاء الخريطة
 // =======================
 var map = L.map('map', {
-    center: [36.8796, 6.9065], // وسط ولاية سكيكدة
-    zoom: 12,
+    center: [36.8796, 6.9065], // وسط سكيكدة
+    zoom: 14,
     zoomControl: true,
     scrollWheelZoom: true
 });
 
 // =======================
-// 2️⃣ إضافة Tile Layer داكنة للحفاظ على أسماء المدن والشوارع فقط
+// 2️⃣ Tile Layer داكن
 // =======================
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
@@ -55,36 +56,53 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 // =======================
-// 3️⃣ أيقونة الماركر الأخضر
+// 3️⃣ حدود مدينة سكيكدة
+// Polygon لتقييد الماركرات
 // =======================
-var greenIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    className: 'bounce-marker' // إضافة انيميشن خفيف
+var skikdaBounds = [
+    [36.885, 6.895], // شمال غرب
+    [36.885, 6.920], // شمال شرق
+    [36.870, 6.920], // جنوب شرق
+    [36.870, 6.895]  // جنوب غرب
+];
+
+var cityPolygon = L.polygon(skikdaBounds, {
+    color: "#64bb50",
+    fillColor: "#64bb50",
+    fillOpacity: 0.05,
+    weight: 2
+}).addTo(map);
+
+// =======================
+// 4️⃣ أيقونات Marker كرتونية
+// =======================
+var CartoonIcon = L.DivIcon.extend({
+    options: {
+        className: 'cartoon-marker',
+        iconSize: [28,28],
+        iconAnchor: [14,28]
+    }
 });
 
 // =======================
-// 4️⃣ إضافة ماركرات لمطاعم في سكيكدة
+// 5️⃣ إضافة ماركرات داخل حدود المدينة
 // =======================
 var restaurants = [
-    {lat:36.876, lng:6.906, name:"مطعم الريف", rating:9.0},
-    {lat:36.882, lng:6.911, name:"مطعم البهجة", rating:8.5},
-    {lat:36.879, lng:6.920, name:"مطعم الزهراء", rating:8.8},
-    {lat:36.885, lng:6.900, name:"مطعم سكيكدة المركزي", rating:9.2},
-    {lat:36.870, lng:6.915, name:"مطعم البحر", rating:8.7}
+    {lat:36.878, lng:6.898, name:"مطعم الريف", rating:9.0},
+    {lat:36.880, lng:6.905, name:"مطعم البهجة", rating:8.5},
+    {lat:36.882, lng:6.910, name:"مطعم الزهراء", rating:8.8},
+    {lat:36.876, lng:6.915, name:"مطعم سكيكدة المركزي", rating:9.2},
+    {lat:36.874, lng:6.900, name:"مطعم البحر", rating:8.7}
 ];
 
 restaurants.forEach(function(res){
-    L.marker([res.lat, res.lng], {icon: greenIcon})
+    L.marker([res.lat, res.lng], {icon: new CartoonIcon()})
      .addTo(map)
      .bindPopup(`<b>${res.name}</b><br>تقييم: ${res.rating}/10`);
 });
 
 // =======================
-// 5️⃣ خريطة سلسة عند التكبير والتحريك
-// Leaflet افتراضي سلس جدًا، لكن يمكن زيادة smoothness
+// 6️⃣ سلاسة وتحريك سلس
 // =======================
 map.options.fadeAnimation = true;
 map.options.zoomAnimation = true;
