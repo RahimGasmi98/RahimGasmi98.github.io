@@ -2,17 +2,50 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>J3an Map</title>
+<title>J3an</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-body { margin:0; }
-#map { height:100vh; }
+body {
+    margin:0;
+    background:#0f0f0f;
+    font-family: Arial, sans-serif;
+}
 
-/* لون أخضر للنقاط */
-.leaflet-marker-icon {
-    filter: hue-rotate(90deg) saturate(2);
+/* الخريطة */
+#map {
+    height:100vh;
+}
+
+/* تخصيص الـ popup */
+.leaflet-popup-content-wrapper {
+    background:#111;
+    color:#eaeaea;
+    border-radius:12px;
+    border:1px solid #0f3d2e;
+}
+
+.leaflet-popup-tip {
+    background:#111;
+}
+
+/* عنوان المطعم */
+.popup-title {
+    color:#00c853; /* أخضر غامق جميل */
+    font-weight:bold;
+    font-size:16px;
+}
+
+/* زرار التكبير */
+.leaflet-control-zoom a {
+    background:#111 !important;
+    color:#00c853 !important;
+    border:none !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background:#0f3d2e !important;
 }
 </style>
 
@@ -26,17 +59,33 @@ body { margin:0; }
 <script>
 var map = L.map('map').setView([36.7538, 3.0588], 13);
 
-// خريطة داكنة احترافية
+// خريطة داكنة
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap & Carto',
     maxZoom: 19
 }).addTo(map);
 
-// مثال نقطة مطعم
-L.marker([36.7538, 3.0588])
-.addTo(map)
-.bindPopup("<b>J3an Restaurant</b><br>تجربة رائعة ⭐");
+// أيقونة دائرية خضراء احترافية
+var greenIcon = L.divIcon({
+    className: '',
+    html: `<div style="
+        background:#00c853;
+        width:18px;
+        height:18px;
+        border-radius:50%;
+        box-shadow:0 0 12px #00c853;
+        border:2px solid #0f0f0f;
+    "></div>`,
+    iconSize: [18, 18]
+});
 
+// إضافة مطعم
+L.marker([36.7538, 3.0588], {icon: greenIcon})
+.addTo(map)
+.bindPopup(`
+    <div class="popup-title">J3an Restaurant</div>
+    تقييم: ⭐ 8.5 / 10
+`);
 </script>
 
 </body>
