@@ -1,16 +1,43 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>J3an - تقييم المطاعم</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<meta charset="UTF-8">
+<title>J3an Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body { margin:0; }
+#map { height:100vh; }
+
+/* لون أخضر للنقاط */
+.leaflet-marker-icon {
+    filter: hue-rotate(90deg) saturate(2);
+}
+</style>
+
 </head>
 <body>
-  <h1>J3an</h1>
-  <div id="map" style="height: 500px;"></div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+var map = L.map('map').setView([36.7538, 3.0588], 13);
+
+// خريطة داكنة احترافية
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap & Carto',
+    maxZoom: 19
+}).addTo(map);
+
+// مثال نقطة مطعم
+L.marker([36.7538, 3.0588])
+.addTo(map)
+.bindPopup("<b>J3an Restaurant</b><br>تجربة رائعة ⭐");
+
+</script>
+
 </body>
 </html>
