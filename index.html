@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>خريطة J3an - سكيكدة</title>
 
-<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
 body { margin:0; padding:0; font-family: Arial, sans-serif; }
@@ -18,32 +17,28 @@ body { margin:0; padding:0; font-family: Arial, sans-serif; }
 }
 .leaflet-popup-tip { background: #111; }
 
-/* Marker دبوز */
-.drop-marker {
-    width: 20px;
-    height: 30px;
-    background-color: #16a34a; /* أخضر */
-    border: 2px solid #64bb50;
-    border-radius: 50% 50% 50% 50%;
+/* Marker جديد كرتوني */
+.cartoon-pin {
+    width: 24px;
+    height: 36px;
+    background: linear-gradient(to bottom, #64bb50, #16a34a);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
     position: relative;
-    transform: translate(-10px, -30px);
-    box-shadow: 0 0 6px #64bb50;
+    transform: translate(-12px, -36px);
+    box-shadow: 0 0 6px rgba(100,187,80,0.8);
 }
 
-/* السهم أسفل الدبوز */
-.drop-marker::after {
-    content: '';
+/* الدائرة في وسط الماركر */
+.cartoon-pin::before {
+    content:'';
     position: absolute;
-    bottom: -8px;
-    left: 50%;
-    margin-left: -6px;
-    width: 12px;
-    height: 12px;
-    background-color: #16a34a;
-    border-left: 2px solid #64bb50;
-    border-bottom: 2px solid #64bb50;
-    transform: rotate(45deg);
-    border-radius: 2px;
+    top: 7px;
+    left: 7px;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    border: 2px solid #64bb50;
 }
 </style>
 </head>
@@ -51,43 +46,31 @@ body { margin:0; padding:0; font-family: Arial, sans-serif; }
 
 <div id="map"></div>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
-// =======================
-// 1️⃣ إنشاء الخريطة
-// =======================
 var map = L.map('map', {
-    center: [36.8796, 6.9065], // وسط سكيكدة
+    center: [36.8796, 6.9065],
     zoom: 14,
     zoomControl: true,
     scrollWheelZoom: true
 });
 
-// =======================
-// 2️⃣ Tile Layer داكن
-// =======================
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     subdomains: 'abcd',
     maxZoom: 20
 }).addTo(map);
 
-// =======================
-// 3️⃣ أيقونات Marker دبوز
-// =======================
-var DropIcon = L.DivIcon.extend({
+// أيقونة ماركر جديدة
+var CartoonPin = L.DivIcon.extend({
     options: {
-        className: 'drop-marker',
-        iconSize: [20,30],
-        iconAnchor: [10,30] // تثبيت رأس الدبوز عند الإحداثيات
+        className: 'cartoon-pin',
+        iconSize: [24,36],
+        iconAnchor: [12,36]
     }
 });
 
-// =======================
-// 4️⃣ إضافة ماركرات لمطاعم
-// =======================
+// مطاعم
 var restaurants = [
     {lat:36.878, lng:6.898, name:"مطعم الريف", rating:9.0},
     {lat:36.880, lng:6.905, name:"مطعم البهجة", rating:8.5},
@@ -97,18 +80,15 @@ var restaurants = [
 ];
 
 restaurants.forEach(function(res){
-    L.marker([res.lat, res.lng], {icon: new DropIcon()})
+    L.marker([res.lat, res.lng], {icon: new CartoonPin()})
      .addTo(map)
      .bindPopup(`<b>${res.name}</b><br>تقييم: ${res.rating}/10`);
 });
 
-// =======================
-// 5️⃣ سلاسة وتحريك سلس
-// =======================
+// سلاسة الخريطة
 map.options.fadeAnimation = true;
 map.options.zoomAnimation = true;
 
 </script>
-
 </body>
 </html>
