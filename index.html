@@ -18,15 +18,32 @@ body { margin:0; padding:0; font-family: Arial, sans-serif; }
 }
 .leaflet-popup-tip { background: #111; }
 
-/* Marker كرتوني */
-.cartoon-marker {
+/* Marker دبوز */
+.drop-marker {
+    width: 20px;
+    height: 30px;
+    background-color: #16a34a; /* أخضر */
     border: 2px solid #64bb50;
-    border-radius: 50%;
-    width: 28px; height: 28px;
-    background-color: #16a34a;
+    border-radius: 50% 50% 50% 50%;
+    position: relative;
+    transform: translate(-10px, -30px);
     box-shadow: 0 0 6px #64bb50;
-    /* الثبات عند التكبير/التصغير */
-    transform: translate(-14px, -28px) scale(1);
+}
+
+/* السهم أسفل الدبوز */
+.drop-marker::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    margin-left: -6px;
+    width: 12px;
+    height: 12px;
+    background-color: #16a34a;
+    border-left: 2px solid #64bb50;
+    border-bottom: 2px solid #64bb50;
+    transform: rotate(45deg);
+    border-radius: 2px;
 }
 </style>
 </head>
@@ -58,18 +75,18 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 // =======================
-// 3️⃣ أيقونات Marker كرتونية (ثابتة الحجم)
+// 3️⃣ أيقونات Marker دبوز
 // =======================
-var CartoonIcon = L.DivIcon.extend({
+var DropIcon = L.DivIcon.extend({
     options: {
-        className: 'cartoon-marker',
-        iconSize: [28,28],
-        iconAnchor: [14,28] // تثبيت مركز الماركر
+        className: 'drop-marker',
+        iconSize: [20,30],
+        iconAnchor: [10,30] // تثبيت رأس الدبوز عند الإحداثيات
     }
 });
 
 // =======================
-// 4️⃣ إضافة ماركرات داخل المدينة
+// 4️⃣ إضافة ماركرات لمطاعم
 // =======================
 var restaurants = [
     {lat:36.878, lng:6.898, name:"مطعم الريف", rating:9.0},
@@ -80,7 +97,7 @@ var restaurants = [
 ];
 
 restaurants.forEach(function(res){
-    L.marker([res.lat, res.lng], {icon: new CartoonIcon()})
+    L.marker([res.lat, res.lng], {icon: new DropIcon()})
      .addTo(map)
      .bindPopup(`<b>${res.name}</b><br>تقييم: ${res.rating}/10`);
 });
