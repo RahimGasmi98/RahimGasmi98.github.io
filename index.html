@@ -18,10 +18,8 @@
       --primary: #22c55e;
       --primary-dark: #16a34a;
       --gold: #fbbf24;
-      --danger: #ef4444;
       --border: rgba(255,255,255,.07);
       --shadow: rgba(0,0,0,.4);
-      --radius: 14px;
 
       --pin-size: 36px;
       --pin-half: 18px;
@@ -43,134 +41,229 @@
 
     #map { width: 100%; height: 100vh; }
 
-    .leaflet-div-icon {
-      background: transparent !important;
-      border: none !important;
-    }
+    .leaflet-div-icon { background: transparent !important; border: none !important; }
+    .leaflet-control-attribution { display: none !important; }
 
-    /* ─── إخفاء attribution ─── */
-    .leaflet-control-attribution {
-      display: none !important;
-    }
-
-    /* ─── Popup ─── */
+    /* ─── Popup مصغّر ─── */
     .leaflet-popup-content-wrapper {
       background: linear-gradient(170deg, var(--card-2), var(--card));
       color: var(--text);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 14px;
       box-shadow: 0 12px 40px var(--shadow);
       padding: 0;
     }
-    .leaflet-popup-tip {
-      background: var(--card);
-      border: 1px solid var(--border);
-    }
+    .leaflet-popup-tip { background: var(--card); border: 1px solid var(--border); }
     .leaflet-popup-content { margin: 0 !important; }
     .leaflet-popup-close-button {
       color: var(--muted) !important;
-      font-size: 20px !important;
-      top: 6px !important;
-      right: 10px !important;
+      font-size: 18px !important;
+      top: 4px !important;
+      right: 8px !important;
     }
 
-    /* ─── بطاقة Popup ─── */
-    .card { padding: 14px 16px; min-width: 260px; max-width: 300px; }
+    /* ─── Mini Card (Popup) ─── */
+    .mini { padding: 12px 14px; min-width: 220px; max-width: 260px; }
+    .mini-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .mini-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      box-shadow: 0 3px 10px rgba(34,197,94,.3);
+      flex-shrink: 0;
+    }
+    .mini-name { font-size: 13px; font-weight: 700; line-height: 1.3; }
+    .mini-type { font-size: 10px; color: var(--muted); }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .mini-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 0; font-size: 11px; color: #cbd5e1;
+    }
+    .mini-row + .mini-row { border-top: 1px solid var(--border); }
+    .mini-row .lbl { color: var(--muted); }
+
+    .mini-bar-wrap {
+      width: 55px; height: 4px;
+      background: rgba(255,255,255,.06);
+      border-radius: 99px; overflow: hidden;
+      margin: 0 6px; flex-shrink: 0;
+    }
+    .mini-bar { height: 100%; border-radius: 99px; }
+
+    .mini-status {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 700;
+    }
+    .mini-status.open { color: #86efac; background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.25); }
+    .mini-status.closed { color: #fca5a5; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25); }
+
+    .mini-score {
+      font-size: 18px; font-weight: 800;
+      background: linear-gradient(135deg, #fde68a, #f59e0b);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .mini-stars { color: var(--gold); font-size: 11px; letter-spacing: .5px; }
+
+    .btn-more {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 10px; padding: 7px 0;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; border: none; border-radius: 8px;
+      font-family: 'Cairo', sans-serif; font-size: 11.5px; font-weight: 700;
+      cursor: pointer; transition: filter .2s;
+    }
+    .btn-more:hover { filter: brightness(1.15); }
+
+    /* ─── Bottom Sheet ─── */
+    .overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(0,0,0,.5);
+      backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .overlay.active { opacity: 1; pointer-events: all; }
+
+    .sheet {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 2001;
+      background: linear-gradient(180deg, #0f172a, #111827);
+      border-top: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      max-height: 85vh;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.32,.72,0,1);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .sheet.active { transform: translateY(0); }
+
+    .sheet-handle {
+      display: flex; justify-content: center; padding: 10px 0 4px;
+      cursor: grab; flex-shrink: 0;
+    }
+    .sheet-handle span {
+      width: 36px; height: 4px;
+      background: rgba(255,255,255,.2); border-radius: 99px;
+    }
+
+    .sheet-scroll {
+      overflow-y: auto; flex: 1;
+      padding: 0 18px 24px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Sheet Header */
+    .sh-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .sh-icon {
+      width: 50px; height: 50px; border-radius: 14px;
+      display: grid; place-items: center; font-size: 24px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      box-shadow: 0 4px 16px rgba(34,197,94,.3);
+      flex-shrink: 0;
+    }
+    .sh-name { font-size: 18px; font-weight: 800; }
+    .sh-type { font-size: 12px; color: var(--muted); }
+    .sh-rating-inline {
+      display: flex; align-items: center; gap: 6px; margin-top: 2px;
+    }
+    .sh-rating-inline .score {
+      font-size: 14px; font-weight: 800; color: var(--gold);
+    }
+    .sh-rating-inline .stars { color: var(--gold); font-size: 12px; }
+    .sh-rating-inline .status-dot {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 1px 7px; border-radius: 999px;
+      font-size: 9.5px; font-weight: 700; margin-right: 4px;
+    }
+    .sh-rating-inline .status-dot.open { color: #86efac; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.2); }
+    .sh-rating-inline .status-dot.closed { color: #fca5a5; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.2); }
+
+    /* Sheet Section */
+    .sh-section { margin-bottom: 16px; }
+    .sh-section-title {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Description */
+    .sh-desc { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+
+    /* Photos */
+    .sh-photos {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding-bottom: 6px; scroll-snap-type: x mandatory;
+    }
+    .sh-photos::-webkit-scrollbar { height: 0; }
+    .sh-photo {
+      flex-shrink: 0; width: 140px; height: 95px;
+      border-radius: 10px; object-fit: cover;
+      scroll-snap-align: start;
+      border: 1px solid var(--border);
+    }
+
+    /* Info Grid */
+    .sh-info {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .sh-info-item {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px;
+    }
+    .sh-info-item .label { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+    .sh-info-item .value { font-size: 12.5px; font-weight: 700; }
+
+    /* Ratings bars */
+    .sh-rate-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; font-size: 12px;
+    }
+    .sh-rate-item + .sh-rate-item { border-top: 1px solid var(--border); }
+    .sh-rate-item .lbl { color: #cbd5e1; flex: 1; }
+    .sh-bar-wrap {
+      width: 100px; height: 6px;
+      background: rgba(255,255,255,.06);
+      border-radius: 99px; overflow: hidden;
+      margin: 0 10px; flex-shrink: 0;
+    }
+    .sh-bar { height: 100%; border-radius: 99px; }
+    .sh-rate-item strong { color: var(--text); width: 28px; text-align: left; }
+
+    /* Comments */
+    .comment {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px;
       margin-bottom: 8px;
     }
-    .card-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
+    .comment-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .comment-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
       display: grid; place-items: center;
-      font-size: 18px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      box-shadow: 0 4px 14px rgba(34,197,94,.3);
-      flex-shrink: 0;
-    }
-    .card-header .name { font-size: 14px; font-weight: 700; line-height: 1.3; }
-    .card-header .type { font-size: 11px; color: var(--muted); }
-
-    .card .desc {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-bottom: 10px;
-    }
-
-    .rating-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(251,191,36,.06);
-      border: 1px solid rgba(251,191,36,.15);
-      border-radius: 10px;
-      padding: 6px 10px;
-      margin-bottom: 10px;
-    }
-    .rating-box .stars { color: var(--gold); font-size: 14px; letter-spacing: 1px; }
-    .rating-box .score {
-      font-size: 20px; font-weight: 800;
-      background: linear-gradient(135deg, #fde68a, #f59e0b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .sub-ratings { margin-bottom: 10px; }
-    .sub-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4px 0;
-      font-size: 11.5px;
-      color: #cbd5e1;
-    }
-    .sub-item + .sub-item { border-top: 1px solid var(--border); }
-    .sub-item .lbl { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bar-wrap {
-      width: 65px; height: 5px;
+      font-size: 14px;
       background: rgba(255,255,255,.06);
-      border-radius: 99px;
-      overflow: hidden;
-      margin: 0 8px;
       flex-shrink: 0;
     }
-    .bar-fill { height: 100%; border-radius: 99px; }
-    .sub-item strong { flex-shrink: 0; width: 22px; text-align: left; font-size: 11px; }
+    .comment-name { font-size: 12px; font-weight: 700; }
+    .comment-date { font-size: 10px; color: var(--muted); }
+    .comment-stars { color: var(--gold); font-size: 10px; margin-right: auto; }
+    .comment-text { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
 
-    .info-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 11.5px;
-      padding: 5px 0;
+    /* Close btn */
+    .sheet-close {
+      position: absolute; top: 12px; left: 14px; z-index: 10;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,.08); border: 1px solid var(--border);
+      color: var(--muted); font-size: 16px;
+      display: grid; place-items: center;
+      cursor: pointer; transition: background .2s;
     }
-    .info-row + .info-row { border-top: 1px solid var(--border); }
-    .info-row .label { color: var(--muted); }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 10.5px;
-      font-weight: 700;
-    }
-    .badge.open {
-      color: #86efac;
-      background: rgba(34,197,94,.1);
-      border: 1px solid rgba(34,197,94,.25);
-    }
-    .badge.closed {
-      color: #fca5a5;
-      background: rgba(239,68,68,.1);
-      border: 1px solid rgba(239,68,68,.25);
-    }
+    .sheet-close:hover { background: rgba(255,255,255,.15); }
 
     /* ─── Marker ─── */
     .pin {
@@ -179,29 +272,22 @@
       border-radius: 50% 50% 50% 0;
       background: linear-gradient(145deg, var(--primary), var(--primary-dark));
       transform: translate(calc(-1 * var(--pin-half)), calc(-1 * var(--pin-size))) rotate(-45deg);
-      box-shadow:
-        0 6px 20px rgba(34,197,94,.4),
-        inset 0 0 0 2.5px rgba(255,255,255,.15);
-      cursor: pointer;
-      transition: transform .2s, filter .2s;
+      box-shadow: 0 6px 20px rgba(34,197,94,.4), inset 0 0 0 2.5px rgba(255,255,255,.15);
+      cursor: pointer; transition: transform .2s, filter .2s;
     }
     .pin::before {
       content: attr(data-icon);
-      position: absolute; inset: 0;
-      display: grid; place-items: center;
-      transform: rotate(45deg);
-      font-size: var(--pin-font);
+      position: absolute; inset: 0; display: grid; place-items: center;
+      transform: rotate(45deg); font-size: var(--pin-font);
       filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));
     }
     .pin::after {
       content: "";
       position: absolute;
       width: var(--pin-dot); height: var(--pin-dot);
-      background: rgba(255,255,255,.85);
-      border-radius: 50%;
+      background: rgba(255,255,255,.85); border-radius: 50%;
       top: var(--pin-dot-pos); left: var(--pin-dot-pos);
-      transform: rotate(45deg);
-      opacity: .15;
+      transform: rotate(45deg); opacity: .15;
     }
     .pin:hover {
       transform: translate(calc(-1 * var(--pin-half)), calc(-1 * var(--pin-size) - 2px)) rotate(-45deg) scale(1.12);
@@ -211,11 +297,9 @@
     .pulse-ring {
       position: absolute;
       width: var(--pulse-size); height: var(--pulse-size);
-      border-radius: 50%;
-      background: rgba(34,197,94,.25);
+      border-radius: 50%; background: rgba(34,197,94,.25);
       transform: translate(calc(-1 * var(--pin-half)), calc(-1 * var(--pin-half)));
-      animation: pulse 2.5s ease-out infinite;
-      pointer-events: none;
+      animation: pulse 2.5s ease-out infinite; pointer-events: none;
     }
     @keyframes pulse {
       0%   { transform: translate(calc(-1 * var(--pin-half)), calc(-1 * var(--pin-half))) scale(1); opacity:.6; }
@@ -224,18 +308,11 @@
 
     /* ─── Header ─── */
     .map-header {
-      position: fixed;
-      top: 10px; right: 10px;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(15,23,42,.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 14px;
-      box-shadow: 0 8px 28px var(--shadow);
+      position: fixed; top: 10px; right: 10px; z-index: 1000;
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 8px 14px; box-shadow: 0 8px 28px var(--shadow);
     }
     .map-header .logo { font-size: 20px; }
     .map-header .title { font-size: 13px; font-weight: 700; }
@@ -243,150 +320,81 @@
 
     /* ─── Search ─── */
     .search-box {
-      position: fixed;
-      top: 10px; left: 10px;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      background: rgba(15,23,42,.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 5px 10px;
-      box-shadow: 0 8px 28px var(--shadow);
-      width: 220px;
-      transition: width .3s;
+      position: fixed; top: 10px; left: 10px; z-index: 1000;
+      display: flex; align-items: center;
+      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 5px 10px; box-shadow: 0 8px 28px var(--shadow);
+      width: 220px; transition: width .3s;
     }
     .search-box:focus-within { width: 280px; border-color: rgba(34,197,94,.4); }
     .search-box input {
-      background: transparent;
-      border: none; outline: none;
-      color: var(--text);
-      font-family: 'Cairo', sans-serif;
-      font-size: 12px;
-      width: 100%;
-      padding: 5px 4px;
-      direction: rtl;
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'Cairo', sans-serif;
+      font-size: 12px; width: 100%; padding: 5px 4px; direction: rtl;
     }
     .search-box input::placeholder { color: #64748b; }
     .search-icon { font-size: 14px; margin-left: 6px; flex-shrink: 0; }
 
     /* ─── Counter ─── */
     .counter {
-      position: fixed;
-      bottom: 14px; right: 14px;
-      z-index: 1000;
-      background: rgba(15,23,42,.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 11px;
-      color: var(--muted);
+      position: fixed; bottom: 14px; right: 14px; z-index: 1000;
+      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 12px; font-size: 11px; color: var(--muted);
       box-shadow: 0 6px 20px var(--shadow);
     }
     .counter strong { color: var(--primary); font-weight: 800; }
 
-    /* ═══════ 📱 MOBILE ≤ 600px ═══════ */
+    /* ═══════ 📱 MOBILE ═══════ */
     @media (max-width: 600px) {
       :root {
-        --pin-size: 26px;
-        --pin-half: 13px;
-        --pin-font: 11px;
-        --pin-dot: 7px;
-        --pin-dot-pos: 9.5px;
-        --pulse-size: 26px;
+        --pin-size: 26px; --pin-half: 13px; --pin-font: 11px;
+        --pin-dot: 7px; --pin-dot-pos: 9.5px; --pulse-size: 26px;
       }
-
-      .map-header {
-        top: 6px; right: 6px;
-        padding: 5px 10px;
-        gap: 6px;
-        border-radius: 10px;
-      }
+      .map-header { top: 6px; right: 6px; padding: 5px 10px; gap: 6px; border-radius: 10px; }
       .map-header .logo { font-size: 16px; }
       .map-header .title { font-size: 11px; }
       .map-header .subtitle { font-size: 9px; }
 
       .search-box {
-        top: auto;
-        bottom: 14px;
-        left: 50%;
-        transform: translateX(-50%);
-        right: auto;
-        width: calc(100% - 24px);
-        max-width: 320px;
-        padding: 5px 10px;
-        border-radius: 10px;
+        top: auto; bottom: 14px;
+        left: 50%; transform: translateX(-50%); right: auto;
+        width: calc(100% - 24px); max-width: 320px;
       }
       .search-box:focus-within { width: calc(100% - 24px); max-width: 320px; }
-      .search-box input { font-size: 12px; padding: 6px 4px; }
-      .search-icon { font-size: 13px; }
 
-      .counter {
-        bottom: 60px;
-        right: 50%;
-        transform: translateX(50%);
-        font-size: 10px;
-        padding: 4px 10px;
-        border-radius: 8px;
-      }
+      .counter { bottom: 60px; right: 50%; transform: translateX(50%); font-size: 10px; padding: 4px 10px; }
 
       .leaflet-popup-content-wrapper { border-radius: 12px; }
-      .card {
-        padding: 10px 12px;
-        min-width: 220px;
-        max-width: 260px;
-      }
-      .card-icon { width: 32px; height: 32px; font-size: 14px; border-radius: 8px; }
-      .card-header { gap: 8px; margin-bottom: 6px; }
-      .card-header .name { font-size: 12.5px; }
-      .card-header .type { font-size: 10px; }
-      .card .desc { font-size: 11px; margin-bottom: 8px; line-height: 1.55; }
+      .mini { padding: 10px 12px; min-width: 200px; max-width: 240px; }
+      .mini-icon { width: 30px; height: 30px; font-size: 13px; border-radius: 8px; }
+      .mini-name { font-size: 11.5px; }
+      .mini-type { font-size: 9px; }
+      .mini-row { font-size: 10px; padding: 3px 0; }
+      .mini-bar-wrap { width: 45px; height: 3px; }
+      .mini-score { font-size: 15px; }
+      .mini-stars { font-size: 10px; }
+      .btn-more { font-size: 10.5px; padding: 6px 0; }
+      .leaflet-popup-close-button { font-size: 16px !important; }
 
-      .rating-box { padding: 5px 8px; margin-bottom: 8px; border-radius: 8px; }
-      .rating-box .stars { font-size: 12px; }
-      .rating-box .score { font-size: 17px; }
-
-      .sub-item { font-size: 10.5px; padding: 3px 0; }
-      .bar-wrap { width: 50px; height: 4px; margin: 0 6px; }
-      .sub-item strong { font-size: 10px; }
-      .sub-ratings { margin-bottom: 8px; }
-
-      .info-row { font-size: 10.5px; padding: 4px 0; }
-      .badge { font-size: 9.5px; padding: 2px 6px; }
-
-      .leaflet-popup-close-button {
-        font-size: 18px !important;
-        top: 4px !important;
-        right: 8px !important;
-      }
+      .sheet { max-height: 90vh; border-radius: 16px 16px 0 0; }
+      .sheet-scroll { padding: 0 14px 20px; }
+      .sh-icon { width: 42px; height: 42px; font-size: 20px; }
+      .sh-name { font-size: 16px; }
+      .sh-photo { width: 120px; height: 80px; }
+      .sh-info { gap: 6px; }
 
       .leaflet-bottom.leaflet-left { bottom: 65px !important; }
     }
 
-    /* ═══════ 📱 شاشات صغيرة جداً ≤ 380px ═══════ */
     @media (max-width: 380px) {
       :root {
-        --pin-size: 22px;
-        --pin-half: 11px;
-        --pin-font: 9px;
-        --pin-dot: 6px;
-        --pin-dot-pos: 8px;
-        --pulse-size: 22px;
+        --pin-size: 22px; --pin-half: 11px; --pin-font: 9px;
+        --pin-dot: 6px; --pin-dot-pos: 8px; --pulse-size: 22px;
       }
-
-      .map-header .logo { font-size: 14px; }
-      .map-header .title { font-size: 10px; }
       .map-header .subtitle { display: none; }
-
-      .card { min-width: 200px; max-width: 230px; padding: 8px 10px; }
-      .card-icon { width: 28px; height: 28px; font-size: 12px; }
-      .card-header .name { font-size: 11.5px; }
-      .card .desc { font-size: 10px; }
-      .rating-box .score { font-size: 15px; }
-      .rating-box .stars { font-size: 11px; }
-      .bar-wrap { width: 40px; }
+      .mini { min-width: 180px; max-width: 210px; padding: 8px 10px; }
     }
   </style>
 </head>
@@ -409,10 +417,21 @@
 
   <div id="map"></div>
 
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Bottom Sheet -->
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"><span></span></div>
+    <button class="sheet-close" id="sheetClose">✕</button>
+    <div class="sheet-scroll" id="sheetContent"></div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const isMobile = window.innerWidth <= 600;
 
+    // ─── الخريطة ───
     const map = L.map("map", {
       center: [36.8765, 6.9065],
       zoom: isMobile ? 13.5 : 14,
@@ -426,98 +445,167 @@
       wheelPxPerZoomLevel: 100,
       tap: true
     });
-
     L.control.zoom({ position: "bottomleft" }).addTo(map);
-
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd",
-      maxZoom: 19
+      subdomains: "abcd", maxZoom: 19
     }).addTo(map);
 
-    function createPin(icon = "🍽") {
-      const size = isMobile ? 26 : 36;
-      const half = size / 2;
+    // ─── Pin ───
+    function createPin(icon) {
+      const s = isMobile ? 26 : 36;
       return L.divIcon({
         html: `<div class="pulse-ring"></div><div class="pin" data-icon="${icon}"></div>`,
-        className: "",
-        iconSize: [size, size],
-        iconAnchor: [half, size],
+        className: "", iconSize: [s, s], iconAnchor: [s/2, s],
         popupAnchor: [0, isMobile ? -22 : -30]
       });
     }
 
+    // ─── بيانات المطاعم ───
     const restaurants = [
       {
-        lat: 36.8788, lng: 6.9013,
+        id: 1, lat: 36.8788, lng: 6.9013,
         name: "مطعم واد مديني", nameEn: "Oued Mdini",
         type: "مشاوي وأطباق تقليدية", icon: "🔥",
-        description: "إطلالة بانورامية رائعة، مشهور بالمشاوي والمخبوزات الطازجة.",
+        description: "مطعم بإطلالة بانورامية خلابة على جبال وسهول سكيكدة. يشتهر بالمشاوي الطازجة المحضّرة على الفحم، والمخبوزات التقليدية، وبعض الأطباق البحرية. الأجواء هادئة ومريحة ومثالية للعائلات، خاصة وقت الغروب.",
         rating: 8.8, food: 9.0, service: 8.5, cleanliness: 8.8, price: 9.0,
-        status: "open", hours: "11:00 – 23:00"
+        status: "open", hours: "11:00 – 23:00", phone: "0555 12 34 56", address: "طريق واد مديني، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "أحمد", avatar: "👨", stars: 5, date: "منذ أسبوع", text: "مشاوي ممتازة والمنظر خيالي! أنصح الجميع بالزيارة." },
+          { user: "سارة", avatar: "👩", stars: 4, date: "منذ شهر", text: "الأكل لذيذ جداً لكن الانتظار كان طويل شوي." },
+          { user: "كريم", avatar: "🧑", stars: 5, date: "منذ شهرين", text: "أفضل مطعم مشاوي في سكيكدة بدون منازع." }
+        ]
       },
       {
-        lat: 36.8810, lng: 6.9100,
+        id: 2, lat: 36.8810, lng: 6.9100,
         name: "مطعم لو فار شيه لويزا", nameEn: "Le Phare Chez Louiza",
         type: "مأكولات بحرية", icon: "🐟",
-        description: "بجانب البحر مباشرة، متخصص في المأكولات البحرية الطازجة.",
+        description: "مطعم بجانب البحر مباشرة مع شرفة رائعة تُطل على الأمواج. متخصص في المأكولات البحرية الطازجة يومياً من الميناء. تشكيلة واسعة من السمك المشوي، الكاليماري، والجمبري مع صلصات محلية مميزة.",
         rating: 9.0, food: 9.3, service: 8.6, cleanliness: 9.0, price: 8.4,
-        status: "open", hours: "12:00 – 23:30"
+        status: "open", hours: "12:00 – 23:30", phone: "0555 98 76 54", address: "واجهة بحرية، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "ليلى", avatar: "👩", stars: 5, date: "منذ 3 أيام", text: "سمك طازج 100% والإطلالة على البحر لا تُقدّر بثمن!" },
+          { user: "ياسين", avatar: "👨", stars: 4, date: "منذ أسبوعين", text: "كل شيء ممتاز، الأسعار معقولة مقارنة بالجودة." }
+        ]
       },
       {
-        lat: 36.8752, lng: 6.9045,
+        id: 3, lat: 36.8752, lng: 6.9045,
         name: "مطعم نيو داي", nameEn: "New Day Skikda",
         type: "بيتزا ووجبات سريعة", icon: "🍕",
-        description: "مشهور بالبيتزا الإيطالية مع جلسات داخلية وخارجية مريحة.",
+        description: "في شارع محمود نفير، مشهور بالبيتزا الإيطالية بالعجينة الطازجة والمكونات المحلية. يقدم أيضاً برغر وساندويتشات متنوعة. جلسات داخلية مكيّفة وخارجية مريحة، مثالي للأصدقاء والشباب.",
         rating: 8.5, food: 8.7, service: 8.3, cleanliness: 8.4, price: 9.0,
-        status: "open", hours: "10:00 – 00:00"
+        status: "open", hours: "10:00 – 00:00", phone: "0555 11 22 33", address: "شارع محمود نفير، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "أمين", avatar: "🧑", stars: 4, date: "منذ أسبوع", text: "بيتزا لذيذة والأسعار ممتازة، المكان نظيف." },
+          { user: "نور", avatar: "👩", stars: 5, date: "منذ شهر", text: "أفضل بيتزا في المدينة! العجينة رائعة." },
+          { user: "رضا", avatar: "👨", stars: 4, date: "منذ شهرين", text: "جيد جداً للوجبات السريعة، خدمة سريعة." }
+        ]
       },
       {
-        lat: 36.8770, lng: 6.9120,
+        id: 4, lat: 36.8770, lng: 6.9120,
         name: "مطعم جين دارك", nameEn: "Jeanne D'Arc",
         type: "مأكولات بحرية ومحلية", icon: "🦐",
-        description: "بالقرب من البحر، أسماك مشوية ومقلية مع معجنات محلية.",
+        description: "قريب من البحر في موقع استراتيجي بسكيكدة. يقدم أسماك مشوية ومقلية طازجة من الصيد اليومي، إلى جانب معجنات وفطائر محلية لوجبة فطور لذيذة. أجواء شعبية ودودة.",
         rating: 8.6, food: 8.9, service: 8.2, cleanliness: 8.5, price: 8.3,
-        status: "open", hours: "08:00 – 22:30"
+        status: "open", hours: "08:00 – 22:30", phone: "0555 44 55 66", address: "شارع العربي بن مهيدي، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1485963631004-f2f00b1d6571?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "فاطمة", avatar: "👩", stars: 4, date: "منذ 5 أيام", text: "فطور ممتاز والمعجنات طازجة كل صباح." },
+          { user: "محمد", avatar: "👨", stars: 5, date: "منذ شهر", text: "السمك المشوي هنا من أفضل ما ذقت!" }
+        ]
       },
       {
-        lat: 36.8740, lng: 6.8980,
+        id: 5, lat: 36.8740, lng: 6.8980,
         name: "مطعم لا جراند فاج", nameEn: "La Grande Vague",
         type: "مأكولات بحرية فاخرة", icon: "🌊",
-        description: "كاليماري وجمبري وسمك مشوي، جلسات هادئة للعائلات.",
+        description: "تجربة بحرية فاخرة مع تشكيلة واسعة من الكاليماري المقرمش، الجمبري بالزبدة، والسمك المشوي على الفحم. جلسات أنيقة وهادئة مناسبة للعائلات والمناسبات الخاصة.",
         rating: 8.9, food: 9.1, service: 8.7, cleanliness: 9.0, price: 8.2,
-        status: "open", hours: "12:00 – 23:00"
+        status: "open", hours: "12:00 – 23:00", phone: "0555 77 88 99", address: "الواجهة البحرية، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "سمير", avatar: "🧑", stars: 5, date: "منذ أسبوع", text: "كاليماري رهيب! من أفضل المطاعم البحرية." },
+          { user: "هدى", avatar: "👩", stars: 4, date: "منذ 3 أسابيع", text: "المكان أنيق والأكل لذيذ، بس الأسعار غالية شوي." },
+          { user: "وليد", avatar: "👨", stars: 5, date: "منذ شهر", text: "تجربة ممتازة، الخدمة راقية والسمك طازج." }
+        ]
       },
       {
-        lat: 36.8695, lng: 6.9060,
+        id: 6, lat: 36.8695, lng: 6.9060,
         name: "مطعم الساحل", nameEn: "Essahel",
         type: "أطباق محلية تقليدية", icon: "🍖",
-        description: "أطباق محلية بتتبيلات فريدة مع مخبوزات طازجة يومياً.",
+        description: "مطعم يقدم أطباق محلية جزائرية أصيلة بتتبيلات فريدة وطعم تقليدي. مشهور باللحوم المشوية والطواجن والمخبوزات الطازجة يومياً. أجواء عائلية ودافئة.",
         rating: 8.4, food: 8.6, service: 8.1, cleanliness: 8.5, price: 8.8,
-        status: "closed", hours: "11:30 – 22:00"
+        status: "closed", hours: "11:30 – 22:00", phone: "0555 33 22 11", address: "وسط المدينة، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "خالد", avatar: "👨", stars: 4, date: "منذ أسبوعين", text: "طواجن ممتازة وطعم تقليدي حقيقي." },
+          { user: "مريم", avatar: "👩", stars: 4, date: "منذ شهر", text: "مكان عائلي جميل والأسعار معقولة جداً." }
+        ]
       },
       {
-        lat: 36.8820, lng: 6.9070,
+        id: 7, lat: 36.8820, lng: 6.9070,
         name: "مطعم البهجة", nameEn: "El Bahdja",
         type: "أكلات سريعة", icon: "🍔",
-        description: "أكلات سريعة متنوعة بأسعار مناسبة وخدمة سريعة.",
+        description: "مطعم أكلات سريعة متنوعة بأسعار مناسبة للجميع. يقدم البرغر، الشاورما، البيتزا، والتاكوس مع صلصات خاصة. خدمة سريعة ومكان نظيف، مثالي لوجبة سريعة أثناء التنقل.",
         rating: 8.2, food: 8.4, service: 8.0, cleanliness: 8.1, price: 9.2,
-        status: "open", hours: "10:00 – 01:00"
+        status: "open", hours: "10:00 – 01:00", phone: "0555 66 77 88", address: "شارع الأمير عبد القادر، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "يوسف", avatar: "🧑", stars: 4, date: "منذ 4 أيام", text: "شاورما لذيذة وسعر ممتاز!" },
+          { user: "إيمان", avatar: "👩", stars: 3, date: "منذ أسبوعين", text: "جيد للوجبات السريعة، لكن ممكن يتحسن أكثر." }
+        ]
       },
       {
-        lat: 36.8730, lng: 6.9110,
+        id: 8, lat: 36.8730, lng: 6.9110,
         name: "مطعم الريف", nameEn: "El Rif",
         type: "مشاوي عائلية", icon: "🥩",
-        description: "مطعم عائلي مشهور بالمشاوي والأطباق التقليدية الجزائرية.",
+        description: "مطعم عائلي في قلب سكيكدة مشهور بالمشاوي على الفحم والأطباق التقليدية الجزائرية. يقدم الكباب، الميشوي، الكفتة، مع سلطات طازجة وخبز تقليدي. أجواء دافئة ومناسبة للتجمعات العائلية.",
         rating: 8.7, food: 9.0, service: 8.4, cleanliness: 8.6, price: 8.5,
-        status: "open", hours: "12:00 – 23:30"
+        status: "open", hours: "12:00 – 23:30", phone: "0555 99 00 11", address: "حي الريف، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "عمر", avatar: "👨", stars: 5, date: "منذ 3 أيام", text: "أفضل كباب في سكيكدة! لحم طازج ومشوي بإتقان." },
+          { user: "نادية", avatar: "👩", stars: 4, date: "منذ أسبوع", text: "مكان عائلي ممتاز والأكل لذيذ جداً." },
+          { user: "بلال", avatar: "🧑", stars: 5, date: "منذ شهر", text: "الميشوي هنا لا يُقارن، أنصح بشدة!" }
+        ]
       }
     ];
 
-    function stars(n) {
-      const full = Math.round(n / 2);
-      return "★".repeat(full) + "☆".repeat(5 - full);
-    }
-
+    // ─── دوال مساعدة ───
+    function stars(n) { const f = Math.round(n/2); return "★".repeat(f) + "☆".repeat(5-f); }
     function barColor(n) {
       if (n >= 9) return "linear-gradient(90deg,#22c55e,#4ade80)";
       if (n >= 8) return "linear-gradient(90deg,#eab308,#facc15)";
@@ -525,53 +613,146 @@
       return "linear-gradient(90deg,#ef4444,#f87171)";
     }
 
-    function subRating(label, value) {
-      return `
-        <div class="sub-item">
-          <span class="lbl">${label}</span>
-          <div class="bar-wrap">
-            <div class="bar-fill" style="width:${value*10}%;background:${barColor(value)}"></div>
-          </div>
-          <strong>${value}</strong>
-        </div>`;
+    // ─── Mini Popup (مختصر) ───
+    function miniRating(label, value) {
+      return `<div class="mini-row">
+        <span class="lbl">${label}</span>
+        <div class="mini-bar-wrap"><div class="mini-bar" style="width:${value*10}%;background:${barColor(value)}"></div></div>
+        <strong>${value}</strong>
+      </div>`;
     }
 
-    function buildPopup(r) {
+    function buildMiniPopup(r) {
+      const isOpen = r.status === "open";
+      return `<div class="mini">
+        <div class="mini-head">
+          <div class="mini-icon">${r.icon}</div>
+          <div>
+            <div class="mini-name">${r.name}</div>
+            <div class="mini-type">${r.type}</div>
+          </div>
+        </div>
+        <div class="mini-row" style="border:none;padding-bottom:6px;">
+          <div><span class="mini-stars">${stars(r.rating)}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="mini-status ${isOpen?'open':'closed'}"><span style="font-size:6px;">●</span> ${isOpen?'مفتوح':'مغلق'}</span>
+            <span class="mini-score">${r.rating}</span>
+          </div>
+        </div>
+        ${miniRating("🍽 الأكل", r.food)}
+        ${miniRating("👨‍🍳 الخدمة", r.service)}
+        ${miniRating("✨ النظافة", r.cleanliness)}
+        ${miniRating("💰 السعر", r.price)}
+        <button class="btn-more" onclick="openSheet(${r.id})">عرض المزيد ↓</button>
+      </div>`;
+    }
+
+    // ─── Bottom Sheet Content ───
+    function sheetRating(label, emoji, value) {
+      return `<div class="sh-rate-item">
+        <span class="lbl">${emoji} ${label}</span>
+        <div class="sh-bar-wrap"><div class="sh-bar" style="width:${value*10}%;background:${barColor(value)}"></div></div>
+        <strong>${value}/10</strong>
+      </div>`;
+    }
+
+    function buildSheetContent(r) {
       const isOpen = r.status === "open";
       return `
-        <div class="card">
-          <div class="card-header">
-            <div class="card-icon">${r.icon}</div>
-            <div>
-              <div class="name">${r.name}</div>
-              <div class="type">${r.type}</div>
+        <div class="sh-header">
+          <div class="sh-icon">${r.icon}</div>
+          <div>
+            <div class="sh-name">${r.name}</div>
+            <div class="sh-type">${r.type}</div>
+            <div class="sh-rating-inline">
+              <span class="score">${r.rating}/10</span>
+              <span class="stars">${stars(r.rating)}</span>
+              <span class="status-dot ${isOpen?'open':'closed'}"><span style="font-size:6px;">●</span> ${isOpen?'مفتوح الآن':'مغلق حالياً'}</span>
             </div>
           </div>
-          <p class="desc">${r.description}</p>
-          <div class="rating-box">
-            <div class="stars">${stars(r.rating)}</div>
-            <div class="score">${r.rating}</div>
+        </div>
+
+        <div class="sh-section">
+          <div class="sh-section-title">📸 صور</div>
+          <div class="sh-photos">
+            ${r.photos.map(p => `<img class="sh-photo" src="${p}" alt="${r.name}" loading="lazy" />`).join("")}
           </div>
-          <div class="sub-ratings">
-            ${subRating("جودة الأكل", r.food)}
-            ${subRating("الخدمة", r.service)}
-            ${subRating("النظافة", r.cleanliness)}
-            ${subRating("السعر / الجودة", r.price)}
+        </div>
+
+        <div class="sh-section">
+          <div class="sh-section-title">📝 الوصف</div>
+          <p class="sh-desc">${r.description}</p>
+        </div>
+
+        <div class="sh-section">
+          <div class="sh-section-title">ℹ️ معلومات</div>
+          <div class="sh-info">
+            <div class="sh-info-item"><div class="label">⏰ أوقات العمل</div><div class="value">${r.hours}</div></div>
+            <div class="sh-info-item"><div class="label">📞 الهاتف</div><div class="value" dir="ltr">${r.phone}</div></div>
+            <div class="sh-info-item" style="grid-column:1/-1"><div class="label">📍 العنوان</div><div class="value">${r.address}</div></div>
           </div>
-          <div class="info-row">
-            <span class="label">⏰ أوقات العمل</span>
-            <span>${r.hours}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">📌 الحالة</span>
-            <span class="badge ${isOpen ? 'open' : 'closed'}">
-              <span style="font-size:7px;">●</span>
-              ${isOpen ? "مفتوح" : "مغلق"}
-            </span>
-          </div>
-        </div>`;
+        </div>
+
+        <div class="sh-section">
+          <div class="sh-section-title">⭐ التقييمات التفصيلية</div>
+          ${sheetRating("جودة الأكل","🍽",r.food)}
+          ${sheetRating("الخدمة","👨‍🍳",r.service)}
+          ${sheetRating("النظافة","✨",r.cleanliness)}
+          ${sheetRating("السعر / الجودة","💰",r.price)}
+        </div>
+
+        <div class="sh-section">
+          <div class="sh-section-title">💬 التعليقات (${r.comments.length})</div>
+          ${r.comments.map(c => `
+            <div class="comment">
+              <div class="comment-head">
+                <div class="comment-avatar">${c.avatar}</div>
+                <div>
+                  <div class="comment-name">${c.user}</div>
+                  <div class="comment-date">${c.date}</div>
+                </div>
+                <div class="comment-stars">${"★".repeat(c.stars)}${"☆".repeat(5-c.stars)}</div>
+              </div>
+              <p class="comment-text">${c.text}</p>
+            </div>
+          `).join("")}
+        </div>
+      `;
     }
 
+    // ─── Sheet Controls ───
+    const overlay = document.getElementById("overlay");
+    const sheet   = document.getElementById("sheet");
+    const sheetContent = document.getElementById("sheetContent");
+
+    function openSheet(id) {
+      const r = restaurants.find(x => x.id === id);
+      if (!r) return;
+      map.closePopup();
+      sheetContent.innerHTML = buildSheetContent(r);
+      requestAnimationFrame(() => {
+        overlay.classList.add("active");
+        sheet.classList.add("active");
+      });
+    }
+
+    function closeSheet() {
+      sheet.classList.remove("active");
+      overlay.classList.remove("active");
+    }
+
+    document.getElementById("sheetClose").addEventListener("click", closeSheet);
+    overlay.addEventListener("click", closeSheet);
+
+    // swipe down to close
+    let touchStartY = 0;
+    sheet.addEventListener("touchstart", e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    sheet.addEventListener("touchmove", e => {
+      const dy = e.touches[0].clientY - touchStartY;
+      if (dy > 80) closeSheet();
+    }, { passive: true });
+
+    // ─── Markers ───
     let markers = [];
 
     function renderMarkers(list) {
@@ -580,8 +761,8 @@
       list.forEach(r => {
         const m = L.marker([r.lat, r.lng], { icon: createPin(r.icon) })
           .addTo(map)
-          .bindPopup(buildPopup(r), {
-            maxWidth: isMobile ? 265 : 310,
+          .bindPopup(buildMiniPopup(r), {
+            maxWidth: isMobile ? 250 : 280,
             closeButton: true,
             autoPan: true,
             autoPanPadding: L.point(20, 60)
@@ -595,20 +776,20 @@
 
     renderMarkers(restaurants);
 
+    // ─── البحث ───
     document.getElementById("search").addEventListener("input", function () {
       const q = this.value.trim().toLowerCase();
       if (!q) { renderMarkers(restaurants); return; }
       const filtered = restaurants.filter(r =>
         r.name.includes(q) || r.nameEn.toLowerCase().includes(q) ||
-        r.type.includes(q) || r.description.includes(q)
+        r.type.includes(q)
       );
       renderMarkers(filtered);
-      if (filtered.length && markers.length) {
+      if (filtered.length && markers.length)
         map.fitBounds(L.featureGroup(markers).getBounds().pad(0.3), { animate: true, duration: 0.5 });
-      }
     });
 
-    map.on("click", function () { map.closePopup(); });
+    map.on("click", () => map.closePopup());
   </script>
 </body>
 </html>
