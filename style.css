@@ -2,5 +2,6 @@ body { font-family: Arial; margin:0; padding:0; }
 h1 { text-align:center; background-color:#ff6347; color:white; padding:15px; }
 .leaflet-overlay-pane {
     backdrop-filter: blur(2px);
+    .leaflet-control-attribution { display: none !important; }
 }
-.leaflet-control-attribution { display: none !important; }
+
