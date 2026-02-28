@@ -23,7 +23,6 @@
       --shadow: rgba(0,0,0,.4);
       --radius: 14px;
 
-      /* أحجام متغيرة */
       --pin-size: 36px;
       --pin-half: 18px;
       --pin-font: 15px;
@@ -47,6 +46,11 @@
     .leaflet-div-icon {
       background: transparent !important;
       border: none !important;
+    }
+
+    /* ─── إخفاء attribution ─── */
+    .leaflet-control-attribution {
+      display: none !important;
     }
 
     /* ─── Popup ─── */
@@ -283,9 +287,7 @@
     }
     .counter strong { color: var(--primary); font-weight: 800; }
 
-    /* ══════════════════════════════════════════
-       📱 MOBILE – شاشات أقل من 600px
-       ══════════════════════════════════════════ */
+    /* ═══════ 📱 MOBILE ≤ 600px ═══════ */
     @media (max-width: 600px) {
       :root {
         --pin-size: 26px;
@@ -296,7 +298,6 @@
         --pulse-size: 26px;
       }
 
-      /* Header صغير */
       .map-header {
         top: 6px; right: 6px;
         padding: 5px 10px;
@@ -307,7 +308,6 @@
       .map-header .title { font-size: 11px; }
       .map-header .subtitle { font-size: 9px; }
 
-      /* Search صغير ولا يتداخل */
       .search-box {
         top: auto;
         bottom: 14px;
@@ -323,7 +323,6 @@
       .search-box input { font-size: 12px; padding: 6px 4px; }
       .search-icon { font-size: 13px; }
 
-      /* Counter فوق البحث */
       .counter {
         bottom: 60px;
         right: 50%;
@@ -333,7 +332,6 @@
         border-radius: 8px;
       }
 
-      /* Popup أصغر */
       .leaflet-popup-content-wrapper { border-radius: 12px; }
       .card {
         padding: 10px 12px;
@@ -364,13 +362,10 @@
         right: 8px !important;
       }
 
-      /* Zoom بعيد عن العناصر */
       .leaflet-bottom.leaflet-left { bottom: 65px !important; }
     }
 
-    /* ══════════════════════════════════════════
-       📱 شاشات صغيرة جداً أقل من 380px
-       ══════════════════════════════════════════ */
+    /* ═══════ 📱 شاشات صغيرة جداً ≤ 380px ═══════ */
     @media (max-width: 380px) {
       :root {
         --pin-size: 22px;
@@ -416,14 +411,13 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ─── كشف الهاتف ───
     const isMobile = window.innerWidth <= 600;
 
-    // ─── الخريطة ───
     const map = L.map("map", {
       center: [36.8765, 6.9065],
       zoom: isMobile ? 13.5 : 14,
       zoomControl: false,
+      attributionControl: false,
       scrollWheelZoom: true,
       fadeAnimation: true,
       zoomAnimation: true,
@@ -436,21 +430,15 @@
     L.control.zoom({ position: "bottomleft" }).addTo(map);
 
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; OSM &copy; CARTO',
       subdomains: "abcd",
       maxZoom: 19
     }).addTo(map);
 
-    // ─── أيقونة Marker حسب حجم الشاشة ───
     function createPin(icon = "🍽") {
       const size = isMobile ? 26 : 36;
       const half = size / 2;
-      const html = `
-        <div class="pulse-ring"></div>
-        <div class="pin" data-icon="${icon}"></div>
-      `;
       return L.divIcon({
-        html,
+        html: `<div class="pulse-ring"></div><div class="pin" data-icon="${icon}"></div>`,
         className: "",
         iconSize: [size, size],
         iconAnchor: [half, size],
@@ -458,99 +446,73 @@
       });
     }
 
-    // ─── بيانات المطاعم ───
     const restaurants = [
       {
         lat: 36.8788, lng: 6.9013,
-        name: "مطعم واد مديني",
-        nameEn: "Oued Mdini",
-        type: "مشاوي وأطباق تقليدية",
-        icon: "🔥",
+        name: "مطعم واد مديني", nameEn: "Oued Mdini",
+        type: "مشاوي وأطباق تقليدية", icon: "🔥",
         description: "إطلالة بانورامية رائعة، مشهور بالمشاوي والمخبوزات الطازجة.",
-        rating: 8.8,
-        food: 9.0, service: 8.5, cleanliness: 8.8, price: 9.0,
+        rating: 8.8, food: 9.0, service: 8.5, cleanliness: 8.8, price: 9.0,
         status: "open", hours: "11:00 – 23:00"
       },
       {
         lat: 36.8810, lng: 6.9100,
-        name: "مطعم لو فار شيه لويزا",
-        nameEn: "Le Phare Chez Louiza",
-        type: "مأكولات بحرية",
-        icon: "🐟",
+        name: "مطعم لو فار شيه لويزا", nameEn: "Le Phare Chez Louiza",
+        type: "مأكولات بحرية", icon: "🐟",
         description: "بجانب البحر مباشرة، متخصص في المأكولات البحرية الطازجة.",
-        rating: 9.0,
-        food: 9.3, service: 8.6, cleanliness: 9.0, price: 8.4,
+        rating: 9.0, food: 9.3, service: 8.6, cleanliness: 9.0, price: 8.4,
         status: "open", hours: "12:00 – 23:30"
       },
       {
         lat: 36.8752, lng: 6.9045,
-        name: "مطعم نيو داي",
-        nameEn: "New Day Skikda",
-        type: "بيتزا ووجبات سريعة",
-        icon: "🍕",
+        name: "مطعم نيو داي", nameEn: "New Day Skikda",
+        type: "بيتزا ووجبات سريعة", icon: "🍕",
         description: "مشهور بالبيتزا الإيطالية مع جلسات داخلية وخارجية مريحة.",
-        rating: 8.5,
-        food: 8.7, service: 8.3, cleanliness: 8.4, price: 9.0,
+        rating: 8.5, food: 8.7, service: 8.3, cleanliness: 8.4, price: 9.0,
         status: "open", hours: "10:00 – 00:00"
       },
       {
         lat: 36.8770, lng: 6.9120,
-        name: "مطعم جين دارك",
-        nameEn: "Jeanne D'Arc",
-        type: "مأكولات بحرية ومحلية",
-        icon: "🦐",
+        name: "مطعم جين دارك", nameEn: "Jeanne D'Arc",
+        type: "مأكولات بحرية ومحلية", icon: "🦐",
         description: "بالقرب من البحر، أسماك مشوية ومقلية مع معجنات محلية.",
-        rating: 8.6,
-        food: 8.9, service: 8.2, cleanliness: 8.5, price: 8.3,
+        rating: 8.6, food: 8.9, service: 8.2, cleanliness: 8.5, price: 8.3,
         status: "open", hours: "08:00 – 22:30"
       },
       {
         lat: 36.8740, lng: 6.8980,
-        name: "مطعم لا جراند فاج",
-        nameEn: "La Grande Vague",
-        type: "مأكولات بحرية فاخرة",
-        icon: "🌊",
+        name: "مطعم لا جراند فاج", nameEn: "La Grande Vague",
+        type: "مأكولات بحرية فاخرة", icon: "🌊",
         description: "كاليماري وجمبري وسمك مشوي، جلسات هادئة للعائلات.",
-        rating: 8.9,
-        food: 9.1, service: 8.7, cleanliness: 9.0, price: 8.2,
+        rating: 8.9, food: 9.1, service: 8.7, cleanliness: 9.0, price: 8.2,
         status: "open", hours: "12:00 – 23:00"
       },
       {
         lat: 36.8695, lng: 6.9060,
-        name: "مطعم الساحل",
-        nameEn: "Essahel",
-        type: "أطباق محلية تقليدية",
-        icon: "🍖",
+        name: "مطعم الساحل", nameEn: "Essahel",
+        type: "أطباق محلية تقليدية", icon: "🍖",
         description: "أطباق محلية بتتبيلات فريدة مع مخبوزات طازجة يومياً.",
-        rating: 8.4,
-        food: 8.6, service: 8.1, cleanliness: 8.5, price: 8.8,
+        rating: 8.4, food: 8.6, service: 8.1, cleanliness: 8.5, price: 8.8,
         status: "closed", hours: "11:30 – 22:00"
       },
       {
         lat: 36.8820, lng: 6.9070,
-        name: "مطعم البهجة",
-        nameEn: "El Bahdja",
-        type: "أكلات سريعة",
-        icon: "🍔",
+        name: "مطعم البهجة", nameEn: "El Bahdja",
+        type: "أكلات سريعة", icon: "🍔",
         description: "أكلات سريعة متنوعة بأسعار مناسبة وخدمة سريعة.",
-        rating: 8.2,
-        food: 8.4, service: 8.0, cleanliness: 8.1, price: 9.2,
+        rating: 8.2, food: 8.4, service: 8.0, cleanliness: 8.1, price: 9.2,
         status: "open", hours: "10:00 – 01:00"
       },
       {
         lat: 36.8730, lng: 6.9110,
-        name: "مطعم الريف",
-        nameEn: "El Rif",
-        type: "مشاوي عائلية",
-        icon: "🥩",
+        name: "مطعم الريف", nameEn: "El Rif",
+        type: "مشاوي عائلية", icon: "🥩",
         description: "مطعم عائلي مشهور بالمشاوي والأطباق التقليدية الجزائرية.",
-        rating: 8.7,
-        food: 9.0, service: 8.4, cleanliness: 8.6, price: 8.5,
+        rating: 8.7, food: 9.0, service: 8.4, cleanliness: 8.6, price: 8.5,
         status: "open", hours: "12:00 – 23:30"
       }
     ];
 
-    // ─── دوال مساعدة ───
     function stars(n) {
       const full = Math.round(n / 2);
       return "★".repeat(full) + "☆".repeat(5 - full);
@@ -564,16 +526,14 @@
     }
 
     function subRating(label, value) {
-      const pct = value * 10;
       return `
         <div class="sub-item">
           <span class="lbl">${label}</span>
           <div class="bar-wrap">
-            <div class="bar-fill" style="width:${pct}%;background:${barColor(value)}"></div>
+            <div class="bar-fill" style="width:${value*10}%;background:${barColor(value)}"></div>
           </div>
           <strong>${value}</strong>
-        </div>
-      `;
+        </div>`;
     }
 
     function buildPopup(r) {
@@ -587,21 +547,17 @@
               <div class="type">${r.type}</div>
             </div>
           </div>
-
           <p class="desc">${r.description}</p>
-
           <div class="rating-box">
             <div class="stars">${stars(r.rating)}</div>
             <div class="score">${r.rating}</div>
           </div>
-
           <div class="sub-ratings">
             ${subRating("جودة الأكل", r.food)}
             ${subRating("الخدمة", r.service)}
             ${subRating("النظافة", r.cleanliness)}
             ${subRating("السعر / الجودة", r.price)}
           </div>
-
           <div class="info-row">
             <span class="label">⏰ أوقات العمل</span>
             <span>${r.hours}</span>
@@ -613,17 +569,14 @@
               ${isOpen ? "مفتوح" : "مغلق"}
             </span>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    // ─── رسم الماركرات ───
     let markers = [];
 
     function renderMarkers(list) {
       markers.forEach(m => map.removeLayer(m));
       markers = [];
-
       list.forEach(r => {
         const m = L.marker([r.lat, r.lng], { icon: createPin(r.icon) })
           .addTo(map)
@@ -636,36 +589,26 @@
         m._data = r;
         markers.push(m);
       });
-
       document.getElementById("counter").innerHTML =
         `🍴 <strong>${list.length}</strong> / <strong>${restaurants.length}</strong> مطعم`;
     }
 
     renderMarkers(restaurants);
 
-    // ─── البحث ───
     document.getElementById("search").addEventListener("input", function () {
       const q = this.value.trim().toLowerCase();
       if (!q) { renderMarkers(restaurants); return; }
-
       const filtered = restaurants.filter(r =>
-        r.name.includes(q) ||
-        r.nameEn.toLowerCase().includes(q) ||
-        r.type.includes(q) ||
-        r.description.includes(q)
+        r.name.includes(q) || r.nameEn.toLowerCase().includes(q) ||
+        r.type.includes(q) || r.description.includes(q)
       );
       renderMarkers(filtered);
-
       if (filtered.length && markers.length) {
-        const group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.3), { animate: true, duration: 0.5 });
+        map.fitBounds(L.featureGroup(markers).getBounds().pad(0.3), { animate: true, duration: 0.5 });
       }
     });
 
-    // ─── إغلاق Popup عند النقر على الخريطة (أسهل للموبايل) ───
-    map.on("click", function () {
-      map.closePopup();
-    });
+    map.on("click", function () { map.closePopup(); });
   </script>
 </body>
 </html>
