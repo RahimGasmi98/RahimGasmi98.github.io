@@ -16,3 +16,13 @@ restaurants.forEach(r => {
     L.marker([r.lat, r.lng]).addTo(map)
      .bindPopup(`<b>${r.name}</b>`);
 });
+const map = L.map("map", {
+  attributionControl: false,  // ← يمنع إنشاء العنصر أصلاً
+  ...
+});
+
+L.tileLayer("...", {
+  // بدون سطر attribution
+  subdomains: "abcd",
+  maxZoom: 19
+}).addTo(map);
