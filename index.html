@@ -43,6 +43,7 @@
 
     .leaflet-div-icon { background: transparent !important; border: none !important; }
     .leaflet-control-attribution { display: none !important; }
+    .leaflet-control-zoom { display: none !important; }
 
     /* ══════ Popup ══════ */
     .leaflet-popup-content-wrapper {
@@ -151,37 +152,29 @@
       100% { transform: translate(calc(-1 * var(--pin-half)), calc(-1 * var(--pin-half))) scale(2.5); opacity:0; }
     }
 
-    /* ══════ UI Controls ══════ */
-    .map-header {
-      position: fixed; top: 10px; right: 10px; z-index: 1000;
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
-      border: 1px solid var(--border); border-radius: 12px;
-      padding: 8px 14px; box-shadow: 0 8px 28px var(--shadow);
-    }
-    .map-header .logo { font-size: 20px; }
-    .map-header .title { font-size: 13px; font-weight: 700; }
-    .map-header .subtitle { font-size: 10.5px; color: var(--muted); }
-
+    /* ══════ Search ══════ */
     .search-box {
-      position: fixed; top: 10px; left: 10px; z-index: 1000;
+      position: fixed; top: 14px; left: 50%; z-index: 1000;
+      transform: translateX(-50%);
       display: flex; align-items: center;
       background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
-      border: 1px solid var(--border); border-radius: 10px;
-      padding: 5px 10px; box-shadow: 0 8px 28px var(--shadow);
-      width: 220px; transition: width .3s, border-color .3s;
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 6px 14px; box-shadow: 0 8px 28px var(--shadow);
+      width: 380px; max-width: calc(100% - 28px);
+      transition: border-color .3s;
     }
-    .search-box:focus-within { width: 280px; border-color: rgba(34,197,94,.4); }
+    .search-box:focus-within { border-color: rgba(34,197,94,.4); }
     .search-box input {
       background: transparent; border: none; outline: none;
       color: var(--text); font-family: 'Cairo', sans-serif;
-      font-size: 12px; width: 100%; padding: 5px 4px; direction: rtl;
+      font-size: 13px; width: 100%; padding: 6px 4px; direction: rtl;
     }
     .search-box input::placeholder { color: #64748b; }
-    .search-icon { font-size: 14px; margin-left: 6px; flex-shrink: 0; }
+    .search-icon { font-size: 15px; margin-left: 8px; flex-shrink: 0; }
 
+    /* ══════ Counter ══════ */
     .counter {
-      position: fixed; bottom: 14px; right: auto; left: 14px; z-index: 1000;
+      position: fixed; bottom: 14px; left: 14px; z-index: 1000;
       background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 8px;
       padding: 6px 12px; font-size: 11px; color: var(--muted);
@@ -189,7 +182,7 @@
     }
     .counter strong { color: var(--primary); font-weight: 800; }
 
-    /* ══════ Credit Badge ══════ */
+    /* ══════ Credit ══════ */
     .credit {
       position: fixed; bottom: 14px; right: 14px; z-index: 1000;
       background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
@@ -277,7 +270,6 @@
       margin-bottom: 10px;
       display: flex; align-items: center; gap: 6px;
     }
-
     .sh-desc { font-size: 12.5px; color: var(--muted); line-height: 1.75; }
 
     .sh-photos {
@@ -340,40 +332,35 @@
         --pin-size: 26px; --pin-half: 13px; --pin-font: 11px;
         --pin-dot: 7px; --pin-dot-pos: 9.5px; --pulse-size: 26px;
       }
-      .map-header { top: 6px; right: 6px; padding: 5px 10px; gap: 6px; border-radius: 10px; }
-      .map-header .logo { font-size: 16px; }
-      .map-header .title { font-size: 11px; }
-      .map-header .subtitle { font-size: 9px; }
 
+      /* بحث في الأعلى */
       .search-box {
-        top: auto; bottom: 14px;
-        left: 50%; transform: translateX(-50%); right: auto;
-        width: calc(100% - 24px); max-width: 320px;
+        top: 10px;
+        width: calc(100% - 60px);
+        max-width: none;
+        left: 10px;
+        right: auto;
+        transform: none;
+        padding: 5px 10px;
+        border-radius: 10px;
       }
-      .search-box:focus-within { width: calc(100% - 24px); max-width: 320px; }
+      .search-box input { font-size: 12px; padding: 5px 4px; }
+      .search-icon { font-size: 13px; margin-left: 6px; }
 
+      /* Counter أسفل يسار */
       .counter {
-        bottom: 60px; left: 50%; right: auto;
-        transform: translateX(-50%);
+        bottom: 10px; left: 10px;
         font-size: 10px; padding: 4px 10px;
       }
 
+      /* Credit أسفل يمين (صغير ومرتب) */
       .credit {
-        bottom: 60px; right: auto; left: 50%;
-        transform: translateX(-50%);
-        display: none;
+        bottom: 10px; right: 10px;
+        font-size: 8px; padding: 3px 8px;
+        border-radius: 6px;
+        gap: 3px;
       }
-
-      .credit-mobile {
-        display: flex !important;
-        position: fixed; bottom: 60px; right: 10px; z-index: 999;
-        background: rgba(15,23,42,.85); backdrop-filter: blur(10px);
-        border: 1px solid var(--border); border-radius: 6px;
-        padding: 3px 8px; font-size: 8.5px; color: var(--muted);
-        align-items: center; gap: 3px;
-        box-shadow: 0 4px 12px var(--shadow);
-      }
-      .credit-mobile span { color: var(--primary); font-weight: 800; font-size: 8.5px; }
+      .credit span { font-size: 8px; }
 
       .leaflet-popup-content-wrapper { border-radius: 12px; }
       .mini { padding: 10px 12px; min-width: 200px; max-width: 240px; }
@@ -394,8 +381,6 @@
       .sh-photo { width: 120px; height: 80px; }
       .sh-info { gap: 6px; }
       .sh-bar-wrap { width: 80px; }
-
-      .leaflet-bottom.leaflet-left { bottom: 65px !important; }
     }
 
     @media (max-width: 380px) {
@@ -403,44 +388,25 @@
         --pin-size: 22px; --pin-half: 11px; --pin-font: 9px;
         --pin-dot: 6px; --pin-dot-pos: 8px; --pulse-size: 22px;
       }
-      .map-header .subtitle { display: none; }
       .mini { min-width: 180px; max-width: 210px; padding: 8px 10px; }
-    }
-
-    /* إخفاء credit-mobile على الشاشات الكبيرة */
-    .credit-mobile { display: none; }
-
-    /* ══════ Desktop: counter يسار + credit يمين ══════ */
-    @media (min-width: 601px) {
-      .credit-mobile { display: none !important; }
+      .credit { font-size: 7px; padding: 2px 6px; }
+      .credit span { font-size: 7px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="map-header">
-    <span class="logo">🍽️</span>
-    <div>
-      <div class="title">مطاعم سكيكدة</div>
-      <div class="subtitle">اكتشف أفضل الأماكن</div>
-    </div>
-  </div>
-
-  <!-- Search -->
+  <!-- Search (centered on desktop, top-left on mobile) -->
   <div class="search-box">
     <span class="search-icon">🔍</span>
     <input type="text" id="search" placeholder="ابحث عن مطعم..." autocomplete="off" />
   </div>
 
-  <!-- Counter (أسفل يسار) -->
+  <!-- Counter -->
   <div class="counter" id="counter"></div>
 
-  <!-- Credit Desktop (أسفل يمين) -->
+  <!-- Credit -->
   <div class="credit">MADE BY : <span>GASMI ABDERRAHIM</span></div>
-
-  <!-- Credit Mobile (صغير ولا يزعج) -->
-  <div class="credit-mobile">BY <span>GASMI ABDERRAHIM</span></div>
 
   <!-- Map -->
   <div id="map"></div>
@@ -457,12 +423,9 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ════════════════════════════
-    //  Setup
-    // ════════════════════════════
-    const isMobile = window.matchMedia("(max-width:600px)").matches;
+    var isMobile = window.matchMedia("(max-width:600px)").matches;
 
-    const map = L.map("map", {
+    var map = L.map("map", {
       center: [36.8765, 6.9065],
       zoom: isMobile ? 13.5 : 14,
       zoomControl: false,
@@ -476,18 +439,13 @@
       tap: true
     });
 
-    L.control.zoom({ position: "bottomleft" }).addTo(map);
-
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
       subdomains: "abcd",
       maxZoom: 19
     }).addTo(map);
 
-    // ════════════════════════════
-    //  Pin
-    // ════════════════════════════
     function createPin(icon) {
-      const s = isMobile ? 26 : 36;
+      var s = isMobile ? 26 : 36;
       return L.divIcon({
         html: '<div class="pulse-ring"></div><div class="pin" data-icon="' + icon + '"></div>',
         className: "",
@@ -497,10 +455,7 @@
       });
     }
 
-    // ════════════════════════════
-    //  Data
-    // ════════════════════════════
-    const restaurants = [
+    var restaurants = [
       {
         id: 1, lat: 36.8788, lng: 6.9013,
         name: "مطعم واد مديني", nameEn: "Oued Mdini",
@@ -524,7 +479,7 @@
         id: 2, lat: 36.8810, lng: 6.9100,
         name: "مطعم لو فار شيه لويزا", nameEn: "Le Phare Chez Louiza",
         type: "مأكولات بحرية", icon: "🐟",
-        description: "مطعم بجانب البحر مباشرة مع شرفة رائعة تُطل على الأمواج. متخصص في المأكولات البحرية الطازجة يومياً من الميناء. تشكيلة واسعة من السمك المشوي، الكاليماري، والجمبري.",
+        description: "مطعم بجانب البحر مباشرة مع شرفة رائعة تُطل على الأمواج. متخصص في المأكولات البحرية الطازجة يومياً من الميناء.",
         rating: 9.0, food: 9.3, service: 8.6, cleanliness: 9.0, price: 8.4,
         status: "open", hours: "12:00 – 23:30", phone: "0555 98 76 54",
         address: "واجهة بحرية، سكيكدة",
@@ -542,7 +497,7 @@
         id: 3, lat: 36.8752, lng: 6.9045,
         name: "مطعم نيو داي", nameEn: "New Day Skikda",
         type: "بيتزا ووجبات سريعة", icon: "🍕",
-        description: "في شارع محمود نفير، مشهور بالبيتزا الإيطالية بالعجينة الطازجة والمكونات المحلية. يقدم أيضاً برغر وساندويتشات متنوعة. جلسات داخلية مكيّفة وخارجية مريحة.",
+        description: "في شارع محمود نفير، مشهور بالبيتزا الإيطالية بالعجينة الطازجة والمكونات المحلية. جلسات داخلية مكيّفة وخارجية مريحة.",
         rating: 8.5, food: 8.7, service: 8.3, cleanliness: 8.4, price: 9.0,
         status: "open", hours: "10:00 – 00:00", phone: "0555 11 22 33",
         address: "شارع محمود نفير، سكيكدة",
@@ -561,7 +516,7 @@
         id: 4, lat: 36.8770, lng: 6.9120,
         name: "مطعم جين دارك", nameEn: "Jeanne D'Arc",
         type: "مأكولات بحرية ومحلية", icon: "🦐",
-        description: "قريب من البحر في موقع استراتيجي بسكيكدة. يقدم أسماك مشوية ومقلية طازجة من الصيد اليومي، إلى جانب معجنات وفطائر محلية لوجبة فطور لذيذة.",
+        description: "قريب من البحر، يقدم أسماك مشوية ومقلية طازجة من الصيد اليومي، إلى جانب معجنات وفطائر محلية.",
         rating: 8.6, food: 8.9, service: 8.2, cleanliness: 8.5, price: 8.3,
         status: "open", hours: "08:00 – 22:30", phone: "0555 44 55 66",
         address: "شارع العربي بن مهيدي، سكيكدة",
@@ -579,7 +534,7 @@
         id: 5, lat: 36.8740, lng: 6.8980,
         name: "مطعم لا جراند فاج", nameEn: "La Grande Vague",
         type: "مأكولات بحرية فاخرة", icon: "🌊",
-        description: "تجربة بحرية فاخرة مع تشكيلة واسعة من الكاليماري المقرمش، الجمبري بالزبدة، والسمك المشوي على الفحم. جلسات أنيقة وهادئة مناسبة للعائلات والمناسبات الخاصة.",
+        description: "تجربة بحرية فاخرة مع تشكيلة واسعة من الكاليماري المقرمش، الجمبري بالزبدة، والسمك المشوي على الفحم.",
         rating: 8.9, food: 9.1, service: 8.7, cleanliness: 9.0, price: 8.2,
         status: "open", hours: "12:00 – 23:00", phone: "0555 77 88 99",
         address: "الواجهة البحرية، سكيكدة",
@@ -598,7 +553,7 @@
         id: 6, lat: 36.8695, lng: 6.9060,
         name: "مطعم الساحل", nameEn: "Essahel",
         type: "أطباق محلية تقليدية", icon: "🍖",
-        description: "مطعم يقدم أطباق محلية جزائرية أصيلة بتتبيلات فريدة وطعم تقليدي. مشهور باللحوم المشوية والطواجن والمخبوزات الطازجة يومياً. أجواء عائلية ودافئة.",
+        description: "أطباق محلية جزائرية أصيلة بتتبيلات فريدة. مشهور باللحوم المشوية والطواجن والمخبوزات الطازجة يومياً.",
         rating: 8.4, food: 8.6, service: 8.1, cleanliness: 8.5, price: 8.8,
         status: "closed", hours: "11:30 – 22:00", phone: "0555 33 22 11",
         address: "وسط المدينة، سكيكدة",
@@ -616,7 +571,7 @@
         id: 7, lat: 36.8820, lng: 6.9070,
         name: "مطعم البهجة", nameEn: "El Bahdja",
         type: "أكلات سريعة", icon: "🍔",
-        description: "مطعم أكلات سريعة متنوعة بأسعار مناسبة للجميع. يقدم البرغر، الشاورما، البيتزا، والتاكوس مع صلصات خاصة. خدمة سريعة ومكان نظيف.",
+        description: "أكلات سري��ة متنوعة بأسعار مناسبة. برغر، شاورما، بيتزا، وتاكوس مع صلصات خاصة. خدمة سريعة ومكان نظيف.",
         rating: 8.2, food: 8.4, service: 8.0, cleanliness: 8.1, price: 9.2,
         status: "open", hours: "10:00 – 01:00", phone: "0555 66 77 88",
         address: "شارع الأمير عبد القادر، سكيكدة",
@@ -627,14 +582,14 @@
         ],
         comments: [
           { user: "يوسف", avatar: "🧑", stars: 4, date: "منذ 4 أيام", text: "شاورما لذيذة وسعر ممتاز!" },
-          { user: "إيمان", avatar: "👩", stars: 3, date: "منذ أسبوعين", text: "جيد للوجبات السريعة، لكن ممكن يتحسن أكثر." }
+          { user: "إيمان", avatar: "👩", stars: 3, date: "منذ أسبوعين", text: "جيد للوجبات ال��ريعة، لكن ممكن يتحسن أكثر." }
         ]
       },
       {
         id: 8, lat: 36.8730, lng: 6.9110,
         name: "مطعم الريف", nameEn: "El Rif",
         type: "مشاوي عائلية", icon: "🥩",
-        description: "مطعم عائلي في قلب سكيكدة مشهور بالمشاوي على الفحم والأطباق التقليدية الجزائرية. يقدم الكباب، الميشوي، الكفتة، مع سلطات طازجة وخبز تقليدي.",
+        description: "مطعم عائلي مشهور بالمشاوي على الفحم والأطباق التقليدية الجزائرية. كباب، ميشوي، كفتة، مع سلطات طازجة وخبز تقليدي.",
         rating: 8.7, food: 9.0, service: 8.4, cleanliness: 8.6, price: 8.5,
         status: "open", hours: "12:00 – 23:30", phone: "0555 99 00 11",
         address: "حي الريف، سكيكدة",
@@ -651,9 +606,6 @@
       }
     ];
 
-    // ════════════════════════════
-    //  Helpers
-    // ════════════════════════════
     function stars(n) {
       var f = Math.round(n / 2);
       return "★".repeat(f) + "☆".repeat(5 - f);
@@ -666,15 +618,11 @@
       return "linear-gradient(90deg,#ef4444,#f87171)";
     }
 
-    // ════════════════════════════
-    //  Mini Popup
-    // ════════════════════════════
     function miniBar(label, value) {
       return '<div class="mini-row">' +
         '<span class="lbl">' + label + '</span>' +
         '<div class="mini-bar-wrap"><div class="mini-bar" style="width:' + (value * 10) + '%;background:' + barColor(value) + '"></div></div>' +
-        '<strong>' + value + '</strong>' +
-      '</div>';
+        '<strong>' + value + '</strong></div>';
     }
 
     function buildMiniPopup(r) {
@@ -682,10 +630,8 @@
       return '<div class="mini">' +
         '<div class="mini-head">' +
           '<div class="mini-icon">' + r.icon + '</div>' +
-          '<div>' +
-            '<div class="mini-name">' + r.name + '</div>' +
-            '<div class="mini-type">' + r.type + '</div>' +
-          '</div>' +
+          '<div><div class="mini-name">' + r.name + '</div>' +
+          '<div class="mini-type">' + r.type + '</div></div>' +
         '</div>' +
         '<div class="mini-row" style="border:none;padding-bottom:6px;">' +
           '<div><span class="mini-stars">' + stars(r.rating) + '</span></div>' +
@@ -702,15 +648,11 @@
       '</div>';
     }
 
-    // ════════════════════════════
-    //  Bottom Sheet
-    // ════════════════════════════
     function sheetBar(label, emoji, value) {
       return '<div class="sh-rate-item">' +
         '<span class="lbl">' + emoji + ' ' + label + '</span>' +
         '<div class="sh-bar-wrap"><div class="sh-bar" style="width:' + (value * 10) + '%;background:' + barColor(value) + '"></div></div>' +
-        '<strong>' + value + '/10</strong>' +
-      '</div>';
+        '<strong>' + value + '/10</strong></div>';
     }
 
     function buildSheet(r) {
@@ -723,39 +665,30 @@
         return '<div class="comment">' +
           '<div class="comment-head">' +
             '<div class="comment-avatar">' + c.avatar + '</div>' +
-            '<div class="comment-info">' +
-              '<div class="comment-name">' + c.user + '</div>' +
-              '<div class="comment-date">' + c.date + '</div>' +
-            '</div>' +
+            '<div class="comment-info"><div class="comment-name">' + c.user + '</div>' +
+            '<div class="comment-date">' + c.date + '</div></div>' +
             '<div class="comment-stars">' + "★".repeat(c.stars) + "☆".repeat(5 - c.stars) + '</div>' +
           '</div>' +
-          '<p class="comment-text">' + c.text + '</p>' +
-        '</div>';
+          '<p class="comment-text">' + c.text + '</p></div>';
       }).join("");
 
-      return '' +
-        '<div class="sh-header">' +
+      return '<div class="sh-header">' +
           '<div class="sh-icon">' + r.icon + '</div>' +
-          '<div>' +
-            '<div class="sh-name">' + r.name + '</div>' +
-            '<div class="sh-type">' + r.type + '</div>' +
-            '<div class="sh-meta">' +
-              '<span class="score">' + r.rating + '/10</span>' +
-              '<span class="stars">' + stars(r.rating) + '</span>' +
-              '<span class="dot ' + (isOpen ? 'open' : 'closed') + '"><span style="font-size:6px;">●</span> ' + (isOpen ? 'مفتوح الآن' : 'مغلق حالياً') + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
+          '<div><div class="sh-name">' + r.name + '</div>' +
+          '<div class="sh-type">' + r.type + '</div>' +
+          '<div class="sh-meta">' +
+            '<span class="score">' + r.rating + '/10</span>' +
+            '<span class="stars">' + stars(r.rating) + '</span>' +
+            '<span class="dot ' + (isOpen ? 'open' : 'closed') + '"><span style="font-size:6px;">●</span> ' + (isOpen ? 'مفتوح الآن' : 'مغلق حالياً') + '</span>' +
+          '</div></div></div>' +
 
         '<div class="sh-section">' +
           '<div class="sh-section-title">📸 صور</div>' +
-          '<div class="sh-photos">' + photosHTML + '</div>' +
-        '</div>' +
+          '<div class="sh-photos">' + photosHTML + '</div></div>' +
 
         '<div class="sh-section">' +
           '<div class="sh-section-title">📝 الوصف</div>' +
-          '<p class="sh-desc">' + r.description + '</p>' +
-        '</div>' +
+          '<p class="sh-desc">' + r.description + '</p></div>' +
 
         '<div class="sh-section">' +
           '<div class="sh-section-title">ℹ️ معلومات</div>' +
@@ -763,8 +696,7 @@
             '<div class="sh-info-item"><div class="label">⏰ أوقات العمل</div><div class="value">' + r.hours + '</div></div>' +
             '<div class="sh-info-item"><div class="label">📞 الهاتف</div><div class="value" dir="ltr">' + r.phone + '</div></div>' +
             '<div class="sh-info-item full"><div class="label">📍 العنوان</div><div class="value">' + r.address + '</div></div>' +
-          '</div>' +
-        '</div>' +
+          '</div></div>' +
 
         '<div class="sh-section">' +
           '<div class="sh-section-title">⭐ التقييمات التفصيلية</div>' +
@@ -780,12 +712,10 @@
         '</div>';
     }
 
-    // ════════════════════════════
-    //  Sheet Controls
-    // ════════════════════════════
     var overlay = document.getElementById("overlay");
-    var sheet   = document.getElementById("sheet");
+    var sheet = document.getElementById("sheet");
     var sheetContent = document.getElementById("sheetContent");
+    var sheetScrollEl = document.getElementById("sheetContent");
 
     function openSheet(id) {
       var r = restaurants.find(function(x) { return x.id === id; });
@@ -807,36 +737,25 @@
     document.getElementById("sheetClose").addEventListener("click", closeSheet);
     overlay.addEventListener("click", closeSheet);
 
-    // Swipe down to close
     var touchStartY = 0;
-    var sheetScrollEl = document.getElementById("sheetContent");
-
     sheet.addEventListener("touchstart", function(e) {
       touchStartY = e.touches[0].clientY;
     }, { passive: true });
 
     sheet.addEventListener("touchmove", function(e) {
       var dy = e.touches[0].clientY - touchStartY;
-      // فقط أغلق إذا كان المستخدم في أعلى المحتوى ويسحب للأسفل
-      if (dy > 80 && sheetScrollEl.scrollTop <= 0) {
-        closeSheet();
-      }
+      if (dy > 80 && sheetScrollEl.scrollTop <= 0) closeSheet();
     }, { passive: true });
 
-    // Escape key
     document.addEventListener("keydown", function(e) {
       if (e.key === "Escape") closeSheet();
     });
 
-    // ════════════════════════════
-    //  Markers
-    // ════════════════════════════
     var markers = [];
 
     function renderMarkers(list) {
       markers.forEach(function(m) { map.removeLayer(m); });
       markers = [];
-
       list.forEach(function(r) {
         var m = L.marker([r.lat, r.lng], { icon: createPin(r.icon) })
           .addTo(map)
@@ -849,39 +768,27 @@
         m._restaurantData = r;
         markers.push(m);
       });
-
       document.getElementById("counter").innerHTML =
         '🍴 <strong>' + list.length + '</strong> / <strong>' + restaurants.length + '</strong> مطعم';
     }
 
     renderMarkers(restaurants);
 
-    // ════════════════════════════
-    //  Search
-    // ════════════════════════════
     document.getElementById("search").addEventListener("input", function() {
       var q = this.value.trim().toLowerCase();
-      if (!q) {
-        renderMarkers(restaurants);
-        return;
-      }
+      if (!q) { renderMarkers(restaurants); return; }
       var filtered = restaurants.filter(function(r) {
         return r.name.indexOf(q) !== -1 ||
                r.nameEn.toLowerCase().indexOf(q) !== -1 ||
                r.type.indexOf(q) !== -1;
       });
       renderMarkers(filtered);
-
       if (filtered.length > 0 && markers.length > 0) {
-        var group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.3), { animate: true, duration: 0.5 });
+        map.fitBounds(L.featureGroup(markers).getBounds().pad(0.3), { animate: true, duration: 0.5 });
       }
     });
 
-    // Close popup on map click
-    map.on("click", function() {
-      map.closePopup();
-    });
+    map.on("click", function() { map.closePopup(); });
   </script>
 </body>
 </html>
