@@ -1,28 +1,24 @@
-var map = L.map('map').setView([36.7538, 3.0588], 13);
+// ═══ تعريف الخريطة مرة واحدة فقط ═══
+var map = L.map('map', {
+  center: [36.7538, 3.0588],
+  zoom: 13,
+  zoomControl: false,
+  attributionControl: false
+});
 
-// إضافة خريطة OpenStreetMap
+// ═══ إضافة الخريطة الرمادية ═══
 L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
   maxZoom: 19
 }).addTo(map);
 
-// مثال على بعض المطاعم
+// ═══ المطاعم ═══
 var restaurants = [
-    {name:"مطعم الأميرة", lat:36.7538, lng:3.0588},
-    {name:"مطعم الفلافل", lat:36.7545, lng:3.0600},
-    {name:"مطعم الكسكسي", lat:36.7525, lng:3.0550}
+  {name: "مطعم الأميرة", lat: 36.7538, lng: 3.0588},
+  {name: "مطعم الفلافل", lat: 36.7545, lng: 3.0600},
+  {name: "مطعم الكسكسي", lat: 36.7525, lng: 3.0550}
 ];
 
-restaurants.forEach(r => {
-    L.marker([r.lat, r.lng]).addTo(map)
-     .bindPopup(`<b>${r.name}</b>`);
+restaurants.forEach(function(r) {
+  L.marker([r.lat, r.lng]).addTo(map)
+    .bindPopup('<b>' + r.name + '</b>');
 });
-const map = L.map("map", {
-  attributionControl: false,  // ← يمنع إنشاء العنصر أصلاً
-  ...
-});
-
-L.tileLayer("...", {
-  // بدون سطر attribution
-  subdomains: "abcd",
-  maxZoom: 19
-}).addTo(map);
