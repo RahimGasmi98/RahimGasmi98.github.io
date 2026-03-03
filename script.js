@@ -1,8 +1,8 @@
 var map = L.map('map').setView([36.7538, 3.0588], 13);
 
 // إضافة خريطة OpenStreetMap
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
+  maxZoom: 19
 }).addTo(map);
 
 // مثال على بعض المطاعم
