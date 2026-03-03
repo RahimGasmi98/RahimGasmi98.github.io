@@ -3,7 +3,6 @@ h1 { text-align: center; background-color: #ff6347; color: white; padding: 15px;
 
 /* ═══ خريطة بلون #212121 ═══ */
 .leaflet-tile-pane {
-  filter: saturate(0) brightness(.45) contrast(1.1);
+  filter: saturate(0) brightness(.3) contrast(1.1);
 }
-
 .leaflet-control-attribution { display: none !important; }
