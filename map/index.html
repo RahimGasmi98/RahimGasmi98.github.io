@@ -105,6 +105,7 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .mini-stars { color: var(--gold); font-size: 11px; letter-spacing: .5px; }
+
     .btn-more {
       display: flex; align-items: center; justify-content: center; gap: 6px;
       width: 100%; margin-top: 10px; padding: 7px 0;
@@ -115,6 +116,19 @@
     }
     .btn-more:hover { filter: brightness(1.15); }
     .btn-more:active { transform: scale(.97); }
+
+    /* زر الطريق داخل البوب-أب */
+    .btn-route {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 8px; padding: 7px 0;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff; border: none; border-radius: 8px;
+      font-family: 'Cairo', sans-serif; font-size: 11.5px; font-weight: 800;
+      cursor: pointer; transition: filter .2s, transform .15s;
+    }
+    .btn-route:hover { filter: brightness(1.15); }
+    .btn-route:active { transform: scale(.97); }
+    .btn-route:disabled { opacity: .45; cursor: not-allowed; filter: none; }
 
     /* ══════ Marker ══════ */
     .pin {
@@ -213,12 +227,8 @@
     .gps-btn:active { transform: scale(.92); }
     .gps-btn.active { color: #3b82f6; border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.1); }
     .gps-btn.loading { animation: gpsRotate 1s linear infinite; }
-    @keyframes gpsRotate {
-      0%   { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes gpsRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* GPS SVG icon */
     .gps-icon {
       width: 22px; height: 22px;
       fill: none; stroke: currentColor;
@@ -268,6 +278,46 @@
     }
     .toast.success { border-color: rgba(34,197,94,.3); }
     .toast.error { border-color: rgba(239,68,68,.3); }
+
+    /* ══════ Route bar (شريط معلومات الطريق) ══════ */
+    .route-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%) translateY(90px);
+      z-index: 2500;
+
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      background: rgba(15,23,42,.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(59,130,246,.35);
+      border-radius: 12px;
+      padding: 10px 14px;
+
+      box-shadow: 0 10px 30px rgba(0,0,0,.45);
+      transition: transform .35s cubic-bezier(.32,.72,0,1);
+      max-width: calc(100% - 28px);
+    }
+    .route-bar.show { transform: translateX(-50%) translateY(0); }
+    .route-bar .r-info { display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
+    .route-bar .r-title { font-size: 12px; font-weight: 800; }
+    .route-bar .r-sub { font-size: 11px; color: #93c5fd; }
+    .route-bar .r-time { font-size: 10px; color: var(--muted); }
+    .route-bar .r-close {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .route-bar .r-close:hover { background: rgba(255,255,255,.14); }
 
     /* ══════ Overlay + Sheet ══════ */
     .overlay {
@@ -453,8 +503,11 @@
       .mini-bar-wrap { width: 45px; height: 3px; }
       .mini-score { font-size: 15px; }
       .mini-stars { font-size: 10px; }
-      .btn-more { font-size: 10.5px; padding: 6px 0; }
+      .btn-more, .btn-route { font-size: 10.5px; padding: 6px 0; }
       .leaflet-popup-close-button { font-size: 16px !important; }
+
+      .route-bar { bottom: 10px; padding: 9px 12px; }
+      .route-bar .r-info { min-width: 140px; }
 
       .sheet { max-height: 90vh; border-radius: 16px 16px 0 0; }
       .sheet-scroll { padding: 0 14px 20px; }
@@ -504,6 +557,16 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  <!-- Route Bar -->
+  <div class="route-bar" id="routeBar">
+    <div class="r-info">
+      <div class="r-title" id="routeTitle"></div>
+      <div class="r-sub" id="routeDist"></div>
+      <div class="r-time" id="routeTime"></div>
+    </div>
+    <div class="r-close" id="routeClose" title="إلغاء الطريق">✕</div>
+  </div>
+
   <!-- Map -->
   <div id="map"></div>
 
@@ -539,8 +602,90 @@
     });
 
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd", maxZoom: 19
+      subdomains: "abcd",
+      maxZoom: 19
     }).addTo(map);
+
+    // ════════════════════════════
+    //  Route (Shortest path) via OSRM
+    // ════════════════════════════
+    var routeLine = null;
+    var routeShadow = null;
+
+    var routeBarEl = document.getElementById("routeBar");
+    var routeTitleEl = document.getElementById("routeTitle");
+    var routeDistEl = document.getElementById("routeDist");
+    var routeTimeEl = document.getElementById("routeTime");
+    var routeCloseEl = document.getElementById("routeClose");
+
+    function clearRoute() {
+      if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+      if (routeShadow) { map.removeLayer(routeShadow); routeShadow = null; }
+      routeBarEl.classList.remove("show");
+    }
+
+    routeCloseEl.addEventListener("click", clearRoute);
+
+    function drawRouteToRestaurant(restaurantId) {
+      if (userLat === null) {
+        showToast("⚠️ فعّل GPS أولاً ثم اختر مطعم", "error");
+        return;
+      }
+
+      var r = restaurants.find(function(x) { return x.id === restaurantId; });
+      if (!r) return;
+
+      clearRoute();
+      map.closePopup();
+      showToast("🛣️ جاري حساب أقصر طريق...", "");
+
+      // OSRM يحتاج: lng,lat
+      var url =
+        "https://router.project-osrm.org/route/v1/driving/" +
+        userLng + "," + userLat + ";" + r.lng + "," + r.lat +
+        "?overview=full&geometries=geojson";
+
+      fetch(url)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (!data.routes || !data.routes.length) {
+            showToast("⚠️ لم يتم العثور على طريق", "error");
+            return;
+          }
+
+          var route = data.routes[0];
+          var coords = route.geometry.coordinates.map(function(c) { return [c[1], c[0]]; });
+
+          routeShadow = L.polyline(coords, {
+            color: "#0b1b3a",
+            weight: 9,
+            opacity: 0.35
+          }).addTo(map);
+
+          routeLine = L.polyline(coords, {
+            color: "#3b82f6",
+            weight: 5,
+            opacity: 0.9,
+            lineCap: "round",
+            lineJoin: "round"
+          }).addTo(map);
+
+          map.fitBounds(routeLine.getBounds().pad(0.15), { animate: true, duration: 0.6 });
+
+          var km = route.distance / 1000;
+          var min = Math.round(route.duration / 60);
+
+          routeTitleEl.textContent = "🗺️ الطريق إلى: " + r.name;
+          routeDistEl.textContent = "📍 المسافة: " + (km < 1 ? Math.round(km * 1000) + " م" : km.toFixed(1) + " كم");
+          routeTimeEl.textContent = "⏱️ الوقت: ~" + min + " دقيقة بالسيارة";
+
+          routeBarEl.classList.add("show");
+          showToast("✅ تم رسم أقصر طريق!", "success");
+        })
+        .catch(function() {
+          showToast("⚠️ خطأ أثناء حساب الطريق", "error");
+        });
+    }
 
     // ════════════════════════════
     //  GPS System
@@ -618,7 +763,6 @@
         }).addTo(map);
       }
 
-      // تحديث الماركرات لعرض المسافة
       renderMarkers(currentList);
     }
 
@@ -640,13 +784,13 @@
       }
 
       if (gpsWatchId !== null) {
-        // إيقاف GPS
         navigator.geolocation.clearWatch(gpsWatchId);
         gpsWatchId = null;
         gpsBtn.classList.remove("active");
         if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
         if (userCircle) { map.removeLayer(userCircle); userCircle = null; }
         userLat = null; userLng = null;
+        clearRoute();
         renderMarkers(currentList);
         showToast("📍 تم إيقاف تتبع الموقع", "");
         return;
@@ -662,7 +806,6 @@
         map.flyTo([pos.coords.latitude, pos.coords.longitude], 15, { duration: 1 });
         showToast("✅ تم تحديد موقعك بنجاح!", "success");
 
-        // متابعة الموقع
         gpsWatchId = navigator.geolocation.watchPosition(updateUserLocation, onGPSError, {
           enableHighAccuracy: true,
           maximumAge: 10000,
@@ -867,6 +1010,13 @@
 
     function buildMiniPopup(r) {
       var isOpen = r.status === "open";
+
+      // زر "أقصر طريق" يظهر فقط إذا GPS مفعّل
+      var routeBtn =
+        '<button class="btn-route" ' +
+        (userLat === null ? 'disabled title="فعّل GPS أولاً"' : 'onclick="drawRouteToRestaurant(' + r.id + ')"') +
+        '>🛣️ أقصر طريق</button>';
+
       return '<div class="mini">' +
         '<div class="mini-head">' +
           '<div class="mini-icon">' + r.icon + '</div>' +
@@ -886,6 +1036,7 @@
         miniBar("👨‍🍳 الخدمة", r.service) +
         miniBar("✨ النظافة", r.cleanliness) +
         miniBar("💰 السعر", r.price) +
+        routeBtn +
         '<button class="btn-more" onclick="openSheet(' + r.id + ')">عرض المزيد ↓</button>' +
       '</div>';
     }
@@ -1015,9 +1166,16 @@
             autoPan: true,
             autoPanPadding: L.point(20, 60)
           });
+
+        // إذا ضغطت على الماركر مباشرة: ارسم الطريق مباشرة (إذا GPS شغال)
+        m.on("click", function() {
+          if (userLat !== null) drawRouteToRestaurant(r.id);
+        });
+
         m._restaurantData = r;
         markers.push(m);
       });
+
       document.getElementById("counter").innerHTML =
         '🍴 <strong>' + list.length + '</strong> / <strong>' + restaurants.length + '</strong> مطعم';
     }
