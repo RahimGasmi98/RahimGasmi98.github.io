@@ -1,8 +1,18 @@
-body { font-family: Arial; margin: 0; padding: 0; }
-h1 { text-align: center; background-color: #ff6347; color: white; padding: 15px; }
-
-/* ═══ خريطة بلون #212121 ═══ */
-.leaflet-tile-pane {
-  filter: saturate(0) brightness(.15) contrast(1.2);
+body {
+  font-family: Arial;
+  margin: 0;
+  padding: 0;
 }
-.leaflet-control-attribution { display: none !important; }
+
+/* ═══ خريطة سوداء ═══ */
+.leaflet-tile-pane {
+  filter: saturate(0) brightness(.15) contrast(1.2) !important;
+}
+
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+.leaflet-control-zoom {
+  display: none !important;
+}
