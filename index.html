@@ -7,6 +7,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
 
   <style>
     :root {
@@ -42,12 +43,8 @@
 
     #map { width: 100%; height: 100vh; position: relative; z-index: 1; }
 
-    /* ═══ خريطة رمادية ═══ */
     .leaflet-div-icon { background: transparent !important; border: none !important; }
-    .leaflet-control-attribution { display: none !important; }
-    .leaflet-control-zoom { display: none !important; }
 
-    /* ══════ Popup ══════ */
     .leaflet-popup-content-wrapper {
       background: linear-gradient(170deg, var(--card-2), var(--card));
       color: var(--text);
@@ -65,7 +62,6 @@
       right: 8px !important;
     }
 
-    /* ══════ Mini Card ══════ */
     .mini { padding: 12px 14px; min-width: 220px; max-width: 260px; }
     .mini-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .mini-icon {
@@ -77,10 +73,7 @@
     }
     .mini-name { font-size: 13px; font-weight: 700; line-height: 1.3; }
     .mini-type { font-size: 10px; color: var(--muted); }
-    .mini-dist {
-      font-size: 10px; color: #60a5fa; margin-top: 2px;
-      display: flex; align-items: center; gap: 3px;
-    }
+    .mini-dist { font-size: 10px; color: #60a5fa; margin-top: 2px; display: flex; align-items: center; gap: 3px; }
     .mini-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 4px 0; font-size: 11px; color: #cbd5e1;
@@ -107,7 +100,6 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .mini-stars { color: var(--gold); font-size: 11px; letter-spacing: .5px; }
-
     .mini-btns { display: flex; gap: 6px; margin-top: 10px; }
     .btn-more {
       display: flex; align-items: center; justify-content: center; gap: 5px;
@@ -131,7 +123,6 @@
     .btn-route:active { transform: scale(.97); }
     .btn-route:disabled { opacity: .4; cursor: not-allowed; filter: none; }
 
-    /* ══════ Marker ══════ */
     .pin {
       position: relative;
       width: var(--pin-size); height: var(--pin-size);
@@ -171,7 +162,6 @@
       100% { transform: translate(calc(-1 * var(--pin-half)), calc(-1 * var(--pin-half))) scale(2.5); opacity:0; }
     }
 
-    /* ══════ User Location ══════ */
     .user-marker {
       width: 22px; height: 22px;
       background: #3b82f6;
@@ -180,19 +170,15 @@
       box-shadow: 0 0 0 8px rgba(59,130,246,.25), 0 2px 10px rgba(0,0,0,.3);
     }
     .user-pulse {
-      position: absolute;
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: rgba(59,130,246,.3);
-      animation: userPulse 2s ease-out infinite;
-      pointer-events: none;
+      position: absolute; width: 22px; height: 22px;
+      border-radius: 50%; background: rgba(59,130,246,.3);
+      animation: userPulse 2s ease-out infinite; pointer-events: none;
     }
     @keyframes userPulse {
       0%   { transform: scale(1); opacity: .7; }
       100% { transform: scale(3.5); opacity: 0; }
     }
 
-    /* ══════ Search ══════ */
     .search-box {
       position: fixed; top: 14px; left: 50%; z-index: 1000;
       transform: translateX(-50%);
@@ -212,7 +198,6 @@
     .search-box input::placeholder { color: #64748b; }
     .search-icon { font-size: 15px; margin-left: 8px; flex-shrink: 0; }
 
-    /* ══════ Left Bottom Stack ══════ */
     .left-stack {
       position: fixed; bottom: 20px; left: 16px; z-index: 1000;
       display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
@@ -223,8 +208,7 @@
       border: 1.5px solid var(--border); border-radius: 50%;
       display: grid; place-items: center;
       box-shadow: 0 6px 20px var(--shadow);
-      cursor: pointer; transition: all .25s;
-      color: var(--muted);
+      cursor: pointer; transition: all .25s; color: var(--muted);
     }
     .gps-btn:hover { border-color: rgba(59,130,246,.4); color: #60a5fa; }
     .gps-btn:active { transform: scale(.92); }
@@ -244,28 +228,23 @@
     }
     .counter strong { color: var(--primary); font-weight: 800; }
 
-    /* ══════ Credit ══════ */
     .credit {
       position: fixed; bottom: 20px; right: 16px; z-index: 1000;
       background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
       border: 1.5px solid var(--border); border-radius: 10px;
-      padding: 7px 14px;
-      font-size: 12px; color: var(--muted);
+      padding: 7px 14px; font-size: 12px; color: var(--muted);
       box-shadow: 0 6px 20px var(--shadow);
-      letter-spacing: .3px;
-      display: flex; align-items: center; gap: 5px;
+      letter-spacing: .3px; display: flex; align-items: center; gap: 5px;
       user-select: none;
     }
     .credit span { color: var(--primary); font-weight: 800; font-size: 12px; }
 
-    /* ══════ Route Info Bar ══════ */
     .route-bar {
       position: fixed; bottom: 20px; left: 50%; z-index: 1100;
       transform: translateX(-50%) translateY(80px);
       background: rgba(15,23,42,.92); backdrop-filter: blur(14px);
       border: 1.5px solid rgba(59,130,246,.3); border-radius: 14px;
-      padding: 10px 18px;
-      display: flex; align-items: center; gap: 14px;
+      padding: 10px 18px; display: flex; align-items: center; gap: 14px;
       box-shadow: 0 8px 30px rgba(0,0,0,.4);
       transition: transform .35s cubic-bezier(.32,.72,0,1);
       max-width: calc(100% - 32px);
@@ -280,12 +259,10 @@
       background: rgba(255,255,255,.08); border: 1px solid var(--border);
       color: var(--muted); font-size: 14px;
       display: grid; place-items: center;
-      cursor: pointer; flex-shrink: 0;
-      transition: background .2s;
+      cursor: pointer; flex-shrink: 0; transition: background .2s;
     }
     .route-bar .r-close:hover { background: rgba(255,255,255,.15); }
 
-    /* ══════ Toast ══════ */
     .toast {
       position: fixed; top: 70px; left: 50%; z-index: 3000;
       transform: translateX(-50%) translateY(-20px);
@@ -293,8 +270,7 @@
       border: 1px solid var(--border); border-radius: 10px;
       padding: 8px 16px; font-size: 12px; color: var(--text);
       box-shadow: 0 8px 28px var(--shadow);
-      opacity: 0; pointer-events: none;
-      transition: all .3s ease;
+      opacity: 0; pointer-events: none; transition: all .3s ease;
       display: flex; align-items: center; gap: 8px;
       max-width: calc(100% - 40px); white-space: nowrap;
     }
@@ -302,7 +278,6 @@
     .toast.success { border-color: rgba(34,197,94,.3); }
     .toast.error { border-color: rgba(239,68,68,.3); }
 
-    /* ══════ Overlay + Sheet ══════ */
     .overlay {
       position: fixed; inset: 0; z-index: 2000;
       background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
@@ -312,10 +287,8 @@
     .sheet {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 2001;
       background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-      border-top: 1px solid var(--border);
-      border-radius: 20px 20px 0 0;
-      max-height: 85vh;
-      transform: translateY(100%);
+      border-top: 1px solid var(--border); border-radius: 20px 20px 0 0;
+      max-height: 85vh; transform: translateY(100%);
       transition: transform .35s cubic-bezier(.32,.72,0,1);
       overflow: hidden; display: flex; flex-direction: column;
     }
@@ -336,7 +309,6 @@
       -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
     }
 
-    /* ══════ Sheet Content ══════ */
     .sh-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
     .sh-icon { width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center; font-size: 24px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); box-shadow: 0 4px 16px rgba(34,197,94,.3); flex-shrink: 0; }
     .sh-name { font-size: 18px; font-weight: 800; }
@@ -374,7 +346,6 @@
     .comment-stars { color: var(--gold); font-size: 10px; flex-shrink: 0; }
     .comment-text { font-size: 11.5px; color: var(--muted); line-height: 1.65; }
 
-    /* ══════ 📱 MOBILE ══════ */
     @media (max-width: 600px) {
       :root { --pin-size:26px; --pin-half:13px; --pin-font:11px; --pin-dot:7px; --pin-dot-pos:9.5px; --pulse-size:26px; }
       .search-box { top:10px; width:calc(100% - 24px); max-width:none; left:12px; right:12px; transform:none; padding:5px 10px; border-radius:10px; }
@@ -477,14 +448,11 @@
       tap:true
     });
 
-    // ═══ خريطة رمادية (light + فلتر) ═══
+    // ═══ خريطة فاتحة + فلتر في style.css يحولها لسوداء ═══
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{
       subdomains:"abcd",maxZoom:19
     }).addTo(map);
 
-    // ════════════════════════════
-    //  GPS
-    // ════════════════════════════
     var userLat=null,userLng=null,userMarker=null,userCircle=null;
     var gpsBtn=document.getElementById("gpsBtn");
     var toastEl=document.getElementById("toast");
@@ -553,9 +521,6 @@
       },onGPSError,{enableHighAccuracy:true,timeout:10000,maximumAge:0});
     });
 
-    // ════════════════════════════
-    //  Route (OSRM)
-    // ════════════════════════════
     var routeLine=null,routeShadow=null;
     var routeBarEl=document.getElementById("routeBar");
 
@@ -586,17 +551,11 @@
     }
     document.getElementById("routeClose").addEventListener("click",clearRoute);
 
-    // ════════════════════════════
-    //  Pin
-    // ════════════════════════════
     function createPin(icon){
       var s=isMobile?26:36;
       return L.divIcon({html:'<div class="pulse-ring"></div><div class="pin" data-icon="'+icon+'"></div>',className:"",iconSize:[s,s],iconAnchor:[s/2,s],popupAnchor:[0,isMobile?-22:-30]});
     }
 
-    // ════════════════════════════
-    //  Data
-    // ════════════════════════════
     var restaurants=[
       {id:1,lat:36.8788,lng:6.9013,name:"مطعم واد مديني",nameEn:"Oued Mdini",type:"مشاوي وأطباق تقليدية",icon:"🔥",description:"مطعم بإطلالة بانورامية خلابة على جبال وسهول سكيكدة. يشتهر بالمشاوي الطازجة والمخبوزات التقليدية.",rating:8.8,food:9.0,service:8.5,cleanliness:8.8,price:9.0,status:"open",hours:"11:00 – 23:00",phone:"0555 12 34 56",address:"طريق واد مديني، سكيكدة",photos:["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"],comments:[{user:"أحمد",avatar:"👨",stars:5,date:"منذ أسبوع",text:"مشاوي ممتازة والمنظر خيالي!"},{user:"سارة",avatar:"👩",stars:4,date:"منذ شهر",text:"لذيذ لكن الانتظار طويل."},{user:"كريم",avatar:"🧑",stars:5,date:"منذ شهرين",text:"أفضل مشاوي في سكيكدة."}]},
       {id:2,lat:36.8810,lng:6.9100,name:"مطعم لو فار شيه لويزا",nameEn:"Le Phare Chez Louiza",type:"مأكولات بحرية",icon:"🐟",description:"بجانب البحر مباشرة، متخصص في المأكولات البحرية الطازجة يومياً.",rating:9.0,food:9.3,service:8.6,cleanliness:9.0,price:8.4,status:"open",hours:"12:00 – 23:30",phone:"0555 98 76 54",address:"واجهة بحرية، سكيكدة",photos:["https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop"],comments:[{user:"ليلى",avatar:"👩",stars:5,date:"منذ 3 أيام",text:"سمك طازج والإطلالة رائعة!"},{user:"ياسين",avatar:"👨",stars:4,date:"منذ أسبوعين",text:"ممتاز والأسعار معقولة."}]},
@@ -608,9 +567,6 @@
       {id:8,lat:36.8730,lng:6.9110,name:"مطعم الريف",nameEn:"El Rif",type:"مشاوي عائلية",icon:"🥩",description:"مشاوي على الفحم، كباب، ميشوي، كفتة مع سلطات وخبز تقليدي.",rating:8.7,food:9.0,service:8.4,cleanliness:8.6,price:8.5,status:"open",hours:"12:00 – 23:30",phone:"0555 99 00 11",address:"حي الريف، سكيكدة",photos:["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"],comments:[{user:"عمر",avatar:"👨",stars:5,date:"منذ 3 أيام",text:"أفضل كباب في سكيكدة!"},{user:"نادية",avatar:"👩",stars:4,date:"منذ أسبوع",text:"عائلي ممتاز."},{user:"بلال",avatar:"🧑",stars:5,date:"منذ شهر",text:"الميشوي لا يُقارن!"}]}
     ];
 
-    // ════════════════════════════
-    //  Helpers
-    // ════════════════════════════
     function stars(n){var f=Math.round(n/2);return "★".repeat(f)+"☆".repeat(5-f);}
     function barColor(n){if(n>=9)return "linear-gradient(90deg,#22c55e,#4ade80)";if(n>=8)return "linear-gradient(90deg,#eab308,#facc15)";if(n>=7)return "linear-gradient(90deg,#f97316,#fb923c)";return "linear-gradient(90deg,#ef4444,#f87171)";}
     function miniBar(l,v){return '<div class="mini-row"><span class="lbl">'+l+'</span><div class="mini-bar-wrap"><div class="mini-bar" style="width:'+(v*10)+'%;background:'+barColor(v)+'"></div></div><strong>'+v+'</strong></div>';}
@@ -638,9 +594,6 @@
         '<div class="sh-section"><div class="sh-section-title">💬 التعليقات ('+r.comments.length+')</div>'+cm+'</div>';
     }
 
-    // ════════════════════════════
-    //  Sheet
-    // ════════════════════════════
     var overlay=document.getElementById("overlay"),sheet=document.getElementById("sheet"),sheetContent=document.getElementById("sheetContent");
 
     function openSheet(id){
@@ -658,9 +611,6 @@
     sheet.addEventListener("touchmove",function(e){if(e.touches[0].clientY-touchStartY>80&&sheetContent.scrollTop<=0)closeSheet();},{passive:true});
     document.addEventListener("keydown",function(e){if(e.key==="Escape")closeSheet();});
 
-    // ════════════════════════════
-    //  Markers
-    // ════════════════════════════
     var markers=[],currentList=restaurants;
 
     function renderMarkers(list){
@@ -674,9 +624,6 @@
     }
     renderMarkers(restaurants);
 
-    // ════════════════════════════
-    //  Search
-    // ════════════════════════════
     document.getElementById("search").addEventListener("input",function(){
       var q=this.value.trim().toLowerCase();
       if(!q){renderMarkers(restaurants);return;}
