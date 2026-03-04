@@ -4,9 +4,9 @@ body {
   padding: 0;
 }
 
-/* ═══ خريطة سوداء ═══ */
+/* ═══ خريطة Dark Blue مع طرق واضحة ═══ */
 .leaflet-tile-pane {
-  filter: saturate(0) brightness(.15) contrast(1.2) !important;
+  filter: brightness(1.15) contrast(1.2) saturate(.6) hue-rotate(10deg) !important;
 }
 
 .leaflet-control-attribution {
