@@ -156,7 +156,7 @@
       100% { transform: translate(calc(-1 * var(--pin-half)), calc(-1 * var(--pin-half))) scale(2.5); opacity:0; }
     }
 
-    /* ══════ User Location ══════ */
+    /* ══════ User Location Marker ══════ */
     .user-marker {
       width: 18px; height: 18px;
       background: #3b82f6;
@@ -169,6 +169,7 @@
       width: 18px; height: 18px;
       border-radius: 50%;
       background: rgba(59,130,246,.3);
+      transform: translate(0, 0);
       animation: userPulse 2s ease-out infinite;
       pointer-events: none;
     }
@@ -197,14 +198,10 @@
     .search-box input::placeholder { color: #64748b; }
     .search-icon { font-size: 15px; margin-left: 8px; flex-shrink: 0; }
 
-    /* ══════ Left Bottom Stack (GPS + Counter) ══════ */
-    .left-stack {
-      position: fixed; bottom: 14px; left: 14px; z-index: 1000;
-      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
-    }
-
+    /* ══════ GPS Button ══════ */
     .gps-btn {
-      width: 42px; height: 42px;
+      position: fixed; bottom: 80px; right: 14px; z-index: 1000;
+      width: 44px; height: 44px;
       background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 50%;
       display: grid; place-items: center;
@@ -214,19 +211,23 @@
     }
     .gps-btn:hover { border-color: rgba(59,130,246,.4); color: #60a5fa; }
     .gps-btn:active { transform: scale(.92); }
-    .gps-btn.active { color: #3b82f6; border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.12); }
-    .gps-btn.loading .gps-icon { animation: gpsRotate 1s linear infinite; }
+    .gps-btn.active { color: #3b82f6; border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.1); }
+    .gps-btn.loading { animation: gpsRotate 1s linear infinite; }
     @keyframes gpsRotate {
       0%   { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* GPS SVG icon */
     .gps-icon {
-      width: 20px; height: 20px;
+      width: 22px; height: 22px;
       fill: none; stroke: currentColor;
       stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
     }
 
+    /* ══════ Counter ══════ */
     .counter {
+      position: fixed; bottom: 14px; left: 14px; z-index: 1000;
       background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 8px;
       padding: 6px 12px; font-size: 11px; color: var(--muted);
@@ -260,7 +261,6 @@
       transition: all .3s ease;
       display: flex; align-items: center; gap: 8px;
       max-width: calc(100% - 40px);
-      white-space: nowrap;
     }
     .toast.show {
       opacity: 1; pointer-events: all;
@@ -288,6 +288,7 @@
       overflow: hidden; display: flex; flex-direction: column;
     }
     .sheet.active { transform: translateY(0); }
+
     .sheet-handle {
       display: flex; justify-content: center; padding: 10px 0 4px;
       cursor: grab; flex-shrink: 0;
@@ -414,20 +415,25 @@
 
       .search-box {
         top: 10px;
-        width: calc(100% - 24px);
+        width: calc(100% - 60px);
         max-width: none;
-        left: 12px; right: 12px;
+        left: 10px; right: auto;
         transform: none;
         padding: 5px 10px; border-radius: 10px;
       }
       .search-box input { font-size: 12px; padding: 5px 4px; }
       .search-icon { font-size: 13px; margin-left: 6px; }
 
-      .left-stack { bottom: 10px; left: 10px; gap: 6px; }
-      .gps-btn { width: 36px; height: 36px; }
-      .gps-icon { width: 17px; height: 17px; }
-      .counter { font-size: 10px; padding: 4px 10px; }
+      .gps-btn {
+        top: 8px; right: 8px; bottom: auto;
+        width: 38px; height: 38px;
+      }
+      .gps-icon { width: 18px; height: 18px; }
 
+      .counter {
+        bottom: 10px; left: 10px;
+        font-size: 10px; padding: 4px 10px;
+      }
       .credit {
         bottom: 10px; right: 10px;
         font-size: 8px; padding: 3px 8px;
@@ -467,8 +473,8 @@
       .mini { min-width: 180px; max-width: 210px; padding: 8px 10px; }
       .credit { font-size: 7px; padding: 2px 6px; }
       .credit span { font-size: 7px; }
-      .gps-btn { width: 32px; height: 32px; }
-      .gps-icon { width: 15px; height: 15px; }
+      .gps-btn { width: 34px; height: 34px; }
+      .gps-icon { width: 16px; height: 16px; }
     }
   </style>
 </head>
@@ -480,17 +486,17 @@
     <input type="text" id="search" placeholder="ابحث عن مطعم..." autocomplete="off" />
   </div>
 
-  <!-- Left Stack: GPS فوق + Counter تحت -->
-  <div class="left-stack">
-    <div class="gps-btn" id="gpsBtn" title="موقعي الحالي">
-      <svg class="gps-icon" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-        <circle cx="12" cy="12" r="8"/>
-      </svg>
-    </div>
-    <div class="counter" id="counter"></div>
+  <!-- GPS Button -->
+  <div class="gps-btn" id="gpsBtn" title="موقعي الحالي">
+    <svg class="gps-icon" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      <circle cx="12" cy="12" r="8"/>
+    </svg>
   </div>
+
+  <!-- Counter -->
+  <div class="counter" id="counter"></div>
 
   <!-- Credit -->
   <div class="credit">MADE BY : <span>GASMI ABDERRAHIM</span></div>
@@ -515,6 +521,9 @@
   <script>
     var isMobile = window.matchMedia("(max-width:600px)").matches;
 
+    // ════════════════════════════
+    //  Map
+    // ════════════════════════════
     var map = L.map("map", {
       center: [36.8765, 6.9065],
       zoom: isMobile ? 13.5 : 14,
@@ -534,9 +543,12 @@
     }).addTo(map);
 
     // ════════════════════════════
-    //  GPS
+    //  GPS System
     // ════════════════════════════
-    var userLat = null, userLng = null, userMarker = null, userCircle = null;
+    var userLat = null;
+    var userLng = null;
+    var userMarker = null;
+    var userCircle = null;
     var gpsBtn = document.getElementById("gpsBtn");
     var toastEl = document.getElementById("toast");
     var gpsWatchId = null;
@@ -546,64 +558,89 @@
       toastEl.innerHTML = msg;
       toastEl.classList.add("show");
       clearTimeout(toastEl._timer);
-      toastEl._timer = setTimeout(function() { toastEl.classList.remove("show"); }, 3500);
+      toastEl._timer = setTimeout(function() {
+        toastEl.classList.remove("show");
+      }, 3500);
     }
 
     function calcDistance(lat1, lng1, lat2, lng2) {
       var R = 6371;
       var dLat = (lat2 - lat1) * Math.PI / 180;
       var dLng = (lng2 - lng1) * Math.PI / 180;
-      var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
-              Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-              Math.sin(dLng/2)*Math.sin(dLng/2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
     }
 
     function formatDist(km) {
-      return km < 1 ? Math.round(km*1000) + " م" : km.toFixed(1) + " كم";
+      if (km < 1) return Math.round(km * 1000) + " م";
+      return km.toFixed(1) + " كم";
     }
 
     function getDistHTML(r) {
       if (userLat === null) return "";
-      return '<div class="mini-dist">📍 ' + formatDist(calcDistance(userLat, userLng, r.lat, r.lng)) + ' منك</div>';
+      var d = calcDistance(userLat, userLng, r.lat, r.lng);
+      return '<div class="mini-dist">📍 ' + formatDist(d) + ' منك</div>';
     }
 
     function getSheetDistHTML(r) {
       if (userLat === null) return "";
-      return '<span class="sh-dist">📍 ' + formatDist(calcDistance(userLat, userLng, r.lat, r.lng)) + ' منك</span>';
+      var d = calcDistance(userLat, userLng, r.lat, r.lng);
+      return '<span class="sh-dist">📍 ' + formatDist(d) + ' منك</span>';
     }
 
     function updateUserLocation(pos) {
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
-      var acc = pos.coords.accuracy;
-      var icon = L.divIcon({
+      var accuracy = pos.coords.accuracy;
+
+      var userIcon = L.divIcon({
         html: '<div class="user-pulse"></div><div class="user-marker"></div>',
-        className: "", iconSize: [18,18], iconAnchor: [9,9]
+        className: "",
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
       });
+
       if (userMarker) {
         userMarker.setLatLng([userLat, userLng]);
-        userCircle.setLatLng([userLat, userLng]).setRadius(acc);
+        userCircle.setLatLng([userLat, userLng]);
+        userCircle.setRadius(accuracy);
       } else {
-        userMarker = L.marker([userLat, userLng], { icon: icon, zIndexOffset: 1000 }).addTo(map);
+        userMarker = L.marker([userLat, userLng], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
         userCircle = L.circle([userLat, userLng], {
-          radius: acc, color: "rgba(59,130,246,.3)",
-          fillColor: "rgba(59,130,246,.08)", fillOpacity: 1, weight: 1
+          radius: accuracy,
+          color: "rgba(59,130,246,.3)",
+          fillColor: "rgba(59,130,246,.08)",
+          fillOpacity: 1,
+          weight: 1
         }).addTo(map);
       }
+
+      // تحديث الماركرات لعرض المسافة
       renderMarkers(currentList);
     }
 
     function onGPSError(err) {
       gpsBtn.classList.remove("loading");
-      var msgs = { 1: "⚠️ يرجى السماح بالوصول للموقع", 2: "⚠️ تعذّر تحديد الموقع", 3: "⚠️ انتهت مهلة تحديد الموقع" };
-      showToast(msgs[err.code] || "⚠️ خطأ غير معروف", "error");
+      if (err.code === 1) {
+        showToast("⚠️ يرجى السماح بالوصول للموقع من إعدادات المتصفح", "error");
+      } else if (err.code === 2) {
+        showToast("⚠️ تعذّر تحديد الموقع، تحقق من GPS", "error");
+      } else {
+        showToast("⚠️ انتهت مهلة تحديد الموقع", "error");
+      }
     }
 
     gpsBtn.addEventListener("click", function() {
-      if (!navigator.geolocation) { showToast("⚠️ المتصفح لا يدعم تحديد الموقع", "error"); return; }
+      if (!navigator.geolocation) {
+        showToast("⚠️ المتصفح لا يدعم تحديد الموقع", "error");
+        return;
+      }
 
       if (gpsWatchId !== null) {
+        // إيقاف GPS
         navigator.geolocation.clearWatch(gpsWatchId);
         gpsWatchId = null;
         gpsBtn.classList.remove("active");
@@ -623,11 +660,19 @@
         gpsBtn.classList.add("active");
         updateUserLocation(pos);
         map.flyTo([pos.coords.latitude, pos.coords.longitude], 15, { duration: 1 });
-        showToast("✅ تم تحديد موقعك!", "success");
+        showToast("✅ تم تحديد موقعك بنجاح!", "success");
+
+        // متابعة الموقع
         gpsWatchId = navigator.geolocation.watchPosition(updateUserLocation, onGPSError, {
-          enableHighAccuracy: true, maximumAge: 10000, timeout: 15000
+          enableHighAccuracy: true,
+          maximumAge: 10000,
+          timeout: 15000
         });
-      }, onGPSError, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      }, onGPSError, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
     });
 
     // ════════════════════════════
@@ -637,7 +682,9 @@
       var s = isMobile ? 26 : 36;
       return L.divIcon({
         html: '<div class="pulse-ring"></div><div class="pin" data-icon="' + icon + '"></div>',
-        className: "", iconSize: [s,s], iconAnchor: [s/2,s],
+        className: "",
+        iconSize: [s, s],
+        iconAnchor: [s / 2, s],
         popupAnchor: [0, isMobile ? -22 : -30]
       });
     }
@@ -646,132 +693,308 @@
     //  Data
     // ════════════════════════════
     var restaurants = [
-      { id:1, lat:36.8788, lng:6.9013, name:"مطعم واد مديني", nameEn:"Oued Mdini", type:"مشاوي وأطباق تقليدية", icon:"🔥",
-        description:"مطعم بإطلالة بانورامية خلابة على جبال وسهول سكيكدة. يشتهر بالمشاوي الطازجة والمخبوزات التقليدية.",
-        rating:8.8, food:9.0, service:8.5, cleanliness:8.8, price:9.0,
-        status:"open", hours:"11:00 – 23:00", phone:"0555 12 34 56", address:"طريق واد مديني، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"],
-        comments:[{user:"أحمد",avatar:"👨",stars:5,date:"منذ أسبوع",text:"مشاوي ممتازة والمنظر خيالي!"},{user:"سارة",avatar:"👩",stars:4,date:"منذ شهر",text:"الأكل لذيذ لكن الانتظار طويل."},{user:"كريم",avatar:"🧑",stars:5,date:"منذ شهرين",text:"أفضل مطعم مشاوي في سكيكدة."}]
+      {
+        id: 1, lat: 36.8788, lng: 6.9013,
+        name: "مطعم واد مديني", nameEn: "Oued Mdini",
+        type: "مشاوي وأطباق تقليدية", icon: "🔥",
+        description: "مطعم بإطلالة بانورامية خلابة على جبال وسهول سكيكدة. يشتهر بالمشاوي الطازجة المحضّرة على الفحم، والمخبوزات التقليدية، وبعض الأطباق البحرية. الأجواء هادئة ومريحة ومثالية للعائلات.",
+        rating: 8.8, food: 9.0, service: 8.5, cleanliness: 8.8, price: 9.0,
+        status: "open", hours: "11:00 – 23:00", phone: "0555 12 34 56",
+        address: "طريق واد مديني، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "أحمد", avatar: "👨", stars: 5, date: "منذ أسبوع", text: "مشاوي ممتازة والمنظر خيالي!" },
+          { user: "سارة", avatar: "👩", stars: 4, date: "منذ شهر", text: "الأكل لذيذ جداً لكن الانتظار طويل شوي." },
+          { user: "كريم", avatar: "🧑", stars: 5, date: "منذ شهرين", text: "أفضل مطعم مشاوي في سكيكدة." }
+        ]
       },
-      { id:2, lat:36.8810, lng:6.9100, name:"مطعم لو فار شيه لويزا", nameEn:"Le Phare Chez Louiza", type:"مأكولات بحرية", icon:"🐟",
-        description:"بجانب البحر مباشرة، متخصص في المأكولات البحرية الطازجة يومياً من الميناء.",
-        rating:9.0, food:9.3, service:8.6, cleanliness:9.0, price:8.4,
-        status:"open", hours:"12:00 – 23:30", phone:"0555 98 76 54", address:"واجهة بحرية، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop"],
-        comments:[{user:"ليلى",avatar:"👩",stars:5,date:"منذ 3 أيام",text:"سمك طازج والإطلالة رائعة!"},{user:"ياسين",avatar:"👨",stars:4,date:"منذ أسبوعين",text:"ممتاز والأسعار معقولة."}]
+      {
+        id: 2, lat: 36.8810, lng: 6.9100,
+        name: "مطعم لو فار شيه لويزا", nameEn: "Le Phare Chez Louiza",
+        type: "مأكولات بحرية", icon: "🐟",
+        description: "بجانب البحر مباشرة مع شرفة رائعة. متخصص في المأكولات البحرية الطازجة يومياً من الميناء.",
+        rating: 9.0, food: 9.3, service: 8.6, cleanliness: 9.0, price: 8.4,
+        status: "open", hours: "12:00 – 23:30", phone: "0555 98 76 54",
+        address: "واجهة بحرية، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "ليلى", avatar: "👩", stars: 5, date: "منذ 3 أيام", text: "سمك طازج والإطلالة على البحر لا تُقدّر بثمن!" },
+          { user: "ياسين", avatar: "👨", stars: 4, date: "منذ أسبوعين", text: "كل شيء ممتاز، الأسعار معقولة." }
+        ]
       },
-      { id:3, lat:36.8752, lng:6.9045, name:"مطعم نيو داي", nameEn:"New Day Skikda", type:"بيتزا ووجبات سريعة", icon:"🍕",
-        description:"مشهور بالبيتزا الإيطالية بالعجينة الطازجة. جلسات داخلية وخارجية مريحة.",
-        rating:8.5, food:8.7, service:8.3, cleanliness:8.4, price:9.0,
-        status:"open", hours:"10:00 – 00:00", phone:"0555 11 22 33", address:"شارع محمود نفير، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop"],
-        comments:[{user:"أمين",avatar:"🧑",stars:4,date:"منذ أسبوع",text:"بيتزا لذيذة والأسعار ممتازة."},{user:"نور",avatar:"👩",stars:5,date:"منذ شهر",text:"أفضل بيتزا في المدينة!"},{user:"رضا",avatar:"👨",stars:4,date:"منذ شهرين",text:"خدمة سريعة ومكان نظيف."}]
+      {
+        id: 3, lat: 36.8752, lng: 6.9045,
+        name: "مطعم نيو داي", nameEn: "New Day Skikda",
+        type: "بيتزا ووجبات سريعة", icon: "🍕",
+        description: "مشهور بالبيتزا الإيطالية بالعجينة الطازجة. جلسات داخلية مكيّفة وخارجية مريحة.",
+        rating: 8.5, food: 8.7, service: 8.3, cleanliness: 8.4, price: 9.0,
+        status: "open", hours: "10:00 – 00:00", phone: "0555 11 22 33",
+        address: "شارع محمود نفير، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "أمين", avatar: "🧑", stars: 4, date: "منذ أسبوع", text: "بيتزا لذيذة والأسعار ممتازة." },
+          { user: "نور", avatar: "👩", stars: 5, date: "منذ شهر", text: "أفضل بيتزا في المدينة!" },
+          { user: "رضا", avatar: "👨", stars: 4, date: "منذ شهرين", text: "خدمة سريعة ومكان نظيف." }
+        ]
       },
-      { id:4, lat:36.8770, lng:6.9120, name:"مطعم جين دارك", nameEn:"Jeanne D'Arc", type:"مأكولات بحرية ومحلية", icon:"🦐",
-        description:"قريب من البحر، أسماك مشوية ومقلية طازجة مع معجنات وفطائر محلية.",
-        rating:8.6, food:8.9, service:8.2, cleanliness:8.5, price:8.3,
-        status:"open", hours:"08:00 – 22:30", phone:"0555 44 55 66", address:"شارع العربي بن مهيدي، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1485963631004-f2f00b1d6571?w=400&h=300&fit=crop"],
-        comments:[{user:"فاطمة",avatar:"👩",stars:4,date:"منذ 5 أيام",text:"فطور ممتاز والمعجنات طازجة."},{user:"محمد",avatar:"👨",stars:5,date:"منذ شهر",text:"السمك المشوي من أفضل ما ذقت!"}]
+      {
+        id: 4, lat: 36.8770, lng: 6.9120,
+        name: "مطعم جين دارك", nameEn: "Jeanne D'Arc",
+        type: "مأكولات بحرية ومحلية", icon: "🦐",
+        description: "قريب من البحر، أسماك مشوية ومقلية طازجة مع معجنات وفطائر محلية.",
+        rating: 8.6, food: 8.9, service: 8.2, cleanliness: 8.5, price: 8.3,
+        status: "open", hours: "08:00 – 22:30", phone: "0555 44 55 66",
+        address: "شارع العربي بن مهيدي، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1485963631004-f2f00b1d6571?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "فاطمة", avatar: "👩", stars: 4, date: "منذ 5 أيام", text: "فطور ممتاز والمعجنات طازجة." },
+          { user: "محمد", avatar: "👨", stars: 5, date: "منذ شهر", text: "السمك المشوي من أفضل ما ذقت!" }
+        ]
       },
-      { id:5, lat:36.8740, lng:6.8980, name:"مطعم لا جراند فاج", nameEn:"La Grande Vague", type:"مأكولات بحرية فاخرة", icon:"🌊",
-        description:"كاليماري مقرمش، جمبري بالزبدة، سمك مشوي على الفحم. جلسات أنيقة للعائلات.",
-        rating:8.9, food:9.1, service:8.7, cleanliness:9.0, price:8.2,
-        status:"open", hours:"12:00 – 23:00", phone:"0555 77 88 99", address:"الواجهة البحرية، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop"],
-        comments:[{user:"سمير",avatar:"🧑",stars:5,date:"منذ أسبوع",text:"كاليماري رهيب!"},{user:"هدى",avatar:"👩",stars:4,date:"منذ 3 أسابيع",text:"أنيق ولذيذ."},{user:"وليد",avatar:"👨",stars:5,date:"منذ شهر",text:"الخدمة راقية والسمك طازج."}]
+      {
+        id: 5, lat: 36.8740, lng: 6.8980,
+        name: "مطعم لا جراند فاج", nameEn: "La Grande Vague",
+        type: "مأكولات بحرية فاخرة", icon: "🌊",
+        description: "كاليماري مقرمش، جمبري بالزبدة، سمك مشوي على الفحم. جلسات أنيقة للعائلات.",
+        rating: 8.9, food: 9.1, service: 8.7, cleanliness: 9.0, price: 8.2,
+        status: "open", hours: "12:00 – 23:00", phone: "0555 77 88 99",
+        address: "الواجهة البحرية، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "سمير", avatar: "🧑", stars: 5, date: "منذ أسبوع", text: "كاليماري رهيب!" },
+          { user: "هدى", avatar: "👩", stars: 4, date: "منذ 3 أسابيع", text: "أنيق ولذيذ، الأسعار غالية شوي." },
+          { user: "وليد", avatar: "👨", stars: 5, date: "منذ شهر", text: "الخدمة راقية والسمك طازج." }
+        ]
       },
-      { id:6, lat:36.8695, lng:6.9060, name:"مطعم الساحل", nameEn:"Essahel", type:"أطباق محلية تقليدية", icon:"🍖",
-        description:"أطباق جزائرية أصيلة بتتبيلات فريدة. لحوم مشوية وطواجن ومخبوزات طازجة.",
-        rating:8.4, food:8.6, service:8.1, cleanliness:8.5, price:8.8,
-        status:"closed", hours:"11:30 – 22:00", phone:"0555 33 22 11", address:"وسط المدينة، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"],
-        comments:[{user:"خالد",avatar:"👨",stars:4,date:"منذ أسبوعين",text:"طواجن ممتازة وطعم تقليدي."},{user:"مريم",avatar:"👩",stars:4,date:"منذ شهر",text:"عائلي وأسعار معقولة."}]
+      {
+        id: 6, lat: 36.8695, lng: 6.9060,
+        name: "مطعم الساحل", nameEn: "Essahel",
+        type: "أطباق محلية تقليدية", icon: "🍖",
+        description: "أطباق جزائرية أصيلة بتتبيلات فريدة. لحوم مشوية وطواجن ومخبوزات طازجة يومياً.",
+        rating: 8.4, food: 8.6, service: 8.1, cleanliness: 8.5, price: 8.8,
+        status: "closed", hours: "11:30 – 22:00", phone: "0555 33 22 11",
+        address: "وسط المدينة، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "خالد", avatar: "👨", stars: 4, date: "منذ أسبوعين", text: "طواجن ممتازة وطعم تقليدي." },
+          { user: "مريم", avatar: "👩", stars: 4, date: "منذ شهر", text: "عائلي وأسعار معقولة." }
+        ]
       },
-      { id:7, lat:36.8820, lng:6.9070, name:"مطعم البهجة", nameEn:"El Bahdja", type:"أكلات سريعة", icon:"🍔",
-        description:"برغر، شاورما، بيتزا، تاكوس مع صلصات خاصة. خدمة سريعة ومكان نظيف.",
-        rating:8.2, food:8.4, service:8.0, cleanliness:8.1, price:9.2,
-        status:"open", hours:"10:00 – 01:00", phone:"0555 66 77 88", address:"شارع الأمير عبد القادر، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop"],
-        comments:[{user:"يوسف",avatar:"🧑",stars:4,date:"منذ 4 أيام",text:"شاورما لذيذة وسعر ممتاز!"},{user:"إيمان",avatar:"👩",stars:3,date:"منذ أسبوعين",text:"جيد، ممكن يتحسن."}]
+      {
+        id: 7, lat: 36.8820, lng: 6.9070,
+        name: "مطعم البهجة", nameEn: "El Bahdja",
+        type: "أكلات سريعة", icon: "🍔",
+        description: "برغر، شاورما، بيتزا، تاكوس مع صلصات خاصة. خدمة سريعة ومكان نظيف.",
+        rating: 8.2, food: 8.4, service: 8.0, cleanliness: 8.1, price: 9.2,
+        status: "open", hours: "10:00 – 01:00", phone: "0555 66 77 88",
+        address: "شارع الأمير عبد القادر، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "يوسف", avatar: "🧑", stars: 4, date: "منذ 4 أيام", text: "شاورما لذيذة وسعر ممتاز!" },
+          { user: "إيمان", avatar: "👩", stars: 3, date: "منذ أسبوعين", text: "جيد، ممكن يتحسن أكثر." }
+        ]
       },
-      { id:8, lat:36.8730, lng:6.9110, name:"مطعم الريف", nameEn:"El Rif", type:"مشاوي عائلية", icon:"🥩",
-        description:"مشاوي على الفحم، كباب، ميشوي، كفتة مع سلطات طازجة وخبز تقليدي.",
-        rating:8.7, food:9.0, service:8.4, cleanliness:8.6, price:8.5,
-        status:"open", hours:"12:00 – 23:30", phone:"0555 99 00 11", address:"حي الريف، سكيكدة",
-        photos:["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"],
-        comments:[{user:"عمر",avatar:"👨",stars:5,date:"منذ 3 أيام",text:"أفضل كباب في سكيكدة!"},{user:"نادية",avatar:"👩",stars:4,date:"منذ أسبوع",text:"عائلي ممتاز والأكل لذيذ."},{user:"بلال",avatar:"🧑",stars:5,date:"منذ شهر",text:"الميشوي لا يُقارن!"}]
+      {
+        id: 8, lat: 36.8730, lng: 6.9110,
+        name: "مطعم الريف", nameEn: "El Rif",
+        type: "مشاوي عائلية", icon: "🥩",
+        description: "مشاوي على الفحم، كباب، ميشوي، كفتة مع سلطات طازجة وخبز تقليدي.",
+        rating: 8.7, food: 9.0, service: 8.4, cleanliness: 8.6, price: 8.5,
+        status: "open", hours: "12:00 – 23:30", phone: "0555 99 00 11",
+        address: "حي الريف، سكيكدة",
+        photos: [
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"
+        ],
+        comments: [
+          { user: "عمر", avatar: "👨", stars: 5, date: "منذ 3 أيام", text: "أفضل كباب في سكيكدة!" },
+          { user: "نادية", avatar: "👩", stars: 4, date: "منذ أسبوع", text: "عائلي ممتاز والأكل لذيذ." },
+          { user: "بلال", avatar: "🧑", stars: 5, date: "منذ شهر", text: "الميشوي هنا لا يُقارن!" }
+        ]
       }
     ];
 
     // ════════════════════════════
     //  Helpers
     // ════════════════════════════
-    function stars(n) { var f=Math.round(n/2); return "★".repeat(f)+"☆".repeat(5-f); }
+    function stars(n) {
+      var f = Math.round(n / 2);
+      return "★".repeat(f) + "☆".repeat(5 - f);
+    }
 
     function barColor(n) {
-      if(n>=9) return "linear-gradient(90deg,#22c55e,#4ade80)";
-      if(n>=8) return "linear-gradient(90deg,#eab308,#facc15)";
-      if(n>=7) return "linear-gradient(90deg,#f97316,#fb923c)";
+      if (n >= 9) return "linear-gradient(90deg,#22c55e,#4ade80)";
+      if (n >= 8) return "linear-gradient(90deg,#eab308,#facc15)";
+      if (n >= 7) return "linear-gradient(90deg,#f97316,#fb923c)";
       return "linear-gradient(90deg,#ef4444,#f87171)";
     }
 
-    function miniBar(l,v) {
-      return '<div class="mini-row"><span class="lbl">'+l+'</span><div class="mini-bar-wrap"><div class="mini-bar" style="width:'+(v*10)+'%;background:'+barColor(v)+'"></div></div><strong>'+v+'</strong></div>';
+    function miniBar(label, value) {
+      return '<div class="mini-row">' +
+        '<span class="lbl">' + label + '</span>' +
+        '<div class="mini-bar-wrap"><div class="mini-bar" style="width:' + (value * 10) + '%;background:' + barColor(value) + '"></div></div>' +
+        '<strong>' + value + '</strong></div>';
     }
 
     function buildMiniPopup(r) {
-      var o = r.status==="open";
-      return '<div class="mini"><div class="mini-head"><div class="mini-icon">'+r.icon+'</div><div><div class="mini-name">'+r.name+'</div><div class="mini-type">'+r.type+'</div>'+getDistHTML(r)+'</div></div>'+
-        '<div class="mini-row" style="border:none;padding-bottom:6px;"><div><span class="mini-stars">'+stars(r.rating)+'</span></div><div style="display:flex;align-items:center;gap:6px;"><span class="mini-status '+(o?'open':'closed')+'"><span style="font-size:6px;">●</span> '+(o?'مفتوح':'مغلق')+'</span><span class="mini-score">'+r.rating+'</span></div></div>'+
-        miniBar("🍽 الأكل",r.food)+miniBar("👨‍🍳 الخدمة",r.service)+miniBar("✨ النظافة",r.cleanliness)+miniBar("💰 السعر",r.price)+
-        '<button class="btn-more" onclick="openSheet('+r.id+')">عرض المزيد ↓</button></div>';
+      var isOpen = r.status === "open";
+      return '<div class="mini">' +
+        '<div class="mini-head">' +
+          '<div class="mini-icon">' + r.icon + '</div>' +
+          '<div><div class="mini-name">' + r.name + '</div>' +
+          '<div class="mini-type">' + r.type + '</div>' +
+          getDistHTML(r) +
+          '</div>' +
+        '</div>' +
+        '<div class="mini-row" style="border:none;padding-bottom:6px;">' +
+          '<div><span class="mini-stars">' + stars(r.rating) + '</span></div>' +
+          '<div style="display:flex;align-items:center;gap:6px;">' +
+            '<span class="mini-status ' + (isOpen ? 'open' : 'closed') + '"><span style="font-size:6px;">●</span> ' + (isOpen ? 'مفتوح' : 'مغلق') + '</span>' +
+            '<span class="mini-score">' + r.rating + '</span>' +
+          '</div>' +
+        '</div>' +
+        miniBar("🍽 الأكل", r.food) +
+        miniBar("👨‍🍳 الخدمة", r.service) +
+        miniBar("✨ النظافة", r.cleanliness) +
+        miniBar("💰 السعر", r.price) +
+        '<button class="btn-more" onclick="openSheet(' + r.id + ')">عرض المزيد ↓</button>' +
+      '</div>';
     }
 
-    function sheetBar(l,e,v) {
-      return '<div class="sh-rate-item"><span class="lbl">'+e+' '+l+'</span><div class="sh-bar-wrap"><div class="sh-bar" style="width:'+(v*10)+'%;background:'+barColor(v)+'"></div></div><strong>'+v+'/10</strong></div>';
+    function sheetBar(label, emoji, value) {
+      return '<div class="sh-rate-item">' +
+        '<span class="lbl">' + emoji + ' ' + label + '</span>' +
+        '<div class="sh-bar-wrap"><div class="sh-bar" style="width:' + (value * 10) + '%;background:' + barColor(value) + '"></div></div>' +
+        '<strong>' + value + '/10</strong></div>';
     }
 
     function buildSheet(r) {
-      var o = r.status==="open";
-      var ph = r.photos.map(function(p){return '<img class="sh-photo" src="'+p+'" alt="'+r.name+'" loading="lazy" />';}).join("");
-      var cm = r.comments.map(function(c){return '<div class="comment"><div class="comment-head"><div class="comment-avatar">'+c.avatar+'</div><div class="comment-info"><div class="comment-name">'+c.user+'</div><div class="comment-date">'+c.date+'</div></div><div class="comment-stars">'+"★".repeat(c.stars)+"☆".repeat(5-c.stars)+'</div></div><p class="comment-text">'+c.text+'</p></div>';}).join("");
+      var isOpen = r.status === "open";
+      var photosHTML = r.photos.map(function(p) {
+        return '<img class="sh-photo" src="' + p + '" alt="' + r.name + '" loading="lazy" />';
+      }).join("");
 
-      return '<div class="sh-header"><div class="sh-icon">'+r.icon+'</div><div><div class="sh-name">'+r.name+'</div><div class="sh-type">'+r.type+'</div><div class="sh-meta"><span class="score">'+r.rating+'/10</span><span class="stars">'+stars(r.rating)+'</span><span class="dot '+(o?'open':'closed')+'"><span style="font-size:6px;">●</span> '+(o?'مفتوح الآن':'مغلق حالياً')+'</span>'+getSheetDistHTML(r)+'</div></div></div>'+
-        '<div class="sh-section"><div class="sh-section-title">📸 صور</div><div class="sh-photos">'+ph+'</div></div>'+
-        '<div class="sh-section"><div class="sh-section-title">📝 الوصف</div><p class="sh-desc">'+r.description+'</p></div>'+
-        '<div class="sh-section"><div class="sh-section-title">ℹ️ معلومات</div><div class="sh-info"><div class="sh-info-item"><div class="label">⏰ أوقات العمل</div><div class="value">'+r.hours+'</div></div><div class="sh-info-item"><div class="label">📞 الهاتف</div><div class="value" dir="ltr">'+r.phone+'</div></div><div class="sh-info-item full"><div class="label">📍 العنوان</div><div class="value">'+r.address+'</div></div></div></div>'+
-        '<div class="sh-section"><div class="sh-section-title">⭐ التقييمات التفصيلية</div>'+sheetBar("جودة الأكل","🍽",r.food)+sheetBar("الخدمة","👨‍🍳",r.service)+sheetBar("النظافة","✨",r.cleanliness)+sheetBar("السعر / الجودة","💰",r.price)+'</div>'+
-        '<div class="sh-section"><div class="sh-section-title">💬 التعليقات ('+r.comments.length+')</div>'+cm+'</div>';
+      var commentsHTML = r.comments.map(function(c) {
+        return '<div class="comment">' +
+          '<div class="comment-head">' +
+            '<div class="comment-avatar">' + c.avatar + '</div>' +
+            '<div class="comment-info"><div class="comment-name">' + c.user + '</div>' +
+            '<div class="comment-date">' + c.date + '</div></div>' +
+            '<div class="comment-stars">' + "★".repeat(c.stars) + "☆".repeat(5 - c.stars) + '</div>' +
+          '</div>' +
+          '<p class="comment-text">' + c.text + '</p></div>';
+      }).join("");
+
+      return '<div class="sh-header">' +
+          '<div class="sh-icon">' + r.icon + '</div>' +
+          '<div><div class="sh-name">' + r.name + '</div>' +
+          '<div class="sh-type">' + r.type + '</div>' +
+          '<div class="sh-meta">' +
+            '<span class="score">' + r.rating + '/10</span>' +
+            '<span class="stars">' + stars(r.rating) + '</span>' +
+            '<span class="dot ' + (isOpen ? 'open' : 'closed') + '"><span style="font-size:6px;">●</span> ' + (isOpen ? 'مفتوح الآن' : 'مغلق حالياً') + '</span>' +
+            getSheetDistHTML(r) +
+          '</div></div></div>' +
+
+        '<div class="sh-section">' +
+          '<div class="sh-section-title">📸 صور</div>' +
+          '<div class="sh-photos">' + photosHTML + '</div></div>' +
+
+        '<div class="sh-section">' +
+          '<div class="sh-section-title">📝 الوصف</div>' +
+          '<p class="sh-desc">' + r.description + '</p></div>' +
+
+        '<div class="sh-section">' +
+          '<div class="sh-section-title">ℹ️ معلومات</div>' +
+          '<div class="sh-info">' +
+            '<div class="sh-info-item"><div class="label">⏰ أوقات العمل</div><div class="value">' + r.hours + '</div></div>' +
+            '<div class="sh-info-item"><div class="label">📞 الهاتف</div><div class="value" dir="ltr">' + r.phone + '</div></div>' +
+            '<div class="sh-info-item full"><div class="label">📍 العنوان</div><div class="value">' + r.address + '</div></div>' +
+          '</div></div>' +
+
+        '<div class="sh-section">' +
+          '<div class="sh-section-title">⭐ التقييمات التفصيلية</div>' +
+          sheetBar("جودة الأكل", "🍽", r.food) +
+          sheetBar("الخدمة", "👨‍🍳", r.service) +
+          sheetBar("النظافة", "✨", r.cleanliness) +
+          sheetBar("السعر / الجودة", "💰", r.price) +
+        '</div>' +
+
+        '<div class="sh-section">' +
+          '<div class="sh-section-title">💬 التعليقات (' + r.comments.length + ')</div>' +
+          commentsHTML +
+        '</div>';
     }
 
     // ════════════════════════════
-    //  Sheet
+    //  Sheet Controls
     // ════════════════════════════
     var overlay = document.getElementById("overlay");
     var sheet = document.getElementById("sheet");
     var sheetContent = document.getElementById("sheetContent");
 
     function openSheet(id) {
-      var r = restaurants.find(function(x){return x.id===id;});
-      if(!r) return;
+      var r = restaurants.find(function(x) { return x.id === id; });
+      if (!r) return;
       map.closePopup();
       sheetContent.innerHTML = buildSheet(r);
       sheetContent.scrollTop = 0;
-      requestAnimationFrame(function(){ overlay.classList.add("active"); sheet.classList.add("active"); });
+      requestAnimationFrame(function() {
+        overlay.classList.add("active");
+        sheet.classList.add("active");
+      });
     }
 
-    function closeSheet() { sheet.classList.remove("active"); overlay.classList.remove("active"); }
+    function closeSheet() {
+      sheet.classList.remove("active");
+      overlay.classList.remove("active");
+    }
 
     document.getElementById("sheetClose").addEventListener("click", closeSheet);
     overlay.addEventListener("click", closeSheet);
 
     var touchStartY = 0;
-    sheet.addEventListener("touchstart", function(e){ touchStartY = e.touches[0].clientY; }, {passive:true});
-    sheet.addEventListener("touchmove", function(e){
-      if(e.touches[0].clientY - touchStartY > 80 && sheetContent.scrollTop <= 0) closeSheet();
-    }, {passive:true});
-    document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeSheet(); });
+    sheet.addEventListener("touchstart", function(e) {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    sheet.addEventListener("touchmove", function(e) {
+      var dy = e.touches[0].clientY - touchStartY;
+      if (dy > 80 && sheetContent.scrollTop <= 0) closeSheet();
+    }, { passive: true });
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") closeSheet();
+    });
 
     // ════════════════════════════
     //  Markers
@@ -781,16 +1004,22 @@
 
     function renderMarkers(list) {
       currentList = list;
-      markers.forEach(function(m){ map.removeLayer(m); });
+      markers.forEach(function(m) { map.removeLayer(m); });
       markers = [];
       list.forEach(function(r) {
-        var m = L.marker([r.lat,r.lng], {icon:createPin(r.icon)})
+        var m = L.marker([r.lat, r.lng], { icon: createPin(r.icon) })
           .addTo(map)
-          .bindPopup(buildMiniPopup(r), {maxWidth:isMobile?250:280, closeButton:true, autoPan:true, autoPanPadding:L.point(20,60)});
+          .bindPopup(buildMiniPopup(r), {
+            maxWidth: isMobile ? 250 : 280,
+            closeButton: true,
+            autoPan: true,
+            autoPanPadding: L.point(20, 60)
+          });
         m._restaurantData = r;
         markers.push(m);
       });
-      document.getElementById("counter").innerHTML = '🍴 <strong>'+list.length+'</strong> / <strong>'+restaurants.length+'</strong> مطعم';
+      document.getElementById("counter").innerHTML =
+        '🍴 <strong>' + list.length + '</strong> / <strong>' + restaurants.length + '</strong> مطعم';
     }
 
     renderMarkers(restaurants);
@@ -800,15 +1029,19 @@
     // ════════════════════════════
     document.getElementById("search").addEventListener("input", function() {
       var q = this.value.trim().toLowerCase();
-      if(!q){ renderMarkers(restaurants); return; }
-      var f = restaurants.filter(function(r){
-        return r.name.indexOf(q)!==-1 || r.nameEn.toLowerCase().indexOf(q)!==-1 || r.type.indexOf(q)!==-1;
+      if (!q) { renderMarkers(restaurants); return; }
+      var filtered = restaurants.filter(function(r) {
+        return r.name.indexOf(q) !== -1 ||
+               r.nameEn.toLowerCase().indexOf(q) !== -1 ||
+               r.type.indexOf(q) !== -1;
       });
-      renderMarkers(f);
-      if(f.length>0 && markers.length>0) map.fitBounds(L.featureGroup(markers).getBounds().pad(0.3), {animate:true, duration:0.5});
+      renderMarkers(filtered);
+      if (filtered.length > 0 && markers.length > 0) {
+        map.fitBounds(L.featureGroup(markers).getBounds().pad(0.3), { animate: true, duration: 0.5 });
+      }
     });
 
-    map.on("click", function(){ map.closePopup(); });
+    map.on("click", function() { map.closePopup(); });
   </script>
 </body>
 </html>
