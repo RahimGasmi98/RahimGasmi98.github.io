@@ -10,16 +10,16 @@
 
   <style>
     :root {
-      --bg: #0a0e1a;
-      --card: #111827;
-      --card-2: #0f172a;
-      --muted: #94a3b8;
-      --text: #f1f5f9;
+      --bg: #e8eef4;
+      --card: #ffffff;
+      --card-2: #f0f4f8;
+      --muted: #5a6a7a;
+      --text: #1a2a3a;
       --primary: #22c55e;
       --primary-dark: #16a34a;
-      --gold: #fbbf24;
-      --border: rgba(255,255,255,.07);
-      --shadow: rgba(0,0,0,.4);
+      --gold: #f59e0b;
+      --border: rgba(0,0,0,.1);
+      --shadow: rgba(0,0,0,.12);
       --pin-size: 36px;
       --pin-half: 18px;
       --pin-font: 15px;
@@ -47,14 +47,14 @@
 
     /* ══════ Popup ══════ */
     .leaflet-popup-content-wrapper {
-      background: linear-gradient(170deg, var(--card-2), var(--card));
+      background: #ffffff;
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 14px;
       box-shadow: 0 12px 40px var(--shadow);
       padding: 0;
     }
-    .leaflet-popup-tip { background: var(--card); border: 1px solid var(--border); }
+    .leaflet-popup-tip { background: #ffffff; border: 1px solid var(--border); }
     .leaflet-popup-content { margin: 0 !important; }
     .leaflet-popup-close-button {
       color: var(--muted) !important;
@@ -81,13 +81,13 @@
     }
     .mini-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 4px 0; font-size: 11px; color: #cbd5e1;
+      padding: 4px 0; font-size: 11px; color: #334155;
     }
     .mini-row + .mini-row { border-top: 1px solid var(--border); }
     .mini-row .lbl { color: var(--muted); }
     .mini-bar-wrap {
       width: 55px; height: 4px;
-      background: rgba(255,255,255,.06);
+      background: rgba(0,0,0,.08);
       border-radius: 99px; overflow: hidden;
       margin: 0 6px; flex-shrink: 0;
     }
@@ -197,7 +197,7 @@
       position: fixed; top: 14px; left: 50%; z-index: 1000;
       transform: translateX(-50%);
       display: flex; align-items: center;
-      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 12px;
       padding: 6px 14px; box-shadow: 0 8px 28px var(--shadow);
       width: 380px; max-width: calc(100% - 28px);
@@ -209,14 +209,14 @@
       color: var(--text); font-family: 'Cairo', sans-serif;
       font-size: 13px; width: 100%; padding: 6px 4px; direction: rtl;
     }
-    .search-box input::placeholder { color: #64748b; }
+    .search-box input::placeholder { color: #94a3b8; }
     .search-icon { font-size: 15px; margin-left: 8px; flex-shrink: 0; }
 
     /* ══════ GPS Button ══════ */
     .gps-btn {
       position: fixed; bottom: 80px; right: 14px; z-index: 1000;
       width: 44px; height: 44px;
-      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 50%;
       display: grid; place-items: center;
       box-shadow: 0 6px 20px var(--shadow);
@@ -238,7 +238,7 @@
     /* ══════ Counter ══════ */
     .counter {
       position: fixed; bottom: 14px; left: 14px; z-index: 1000;
-      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 8px;
       padding: 6px 12px; font-size: 11px; color: var(--muted);
       box-shadow: 0 6px 20px var(--shadow);
@@ -248,7 +248,7 @@
     /* ══════ Credit ══════ */
     .credit {
       position: fixed; bottom: 14px; right: 14px; z-index: 1000;
-      background: rgba(15,23,42,.88); backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 8px;
       padding: 5px 12px;
       font-size: 10px; color: var(--muted);
@@ -263,7 +263,7 @@
     .toast {
       position: fixed; top: 70px; left: 50%; z-index: 3000;
       transform: translateX(-50%) translateY(-20px);
-      background: rgba(15,23,42,.92); backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
       border: 1px solid var(--border); border-radius: 10px;
       padding: 8px 16px; font-size: 12px; color: var(--text);
       box-shadow: 0 8px 28px var(--shadow);
@@ -291,7 +291,7 @@
       align-items: center;
       gap: 12px;
 
-      background: rgba(15,23,42,.92);
+      background: rgba(255,255,255,.92);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(59,130,246,.35);
       border-radius: 12px;
@@ -309,7 +309,7 @@
     .route-bar .r-close {
       width: 30px; height: 30px;
       border-radius: 50%;
-      background: rgba(255,255,255,.08);
+      background: rgba(0,0,0,.06);
       border: 1px solid var(--border);
       color: var(--muted);
       display: grid;
@@ -317,19 +317,19 @@
       cursor: pointer;
       flex-shrink: 0;
     }
-    .route-bar .r-close:hover { background: rgba(255,255,255,.14); }
+    .route-bar .r-close:hover { background: rgba(0,0,0,.1); }
 
     /* ══════ Overlay + Sheet ══════ */
     .overlay {
       position: fixed; inset: 0; z-index: 2000;
-      background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+      background: rgba(0,0,0,.35); backdrop-filter: blur(4px);
       opacity: 0; pointer-events: none; transition: opacity .3s;
     }
     .overlay.active { opacity: 1; pointer-events: all; }
 
     .sheet {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 2001;
-      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
       border-top: 1px solid var(--border);
       border-radius: 20px 20px 0 0;
       max-height: 85vh;
@@ -345,17 +345,17 @@
     }
     .sheet-handle span {
       width: 36px; height: 4px;
-      background: rgba(255,255,255,.2); border-radius: 99px;
+      background: rgba(0,0,0,.15); border-radius: 99px;
     }
     .sheet-close {
       position: absolute; top: 12px; left: 14px; z-index: 10;
       width: 32px; height: 32px; border-radius: 50%;
-      background: rgba(255,255,255,.08); border: 1px solid var(--border);
+      background: rgba(0,0,0,.06); border: 1px solid rgba(0,0,0,.1);
       color: var(--muted); font-size: 16px;
       display: grid; place-items: center;
       cursor: pointer; transition: background .2s;
     }
-    .sheet-close:hover { background: rgba(255,255,255,.15); }
+    .sheet-close:hover { background: rgba(0,0,0,.1); }
     .sheet-scroll {
       overflow-y: auto; flex: 1;
       padding: 0 18px 28px;
@@ -417,7 +417,7 @@
 
     .sh-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .sh-info-item {
-      background: rgba(255,255,255,.03);
+      background: rgba(0,0,0,.03);
       border: 1px solid var(--border);
       border-radius: 10px; padding: 10px;
     }
@@ -429,10 +429,10 @@
       display: flex; align-items: center; padding: 7px 0; font-size: 12px;
     }
     .sh-rate-item + .sh-rate-item { border-top: 1px solid var(--border); }
-    .sh-rate-item .lbl { color: #cbd5e1; flex: 1; }
+    .sh-rate-item .lbl { color: #334155; flex: 1; }
     .sh-bar-wrap {
       width: 100px; height: 6px;
-      background: rgba(255,255,255,.06);
+      background: rgba(0,0,0,.08);
       border-radius: 99px; overflow: hidden;
       margin: 0 10px; flex-shrink: 0;
     }
@@ -440,7 +440,7 @@
     .sh-rate-item strong { color: var(--text); width: 36px; text-align: left; font-size: 11.5px; }
 
     .comment {
-      background: rgba(255,255,255,.03);
+      background: rgba(0,0,0,.03);
       border: 1px solid var(--border);
       border-radius: 12px; padding: 12px; margin-bottom: 8px;
     }
@@ -448,7 +448,7 @@
     .comment-avatar {
       width: 32px; height: 32px; border-radius: 50%;
       display: grid; place-items: center; font-size: 14px;
-      background: rgba(255,255,255,.06); flex-shrink: 0;
+      background: rgba(0,0,0,.06); flex-shrink: 0;
     }
     .comment-info { flex: 1; }
     .comment-name { font-size: 12px; font-weight: 700; }
@@ -601,7 +601,7 @@
       tap: true
     });
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
       subdomains: "abcd",
       maxZoom: 19
     }).addTo(map);
@@ -657,7 +657,7 @@
           var coords = route.geometry.coordinates.map(function(c) { return [c[1], c[0]]; });
 
           routeShadow = L.polyline(coords, {
-            color: "#0b1b3a",
+            color: "#b5cbe4",
             weight: 9,
             opacity: 0.35
           }).addTo(map);
