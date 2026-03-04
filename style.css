@@ -4,9 +4,9 @@ body {
   padding: 0;
 }
 
-/* ═══ خريطة Dark Blue مع طرق واضحة ═══ */
+/* ═══ خريطة Blue Gray فاتحة (Snazzy Maps Style) ═══ */
 .leaflet-tile-pane {
-  filter: brightness(1.15) contrast(1.2) saturate(.6) hue-rotate(10deg) !important;
+  filter: brightness(1.08) contrast(1.05) saturate(0.35) hue-rotate(190deg) !important;
 }
 
 .leaflet-control-attribution {
