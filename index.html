@@ -118,16 +118,12 @@
     .content { padding: 0 0 60px; }
 
     /* ══════ Section Row ══════ */
-    .section-row {
-      padding: 32px 0 0;
-    }
+    .section-row { padding: 32px 0 0; }
     .section-row .section-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 28px 16px;
     }
-    .section-row .section-title {
-      font-size: 22px; font-weight: 800; color: #111;
-    }
+    .section-row .section-title { font-size: 22px; font-weight: 800; color: #111; }
     .section-row .section-see-all {
       font-size: 14px; font-weight: 700; color: #16a34a;
       text-decoration: underline; cursor: pointer;
@@ -157,7 +153,6 @@
       width: 100%; height: 200px;
       object-fit: cover;
       border-radius: 16px;
-      position: relative;
     }
     .place-card .card-img-wrapper {
       position: relative; overflow: hidden; border-radius: 16px;
@@ -541,11 +536,8 @@
   <!-- ══════ Script ══════ -->
   <script>
     function filterCategory(el, cat) {
-      // تحديث الأصناف النشطة
       document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
-
-      // إظهار/إخفاء الأقسام
       document.querySelectorAll('.section-row').forEach(section => {
         const cats = section.dataset.category.split(',');
         if (cat === 'all' || cats.includes(cat)) {
@@ -556,8 +548,6 @@
         }
       });
     }
-
-    // إغلاق الخريطة بزر Escape
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         document.getElementById('mapOverlay').classList.remove('active');
