@@ -3,698 +3,329 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>J3AN Map — خريطة المطاعم</title>
+  <title>J3AN Map — Google Maps Style</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     :root{
-      --bg:#f6f8fb;
-      --card:#ffffff;
+      --card:#fff;
       --text:#1f2937;
       --muted:#6b7280;
-      --line:rgba(0,0,0,.09);
-      --primary:#16a34a;
-      --primary-dark:#15803d;
+      --line:rgba(0,0,0,.1);
+      --green:#16a34a;
       --blue:#2563eb;
       --danger:#dc2626;
-      --gold:#d97706;
-      --shadow:0 6px 18px rgba(0,0,0,.10);
-      --radius:12px;
+      --shadow:0 8px 20px rgba(0,0,0,.12);
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    html,body{
-      width:100%;height:100%;
-      font-family:'Cairo',sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      overflow:hidden;
-      -webkit-tap-highlight-color:transparent;
-    }
+    html,body{width:100%;height:100%;font-family:'Cairo',sans-serif;overflow:hidden;background:#f3f4f6}
+    #map{width:100%;height:100%}
 
-    #map{width:100%;height:100dvh}
-
-    .leaflet-control-attribution,.leaflet-control-zoom{display:none!important}
-    .leaflet-div-icon{background:transparent!important;border:none!important}
-
-    /* Top Controls */
     .topbar{
-      position:fixed;top:10px;left:10px;right:10px;z-index:1200;
+      position:fixed;top:10px;left:10px;right:10px;z-index:20;
       display:flex;align-items:center;gap:8px;
     }
-    .back-btn{
-      width:40px;height:40px;border:none;cursor:pointer;flex-shrink:0;
-      border-radius:10px;background:var(--card);border:1px solid var(--line);
-      box-shadow:var(--shadow);font-size:18px;color:#111827;
-    }
-    .search-box{
-      flex:1;display:flex;align-items:center;gap:8px;
-      background:var(--card);border:1px solid var(--line);
-      border-radius:10px;padding:8px 10px;box-shadow:var(--shadow);
-    }
-    .search-box span{font-size:14px;color:#64748b}
-    .search-box input{
-      width:100%;border:none;outline:none;background:transparent;
-      font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);
-    }
-    .search-box input::placeholder{color:#9ca3af}
-
-    .fab{
-      position:fixed;z-index:1200;right:10px;
-      width:42px;height:42px;border:none;cursor:pointer;border-radius:50%;
+    .btn, .gps-btn{
+      width:40px;height:40px;border:none;border-radius:10px;cursor:pointer;
       background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
-      display:grid;place-items:center;color:#475569;
+      font-size:18px;color:#111827;flex-shrink:0;
     }
-    .fab.gps{bottom:78px}
-    .fab svg{
-      width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;
-      stroke-linecap:round;stroke-linejoin:round;
+    .search{
+      flex:1;display:flex;align-items:center;gap:8px;
+      background:#fff;border:1px solid var(--line);border-radius:10px;
+      padding:8px 10px;box-shadow:var(--shadow);
     }
+    .search input{
+      width:100%;border:none;outline:none;background:transparent;
+      font-size:13px;font-family:'Cairo',sans-serif;color:var(--text);
+    }
+
+    .filters{
+      position:fixed;top:60px;left:10px;right:10px;z-index:20;
+      display:flex;gap:6px;overflow:auto;padding-bottom:2px;scrollbar-width:none;
+    }
+    .filters::-webkit-scrollbar{display:none}
+    .chip{
+      border:none;cursor:pointer;white-space:nowrap;
+      background:#fff;border:1px solid var(--line);
+      border-radius:999px;padding:7px 12px;font-size:11px;font-weight:700;
+      color:#374151;box-shadow:0 3px 10px rgba(0,0,0,.08);
+    }
+    .chip.active{background:#111827;color:#fff;border-color:#111827}
 
     .counter{
-      position:fixed;left:10px;bottom:10px;z-index:1200;
-      background:var(--card);border:1px solid var(--line);
-      border-radius:10px;padding:5px 10px;font-size:11px;color:var(--muted);
-      box-shadow:var(--shadow);
+      position:fixed;left:10px;bottom:10px;z-index:20;
+      background:#fff;border:1px solid var(--line);border-radius:10px;
+      padding:6px 10px;font-size:11px;color:var(--muted);box-shadow:var(--shadow);
     }
-    .counter b{color:var(--primary-dark)}
-
-    .credit{
-      position:fixed;right:10px;bottom:10px;z-index:1200;
-      background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
-      border-radius:10px;padding:5px 10px;font-size:10px;color:#6b7280;user-select:none;
-    }
-    .credit b{color:var(--primary-dark)}
 
     .toast{
-      position:fixed;top:60px;left:50%;z-index:2000;
-      transform:translateX(-50%) translateY(-10px);
+      position:fixed;top:102px;left:50%;z-index:30;
+      transform:translateX(-50%) translateY(-8px);
       background:#fff;border:1px solid var(--line);border-radius:10px;
-      box-shadow:var(--shadow);padding:8px 14px;font-size:12px;
+      padding:8px 12px;font-size:12px;box-shadow:var(--shadow);
       opacity:0;pointer-events:none;transition:.2s;
       max-width:calc(100% - 24px);white-space:nowrap;
     }
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    .toast.ok{border-color:rgba(22,163,74,.35)}
-    .toast.err{border-color:rgba(220,38,38,.35)}
 
-    /* Marker */
-    .pin{
-      width:30px;height:30px;border-radius:50% 50% 50% 0;
-      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-      transform:rotate(-45deg);
-      box-shadow:0 3px 10px rgba(22,163,74,.30);
-      display:grid;place-items:center;
+    .mini{
+      min-width:250px;max-width:300px;padding:8px 2px 2px;
+      font-family:'Cairo',sans-serif;
     }
-    .pin i{transform:rotate(45deg);font-style:normal;font-size:13px;color:#fff}
-
-    .user-dot{
-      width:16px;height:16px;border-radius:50%;
-      background:var(--blue);border:3px solid #fff;
-      box-shadow:0 0 0 6px rgba(37,99,235,.20),0 2px 8px rgba(0,0,0,.12);
-    }
-
-    /* Popup */
-    .leaflet-popup-content-wrapper{
-      background:#fff;border:1px solid var(--line);
-      border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);padding:0;
-    }
-    .leaflet-popup-tip{background:#fff;border:1px solid var(--line)}
-    .leaflet-popup-content{margin:0!important}
-    .leaflet-popup-close-button{left:8px!important;right:auto!important;top:6px!important;color:#94a3b8!important}
-
-    .mini{min-width:245px;max-width:300px;padding:12px}
-    .mini-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-    .mini-icon{
-      width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
-      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-      color:#fff;font-size:15px;flex-shrink:0;
-    }
-    .mini-name{font-size:13px;font-weight:800;color:#111827;line-height:1.35}
-    .mini-type{font-size:10px;color:var(--muted)}
-    .dist{margin-top:3px;font-size:10px;color:#2563eb}
-
-    .mini-row{
+    .mini h4{font-size:14px;color:#111827;margin-bottom:2px}
+    .mini .type{font-size:11px;color:#6b7280;margin-bottom:6px}
+    .mini .row{
       display:flex;align-items:center;justify-content:space-between;
-      font-size:11px;color:#334155;padding:4px 0;
+      font-size:11px;padding:4px 0;border-top:1px solid rgba(0,0,0,.06);
     }
-    .mini-row + .mini-row{border-top:1px solid var(--line)}
-
     .status{
       font-size:10px;font-weight:800;border-radius:999px;padding:2px 8px;border:1px solid transparent;
     }
-    .status.open{color:#15803d;background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.24)}
-    .status.closed{color:var(--danger);background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.22)}
+    .status.open{color:#15803d;background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.25)}
+    .status.closed{color:var(--danger);background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.24)}
 
-    .rate-box{
-      margin-top:7px;padding:7px;border-radius:9px;
-      background:#f8fafc;border:1px solid var(--line);
+    .rate{
+      margin-top:7px;padding:7px;border-radius:8px;
+      border:1px solid rgba(0,0,0,.08);background:#f8fafc;
     }
-    .rate-item{
-      display:flex;align-items:center;gap:6px;font-size:10.5px;color:#475569;padding:3px 0;
-    }
-    .rate-item + .rate-item{border-top:1px dashed rgba(0,0,0,.08)}
-    .rate-item .lbl{width:78px;flex-shrink:0}
-    .bar-wrap{
-      flex:1;height:5px;border-radius:999px;background:#e5e7eb;overflow:hidden;
-    }
-    .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,#22c55e,#84cc16)}
-    .num{width:30px;text-align:left;font-weight:800;color:#111827}
+    .ri{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:10.5px}
+    .lbl{width:88px;color:#475569;flex-shrink:0}
+    .bw{flex:1;height:5px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+    .b{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16)}
+    .n{width:30px;text-align:left;font-size:10px;font-weight:800;color:#111827}
 
-    .btn{
-      width:100%;border:none;border-radius:8px;cursor:pointer;
-      padding:7px 9px;margin-top:7px;color:#fff;
-      font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;
+    .popup-actions{
+      display:flex;gap:6px;margin-top:7px;
     }
-    .btn.more{background:linear-gradient(135deg,var(--primary),var(--primary-dark))}
-    .btn.route{background:linear-gradient(135deg,#3b82f6,#2563eb)}
-
-    /* Bottom sheet */
-    .overlay{
-      position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.30);
-      opacity:0;pointer-events:none;transition:.2s;
+    .pa{
+      flex:1;border:none;border-radius:8px;cursor:pointer;
+      padding:7px 8px;font-size:10.5px;font-weight:800;color:#fff;
+      font-family:'Cairo',sans-serif;
     }
-    .overlay.active{opacity:1;pointer-events:auto}
-
-    .sheet{
-      position:fixed;left:0;right:0;bottom:0;z-index:1600;
-      background:#fff;border-top:1px solid var(--line);
-      border-radius:16px 16px 0 0;max-height:86dvh;
-      transform:translateY(100%);transition:.28s;
-      display:flex;flex-direction:column;overflow:hidden;
-    }
-    .sheet.active{transform:translateY(0)}
-    .sheet-handle{padding:9px 0 6px;display:flex;justify-content:center}
-    .sheet-handle i{width:36px;height:4px;border-radius:999px;background:#cbd5e1}
-    .sheet-close{
-      position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;
-      border:1px solid var(--line);background:#f1f5f9;color:#64748b;cursor:pointer;
-    }
-    .sheet-body{overflow:auto;padding:0 12px 18px}
-
-    .sh-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-    .sh-icon{
-      width:44px;height:44px;border-radius:10px;display:grid;place-items:center;
-      color:#fff;font-size:20px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));flex-shrink:0;
-    }
-    .sh-name{font-size:16px;font-weight:800;color:#111827}
-    .sh-type{font-size:12px;color:var(--muted)}
-    .sh-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:3px;font-size:11px}
-    .chip{padding:2px 8px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid transparent}
-    .chip.open{color:#15803d;background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.24)}
-    .chip.closed{color:var(--danger);background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.22)}
-    .chip.dist{color:#1d4ed8;background:rgba(37,99,235,.09);border-color:rgba(37,99,235,.25)}
-
-    .sec{margin-top:13px}
-    .sec h4{font-size:13px;color:#0f172a;margin-bottom:7px}
-    .desc{font-size:12px;color:#4b5563;line-height:1.8}
-
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-    .info{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:8px}
-    .info .k{font-size:10px;color:#94a3b8}
-    .info .v{font-size:12px;font-weight:700;color:#0f172a;margin-top:2px}
-    .full{grid-column:1/-1}
-
-    .photos{display:flex;gap:8px;overflow:auto;padding-bottom:5px;scrollbar-width:none}
-    .photos::-webkit-scrollbar{display:none}
-    .photos img{width:136px;height:88px;object-fit:cover;border-radius:9px;border:1px solid var(--line);flex-shrink:0}
-
-    .comment{
-      background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px;margin-bottom:7px;
-    }
-    .comment .h{font-size:11px;font-weight:700;color:#111827;margin-bottom:3px}
-    .comment .t{font-size:11.5px;color:#4b5563;line-height:1.7}
-
-    /* Route bar */
-    .routebar{
-      position:fixed;left:50%;bottom:10px;z-index:1700;
-      transform:translateX(-50%) translateY(90px);
-      background:#fff;border:1px solid rgba(37,99,235,.30);
-      border-radius:10px;box-shadow:var(--shadow);
-      padding:8px 10px;display:flex;align-items:center;gap:8px;
-      transition:.25s;max-width:calc(100% - 20px);
-    }
-    .routebar.show{transform:translateX(-50%) translateY(0)}
-    .routebar .txt{font-size:11px;color:#1e3a8a}
-    .routebar .x{
-      width:26px;height:26px;border-radius:50%;border:1px solid var(--line);
-      background:#f1f5f9;cursor:pointer;
-    }
-
-    @media (max-width:600px){
-      .topbar{top:8px;left:8px;right:8px}
-      .back-btn{width:37px;height:37px}
-      .search-box{padding:6px 9px}
-      .search-box input{font-size:12px}
-      .fab{width:38px;height:38px;right:8px}
-      .fab.gps{bottom:74px}
-      .counter,.credit{bottom:8px}
-      .counter{left:8px;font-size:10px}
-      .credit{right:8px;font-size:8.8px}
-      .mini{min-width:220px}
-    }
+    .pa.details{background:linear-gradient(135deg,#16a34a,#15803d)}
+    .pa.route{background:linear-gradient(135deg,#3b82f6,#2563eb)}
   </style>
 </head>
 <body>
 
   <div class="topbar">
-    <button class="back-btn" id="backBtn" title="رجوع">←</button>
-    <div class="search-box">
+    <button class="btn" id="backBtn">←</button>
+    <div class="search">
       <span>🔍</span>
-      <input id="searchInput" type="text" placeholder="ابحث عن مطعم أو نوع الأكل..." autocomplete="off" />
+      <input id="searchInput" placeholder="ابحث عن مط��م أو نوع..." />
     </div>
+    <button class="gps-btn" id="gpsBtn">📍</button>
   </div>
 
-  <button class="fab gps" id="gpsBtn" title="موقعي الحالي">
-    <svg viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="3"></circle>
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
-      <circle cx="12" cy="12" r="8"></circle>
-    </svg>
-  </button>
+  <div class="filters" id="filters">
+    <button class="chip active" data-cat="all">الكل</button>
+    <button class="chip" data-cat="grill">🥩 مشاوي</button>
+    <button class="chip" data-cat="seafood">🐟 بحري</button>
+    <button class="chip" data-cat="fast">🍔 سريع</button>
+    <button class="chip" data-cat="pizza">🍕 بيتزا</button>
+    <button class="chip" data-cat="cafe">☕ كافيه</button>
+  </div>
 
   <div class="counter" id="counter"></div>
-  <div class="credit">MADE BY <b>GASMI ABDERRAHIM</b></div>
   <div class="toast" id="toast"></div>
-
-  <div class="routebar" id="routeBar">
-    <div class="txt" id="routeTxt"></div>
-    <button class="x" id="routeClose">✕</button>
-  </div>
-
   <div id="map"></div>
 
-  <div class="overlay" id="overlay"></div>
-  <div class="sheet" id="sheet">
-    <div class="sheet-handle"><i></i></div>
-    <button class="sheet-close" id="sheetClose">✕</button>
-    <div class="sheet-body" id="sheetBody"></div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ========= Data =========
-    var restaurants = [
-      {
-        id: 1, lat: 36.8788, lng: 6.9013,
-        name: "مطعم واد مديني", type: "مشاوي وأطباق تقليدية", icon: "🔥",
-        description: "مطعم معروف بالمشاوي الطازجة والأجواء العائلية.",
-        rating: 8.8, cleanliness: 8.7, price: 8.9, quality: 9.1, serviceSpeed: 8.4,
-        status: "open", hours: "11:00 – 23:00", phone: "0555 12 34 56", address: "طريق واد مديني، سكيكدة",
-        photos: ["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop"],
-        comments: ["مشاوي رهيبة", "الخدمة محترمة"]
-      },
-      {
-        id: 2, lat: 36.8810, lng: 6.9100,
-        name: "Le Phare Chez Louiza", type: "مأكولات بحرية", icon: "🐟",
-        description: "أسماك طازجة يوميًا وإطلالة جميلة.",
-        rating: 9.0, cleanliness: 9.1, price: 8.2, quality: 9.3, serviceSpeed: 8.6,
-        status: "open", hours: "12:00 – 23:30", phone: "0555 98 76 54", address: "الواجهة البحرية، سكيكدة",
-        photos: ["https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=600&h=400&fit=crop"],
-        comments: ["السمك طازج جدًا", "منظر البحر رائع"]
-      },
-      {
-        id: 3, lat: 36.8752, lng: 6.9045,
-        name: "مطعم نيو داي", type: "بيتزا ووجبات سريعة", icon: "🍕",
-        description: "بيتزا بعجينة طازجة وبأسعار جيدة.",
-        rating: 8.5, cleanliness: 8.3, price: 9.1, quality: 8.6, serviceSpeed: 8.7,
-        status: "open", hours: "10:00 – 00:00", phone: "0555 11 22 33", address: "شارع محمود نفير، سكيكدة",
-        photos: ["https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop"],
-        comments: ["أفضل بيتزا", "سريع في التحضير"]
-      },
-      {
-        id: 4, lat: 36.8730, lng: 6.9110,
-        name: "مطعم الريف", type: "مشاوي عائلية", icon: "🥩",
-        description: "كباب وميشوي وكفتة على الفحم.",
-        rating: 8.7, cleanliness: 8.6, price: 8.4, quality: 9.0, serviceSpeed: 8.3,
-        status: "open", hours: "12:00 – 23:30", phone: "0555 99 00 11", address: "حي الريف، سكيكدة",
-        photos: ["https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop"],
-        comments: ["كباب ممتاز", "جلسة عائلية جميلة"]
-      },
-      {
-        id: 5, lat: 36.8802, lng: 6.9038,
-        name: "كافيه لا فيستا", type: "كافيه وحلويات", icon: "☕",
-        description: "قهوة مختصة وحلويات خفيفة.",
-        rating: 8.3, cleanliness: 8.9, price: 8.5, quality: 8.2, serviceSpeed: 8.0,
-        status: "open", hours: "09:00 – 00:00", phone: "0555 20 20 20", address: "حي الميناء، سكيكدة",
-        photos: ["https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&h=400&fit=crop"],
-        comments: ["قهوة لذيذة", "مكان هادئ"]
-      }
+    let map, infoWindow, directionsService, directionsRenderer;
+    let userMarker = null;
+    let userPos = null;
+    let markers = [];
+    let selectedCategory = "all";
+
+    const restaurants = [
+      {id:1, name:"مطعم واد مديني", type:"مشاوي وأطباق تقليدية", cat:"grill", lat:36.8788, lng:6.9013, rating:8.8, cleanliness:8.7, price:8.9, quality:9.1, serviceSpeed:8.4, status:"open"},
+      {id:2, name:"Le Phare Chez Louiza", type:"مأكولات بحرية", cat:"seafood", lat:36.8810, lng:6.9100, rating:9.0, cleanliness:9.1, price:8.2, quality:9.3, serviceSpeed:8.6, status:"open"},
+      {id:3, name:"مطعم نيو داي", type:"بيتزا ووجبات سريعة", cat:"pizza", lat:36.8752, lng:6.9045, rating:8.5, cleanliness:8.3, price:9.1, quality:8.6, serviceSpeed:8.7, status:"open"},
+      {id:4, name:"مطعم الريف", type:"مشاوي عائلية", cat:"grill", lat:36.8730, lng:6.9110, rating:8.7, cleanliness:8.6, price:8.4, quality:9.0, serviceSpeed:8.3, status:"open"},
+      {id:5, name:"كافيه لا فيستا", type:"كافيه وحلويات", cat:"cafe", lat:36.8802, lng:6.9038, rating:8.3, cleanliness:8.9, price:8.5, quality:8.2, serviceSpeed:8.0, status:"open"},
+      {id:6, name:"مطعم البهجة", type:"وجبات سريعة", cat:"fast", lat:36.8820, lng:6.9070, rating:8.2, cleanliness:8.1, price:9.2, quality:8.3, serviceSpeed:8.4, status:"open"},
+      {id:7, name:"مطعم الساحل", type:"أطباق محلية", cat:"grill", lat:36.8695, lng:6.9060, rating:8.4, cleanliness:8.5, price:8.8, quality:8.6, serviceSpeed:8.1, status:"closed"}
     ];
 
-    // ========= Map =========
-    var map = L.map("map", {
-      center: [36.8765, 6.9065],
-      zoom: window.matchMedia("(max-width:600px)").matches ? 13.5 : 14,
-      zoomControl: false,
-      attributionControl: false
-    });
+    const toastEl = document.getElementById("toast");
+    const counterEl = document.getElementById("counter");
+    const searchInput = document.getElementById("searchInput");
 
-    // Google-like colors
-    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-      maxZoom: 19
-    }).addTo(map);
-
-    // ========= Elements =========
-    var searchInput = document.getElementById("searchInput");
-    var counterEl = document.getElementById("counter");
-    var toastEl = document.getElementById("toast");
-    var overlay = document.getElementById("overlay");
-    var sheet = document.getElementById("sheet");
-    var sheetBody = document.getElementById("sheetBody");
-    var sheetClose = document.getElementById("sheetClose");
-    var gpsBtn = document.getElementById("gpsBtn");
-    var routeBar = document.getElementById("routeBar");
-    var routeTxt = document.getElementById("routeTxt");
-    var routeClose = document.getElementById("routeClose");
-
-    function toast(msg, type){
-      toastEl.className = "toast " + (type || "");
+    function toast(msg){
       toastEl.textContent = msg;
       toastEl.classList.add("show");
       clearTimeout(toastEl._t);
-      toastEl._t = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600);
+      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2300);
     }
 
-    function calcDistance(lat1, lng1, lat2, lng2){
-      var R = 6371;
-      var dLat = (lat2-lat1) * Math.PI / 180;
-      var dLng = (lng2-lng1) * Math.PI / 180;
-      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R*c;
-    }
-
-    function formatDist(km){
-      return km < 1 ? Math.round(km * 1000) + " م" : km.toFixed(1) + " كم";
-    }
-
-    function barWidth(v){ return Math.max(0, Math.min(100, (v/10)*100)); }
-
-    function rateRow(label, value){
-      return '' +
-        '<div class="rate-item">' +
-          '<span class="lbl">' + label + '</span>' +
-          '<div class="bar-wrap"><div class="bar" style="width:' + barWidth(value) + '%"></div></div>' +
-          '<span class="num">' + value.toFixed(1) + '</span>' +
-        '</div>';
-    }
-
-    // ========= Render markers =========
-    var markersLayer = L.layerGroup().addTo(map);
-    var currentList = restaurants.slice();
-
-    function pinIcon(icon){
-      return L.divIcon({
-        className: "",
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-        popupAnchor: [0, -25],
-        html: '<div class="pin"><i>' + icon + '</i></div>'
-      });
-    }
+    function bw(v){ return Math.max(0, Math.min(100, (v / 10) * 100)); }
 
     function popupHTML(r){
-      var distHTML = "";
-      if (userLat !== null){
-        var d = calcDistance(userLat, userLng, r.lat, r.lng);
-        distHTML = '<div class="dist">📍 ' + formatDist(d) + ' منك</div>';
-      }
+      return `
+        <div class="mini">
+          <h4>${r.name}</h4>
+          <div class="type">${r.type}</div>
+          <div class="row"><span>التقييم العام</span><strong>⭐ ${r.rating}</strong></div>
+          <div class="row"><span>الحالة</span><span class="status ${r.status === 'open' ? 'open' : 'closed'}">${r.status === 'open' ? 'مفتوح' : 'مغلق'}</span></div>
 
-      return '' +
-        '<div class="mini">' +
-          '<div class="mini-head">' +
-            '<div class="mini-icon">' + r.icon + '</div>' +
-            '<div>' +
-              '<div class="mini-name">' + r.name + '</div>' +
-              '<div class="mini-type">' + r.type + '</div>' +
-              distHTML +
-            '</div>' +
-          '</div>' +
+          <div class="rate">
+            <div class="ri"><span class="lbl">النظافة</span><span class="bw"><span class="b" style="width:${bw(r.cleanliness)}%"></span></span><span class="n">${r.cleanliness}</span></div>
+            <div class="ri"><span class="lbl">السعر</span><span class="bw"><span class="b" style="width:${bw(r.price)}%"></span></span><span class="n">${r.price}</span></div>
+            <div class="ri"><span class="lbl">الجودة</span><span class="bw"><span class="b" style="width:${bw(r.quality)}%"></span></span><span class="n">${r.quality}</span></div>
+            <div class="ri"><span class="lbl">الخدمة والسرعة</span><span class="bw"><span class="b" style="width:${bw(r.serviceSpeed)}%"></span></span><span class="n">${r.serviceSpeed}</span></div>
+          </div>
 
-          '<div class="mini-row"><span>التقييم العام</span><strong style="color:var(--gold)">⭐ ' + r.rating + '</strong></div>' +
-          '<div class="mini-row"><span>الحالة</span><span class="status ' + (r.status==="open"?"open":"closed") + '">' + (r.status==="open"?"مفتوح":"مغلق") + '</span></div>' +
-
-          '<div class="rate-box">' +
-            rateRow("النظافة", r.cleanliness) +
-            rateRow("السعر", r.price) +
-            rateRow("الجودة", r.quality) +
-            rateRow("الخدمة والسرعة", r.serviceSpeed) +
-          '</div>' +
-
-          '<button class="btn more" onclick="openDetails(' + r.id + ')">عرض التفاصيل</button>' +
-          '<button class="btn route" onclick="drawRoute(' + r.id + ')">أقصر طريق</button>' +
-        '</div>';
+          <div class="popup-actions">
+            <button class="pa details" onclick="openGoogleMaps(${r.lat},${r.lng})">فتح في Google Maps</button>
+            <button class="pa route" onclick="drawRoute(${r.id})">أقصر طريق</button>
+          </div>
+        </div>
+      `;
     }
 
-    function renderMarkers(list){
-      markersLayer.clearLayers();
-      list.forEach(function(r){
-        L.marker([r.lat, r.lng], { icon: pinIcon(r.icon) })
-          .addTo(markersLayer)
-          .bindPopup(popupHTML(r));
+    function filteredRestaurants(){
+      const q = searchInput.value.trim().toLowerCase();
+      return restaurants.filter(r => {
+        const byText = r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
+        const byCat = selectedCategory === "all" || r.cat === selectedCategory;
+        return byText && byCat;
       });
-      counterEl.innerHTML = "تم العثور على <b>" + list.length + "</b> مطاعم";
     }
 
-    // ========= Bottom sheet =========
-    function openSheet(r){
-      var distChip = "";
-      if (userLat !== null){
-        var d = calcDistance(userLat, userLng, r.lat, r.lng);
-        distChip = '<span class="chip dist">📍 ' + formatDist(d) + '</span>';
-      }
-
-      var photos = (r.photos || []).map(function(p){
-        return '<img src="' + p + '" alt="">';
-      }).join("");
-
-      var names = ["أحمد", "سارة", "يوسف", "ليلى", "كريم", "هدى"];
-      var comments = (r.comments || []).map(function(c,i){
-        return '<div class="comment"><div class="h">👤 ' + names[i % names.length] + '</div><div class="t">' + c + '</div></div>';
-      }).join("");
-
-      sheetBody.innerHTML =
-        '<div class="sh-head">' +
-          '<div class="sh-icon">' + r.icon + '</div>' +
-          '<div>' +
-            '<div class="sh-name">' + r.name + '</div>' +
-            '<div class="sh-type">' + r.type + '</div>' +
-            '<div class="sh-meta">' +
-              '<span>⭐ ' + r.rating + '</span>' +
-              '<span class="chip ' + (r.status==="open"?"open":"closed") + '">' + (r.status==="open"?"مفتوح":"مغلق") + '</span>' +
-              distChip +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-
-        '<div class="sec"><h4>نبذة</h4><div class="desc">' + r.description + '</div></div>' +
-
-        '<div class="sec"><h4>التقييمات التفصيلية</h4><div class="rate-box">' +
-          rateRow("النظافة", r.cleanliness) +
-          rateRow("السعر", r.price) +
-          rateRow("الجودة", r.quality) +
-          rateRow("الخدمة والسرعة", r.serviceSpeed) +
-        '</div></div>' +
-
-        '<div class="sec"><h4>معلومات</h4><div class="grid">' +
-          '<div class="info"><div class="k">ساعات العمل</div><div class="v">' + r.hours + '</div></div>' +
-          '<div class="info"><div class="k">الهاتف</div><div class="v">' + r.phone + '</div></div>' +
-          '<div class="info full"><div class="k">العنوان</div><div class="v">' + r.address + '</div></div>' +
-        '</div></div>' +
-
-        '<div class="sec"><h4>صور</h4><div class="photos">' + photos + '</div></div>' +
-        '<div class="sec"><h4>تعليقات الناس</h4>' + comments + '</div>';
-
-      overlay.classList.add("active");
-      sheet.classList.add("active");
+    function clearMarkers(){
+      markers.forEach(m => m.setMap(null));
+      markers = [];
     }
 
-    function closeSheet(){
-      overlay.classList.remove("active");
-      sheet.classList.remove("active");
-    }
+    function renderMarkers(){
+      const list = filteredRestaurants();
+      clearMarkers();
 
-    overlay.addEventListener("click", closeSheet);
-    sheetClose.addEventListener("click", closeSheet);
-
-    window.openDetails = function(id){
-      var r = restaurants.find(function(x){ return x.id === id; });
-      if (!r) return;
-      map.closePopup();
-      openSheet(r);
-    };
-
-    // ========= Search =========
-    searchInput.addEventListener("input", function(e){
-      var q = e.target.value.trim().toLowerCase();
-      currentList = restaurants.filter(function(r){
-        return r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
-      });
-      renderMarkers(currentList);
-    });
-
-    // ========= GPS =========
-    var userLat = null, userLng = null, userMarker = null, userCircle = null, gpsWatchId = null;
-
-    function updateUserLocation(pos){
-      userLat = pos.coords.latitude;
-      userLng = pos.coords.longitude;
-      var acc = pos.coords.accuracy || 30;
-
-      var userIcon = L.divIcon({
-        className: "",
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
-        html: '<div class="user-dot"></div>'
-      });
-
-      if (!userMarker){
-        userMarker = L.marker([userLat, userLng], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
-        userCircle = L.circle([userLat, userLng], {
-          radius: acc,
-          color: "rgba(37,99,235,.28)",
-          fillColor: "rgba(37,99,235,.08)",
-          fillOpacity: 1,
-          weight: 1
-        }).addTo(map);
-      } else {
-        userMarker.setLatLng([userLat, userLng]);
-        userCircle.setLatLng([userLat, userLng]);
-        userCircle.setRadius(acc);
-      }
-
-      renderMarkers(currentList);
-    }
-
-    function onGPSError(err){
-      if (err.code === 1) toast("يرجى السماح بالوصول للموقع", "err");
-      else if (err.code === 2) toast("تعذر تحديد الموقع", "err");
-      else toast("انتهت مهلة تحديد الموقع", "err");
-    }
-
-    gpsBtn.addEventListener("click", function(){
-      if (!navigator.geolocation){
-        toast("المتصفح لا يدعم GPS", "err");
-        return;
-      }
-
-      if (gpsWatchId !== null){
-        navigator.geolocation.clearWatch(gpsWatchId);
-        gpsWatchId = null;
-        if (userMarker){ map.removeLayer(userMarker); userMarker = null; }
-        if (userCircle){ map.removeLayer(userCircle); userCircle = null; }
-        userLat = null; userLng = null;
-        clearRoute();
-        renderMarkers(currentList);
-        toast("تم إيقاف تتبع الموقع");
-        return;
-      }
-
-      toast("جاري تحديد موقعك...");
-      navigator.geolocation.getCurrentPosition(function(pos){
-        updateUserLocation(pos);
-        map.flyTo([pos.coords.latitude, pos.coords.longitude], 15, { duration: 0.8 });
-        toast("تم تحديد موقعك بنجاح", "ok");
-
-        gpsWatchId = navigator.geolocation.watchPosition(updateUserLocation, onGPSError, {
-          enableHighAccuracy: true,
-          maximumAge: 10000,
-          timeout: 15000
+      list.forEach(r => {
+        const marker = new google.maps.Marker({
+          position: { lat:r.lat, lng:r.lng },
+          map,
+          title: r.name
         });
-      }, onGPSError, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
+
+        marker.addListener("click", () => {
+          infoWindow.setContent(popupHTML(r));
+          infoWindow.open(map, marker);
+        });
+
+        markers.push(marker);
       });
-    });
 
-    // ========= Route =========
-    var routeLine = null, routeShadow = null;
-
-    function clearRoute(){
-      if (routeLine){ map.removeLayer(routeLine); routeLine = null; }
-      if (routeShadow){ map.removeLayer(routeShadow); routeShadow = null; }
-      routeBar.classList.remove("show");
+      counterEl.innerHTML = `تم العثور على <b>${list.length}</b> مكان`;
     }
-    routeClose.addEventListener("click", clearRoute);
+
+    function initMap(){
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat:36.8765, lng:6.9065 },
+        zoom: 14,
+        mapTypeId: "roadmap", // ستايل Google Maps العادي
+        streetViewControl: false,
+        fullscreenControl: false,
+        mapTypeControl: false
+      });
+
+      infoWindow = new google.maps.InfoWindow();
+
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer({
+        map,
+        suppressMarkers: false,
+        polylineOptions: {
+          strokeColor: "#2563eb",
+          strokeOpacity: 0.9,
+          strokeWeight: 5
+        }
+      });
+
+      renderMarkers();
+      bindEvents();
+    }
+
+    function bindEvents(){
+      searchInput.addEventListener("input", renderMarkers);
+
+      document.querySelectorAll(".chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          selectedCategory = chip.dataset.cat;
+          renderMarkers();
+        });
+      });
+
+      document.getElementById("gpsBtn").addEventListener("click", () => {
+        if(!navigator.geolocation){ toast("المتصفح لا يدعم GPS"); return; }
+
+        navigator.geolocation.getCurrentPosition(pos => {
+          userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          map.panTo(userPos);
+          map.setZoom(15);
+
+          if(userMarker) userMarker.setMap(null);
+          userMarker = new google.maps.Marker({
+            position: userPos,
+            map,
+            title: "موقعي الحالي",
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 8,
+              fillColor: "#2563eb",
+              fillOpacity: 1,
+              strokeColor: "#ffffff",
+              strokeWeight: 3
+            }
+          });
+
+          toast("تم تحديد موقعك بنجاح");
+        }, () => toast("تعذر تحديد الموقع"), { enableHighAccuracy:true, timeout:10000 });
+      });
+
+      document.getElementById("backBtn").addEventListener("click", () => {
+        if (window.parent && window.parent !== window) {
+          try {
+            window.parent.document.getElementById("mapOverlay").classList.remove("active");
+            return;
+          } catch(e){}
+        }
+        history.back();
+      });
+    }
+
+    window.openGoogleMaps = function(lat, lng){
+      window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+    };
 
     window.drawRoute = function(id){
-      if (userLat === null){
-        toast("فعّل GPS أولاً ثم اختر مطعم", "err");
-        return;
-      }
+      if(!userPos){ toast("فعّل GPS أولاً"); return; }
+      const r = restaurants.find(x => x.id === id);
+      if(!r) return;
 
-      var r = restaurants.find(function(x){ return x.id === id; });
-      if (!r) return;
-
-      clearRoute();
-      map.closePopup();
-      toast("جاري حساب أقصر طريق...");
-
-      var url = "https://router.project-osrm.org/route/v1/driving/" +
-        userLng + "," + userLat + ";" + r.lng + "," + r.lat +
-        "?overview=full&geometries=geojson";
-
-      fetch(url)
-        .then(function(res){ return res.json(); })
-        .then(function(data){
-          if (!data.routes || !data.routes.length){
-            toast("لم يتم العثور على طريق", "err");
-            return;
-          }
-
-          var route = data.routes[0];
-          var coords = route.geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
-
-          routeShadow = L.polyline(coords, {
-            color: "rgba(0,0,0,.10)",
-            weight: 8,
-            opacity: .5
-          }).addTo(map);
-
-          routeLine = L.polyline(coords, {
-            color: "#2563eb",
-            weight: 4.5,
-            opacity: .9,
-            lineCap: "round",
-            lineJoin: "round"
-          }).addTo(map);
-
-          map.fitBounds(routeLine.getBounds().pad(0.14), { animate: true, duration: 0.7 });
-
-          var km = route.distance / 1000;
-          var min = Math.round(route.duration / 60);
-
-          routeTxt.innerHTML = "إلى <b>" + r.name + "</b> · " +
-            (km < 1 ? Math.round(km * 1000) + " م" : km.toFixed(1) + " كم") +
-            " · ~" + min + " د";
-
-          routeBar.classList.add("show");
-          toast("تم رسم الطريق", "ok");
-        })
-        .catch(function(){
-          toast("خطأ أثناء حساب الطريق", "err");
-        });
+      directionsService.route({
+        origin: userPos,
+        destination: { lat:r.lat, lng:r.lng },
+        travelMode: google.maps.TravelMode.DRIVING
+      }, (result, status) => {
+        if(status === "OK"){
+          directionsRenderer.setDirections(result);
+          toast("تم رسم الطريق");
+        } else {
+          toast("تعذر رسم الطريق");
+        }
+      });
     };
 
-    // ========= Back =========
-    document.getElementById("backBtn").addEventListener("click", function(){
-      if (window.parent && window.parent !== window) {
-        try {
-          window.parent.document.getElementById("mapOverlay").classList.remove("active");
-          return;
-        } catch(e){}
-      }
-      history.back();
-    });
-
-    // init
-    renderMarkers(currentList);
+    window.initMap = initMap;
   </script>
+
+  <!-- بدّل YOUR_API_KEY بمفتاحك -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
 </body>
 </html>
