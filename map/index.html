@@ -3,38 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>J3AN Map — Google Maps Style</title>
+  <title>J3AN Map — OpenStreetMap + Leaflet</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     :root{
+      --bg:#f7f8fb;
       --card:#fff;
       --text:#1f2937;
       --muted:#6b7280;
-      --line:rgba(0,0,0,.1);
+      --line:rgba(0,0,0,.08);
       --green:#16a34a;
+      --green-dark:#15803d;
       --blue:#2563eb;
       --danger:#dc2626;
-      --shadow:0 8px 20px rgba(0,0,0,.12);
+      --shadow:0 8px 20px rgba(0,0,0,.10);
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    html,body{width:100%;height:100%;font-family:'Cairo',sans-serif;overflow:hidden;background:#f3f4f6}
-    #map{width:100%;height:100%}
+    html,body{width:100%;height:100%;font-family:'Cairo',sans-serif;background:var(--bg);overflow:hidden}
+    #map{width:100%;height:100dvh}
+
+    .leaflet-control-attribution,.leaflet-control-zoom{display:none!important}
+    .leaflet-div-icon{background:transparent!important;border:none!important}
 
     .topbar{
-      position:fixed;top:10px;left:10px;right:10px;z-index:20;
+      position:fixed;top:10px;left:10px;right:10px;z-index:1200;
       display:flex;align-items:center;gap:8px;
     }
-    .btn, .gps-btn{
+    .btn{
       width:40px;height:40px;border:none;border-radius:10px;cursor:pointer;
       background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
-      font-size:18px;color:#111827;flex-shrink:0;
+      color:#111827;font-size:18px;flex-shrink:0;
     }
     .search{
       flex:1;display:flex;align-items:center;gap:8px;
-      background:#fff;border:1px solid var(--line);border-radius:10px;
+      background:var(--card);border:1px solid var(--line);border-radius:10px;
       padding:8px 10px;box-shadow:var(--shadow);
     }
     .search input{
@@ -42,27 +48,40 @@
       font-size:13px;font-family:'Cairo',sans-serif;color:var(--text);
     }
 
-    .filters{
-      position:fixed;top:60px;left:10px;right:10px;z-index:20;
+    .chips{
+      position:fixed;top:60px;left:10px;right:10px;z-index:1200;
       display:flex;gap:6px;overflow:auto;padding-bottom:2px;scrollbar-width:none;
     }
-    .filters::-webkit-scrollbar{display:none}
+    .chips::-webkit-scrollbar{display:none}
     .chip{
       border:none;cursor:pointer;white-space:nowrap;
-      background:#fff;border:1px solid var(--line);
-      border-radius:999px;padding:7px 12px;font-size:11px;font-weight:700;
-      color:#374151;box-shadow:0 3px 10px rgba(0,0,0,.08);
+      background:#fff;border:1px solid var(--line);border-radius:999px;
+      padding:7px 12px;font-size:11px;font-weight:700;color:#374151;
+      box-shadow:0 3px 10px rgba(0,0,0,.08);
     }
-    .chip.active{background:#111827;color:#fff;border-color:#111827}
+    .chip.active{background:#111827;border-color:#111827;color:#fff}
+
+    .fab{
+      position:fixed;right:10px;z-index:1200;
+      width:42px;height:42px;border:none;border-radius:50%;cursor:pointer;
+      background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);
+      display:grid;place-items:center;color:#475569;
+    }
+    .fab.gps{bottom:78px}
+    .fab.layers{bottom:126px;font-size:17px}
+    .fab svg{
+      width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;
+      stroke-linecap:round;stroke-linejoin:round;
+    }
 
     .counter{
-      position:fixed;left:10px;bottom:10px;z-index:20;
+      position:fixed;left:10px;bottom:10px;z-index:1200;
       background:#fff;border:1px solid var(--line);border-radius:10px;
       padding:6px 10px;font-size:11px;color:var(--muted);box-shadow:var(--shadow);
     }
 
     .toast{
-      position:fixed;top:102px;left:50%;z-index:30;
+      position:fixed;top:102px;left:50%;z-index:2000;
       transform:translateX(-50%) translateY(-8px);
       background:#fff;border:1px solid var(--line);border-radius:10px;
       padding:8px 12px;font-size:12px;box-shadow:var(--shadow);
@@ -71,16 +90,29 @@
     }
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    .mini{
-      min-width:250px;max-width:300px;padding:8px 2px 2px;
-      font-family:'Cairo',sans-serif;
+    /* popup */
+    .leaflet-popup-content-wrapper{
+      background:#fff;border:1px solid var(--line);border-radius:12px;
+      box-shadow:0 10px 24px rgba(0,0,0,.12);padding:0;
     }
-    .mini h4{font-size:14px;color:#111827;margin-bottom:2px}
-    .mini .type{font-size:11px;color:#6b7280;margin-bottom:6px}
-    .mini .row{
+    .leaflet-popup-tip{background:#fff;border:1px solid var(--line)}
+    .leaflet-popup-content{margin:0!important}
+    .leaflet-popup-close-button{left:8px!important;right:auto!important;top:6px!important;color:#94a3b8!important}
+
+    .mini{min-width:250px;max-width:300px;padding:12px}
+    .mini-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .mini-icon{
+      width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--green),var(--green-dark));
+      color:#fff;font-size:15px;flex-shrink:0;
+    }
+    .mini-name{font-size:13px;font-weight:800;color:#111827}
+    .mini-type{font-size:10px;color:var(--muted)}
+    .mini-row{
       display:flex;align-items:center;justify-content:space-between;
       font-size:11px;padding:4px 0;border-top:1px solid rgba(0,0,0,.06);
     }
+
     .status{
       font-size:10px;font-weight:800;border-radius:999px;padding:2px 8px;border:1px solid transparent;
     }
@@ -88,25 +120,21 @@
     .status.closed{color:var(--danger);background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.24)}
 
     .rate{
-      margin-top:7px;padding:7px;border-radius:8px;
-      border:1px solid rgba(0,0,0,.08);background:#f8fafc;
+      margin-top:7px;padding:7px;border-radius:8px;background:#f8fafc;border:1px solid rgba(0,0,0,.08);
     }
-    .ri{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:10.5px}
+    .ri{display:flex;align-items:center;gap:6px;font-size:10.5px;padding:2px 0}
     .lbl{width:88px;color:#475569;flex-shrink:0}
-    .bw{flex:1;height:5px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+    .bw{flex:1;height:5px;background:#e5e7eb;border-radius:999px;overflow:hidden}
     .b{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16)}
     .n{width:30px;text-align:left;font-size:10px;font-weight:800;color:#111827}
 
-    .popup-actions{
-      display:flex;gap:6px;margin-top:7px;
+    .actions{display:flex;gap:6px;margin-top:8px}
+    .a{
+      flex:1;border:none;border-radius:8px;cursor:pointer;padding:7px 8px;
+      font-size:10.5px;font-weight:800;color:#fff;font-family:'Cairo',sans-serif;
     }
-    .pa{
-      flex:1;border:none;border-radius:8px;cursor:pointer;
-      padding:7px 8px;font-size:10.5px;font-weight:800;color:#fff;
-      font-family:'Cairo',sans-serif;
-    }
-    .pa.details{background:linear-gradient(135deg,#16a34a,#15803d)}
-    .pa.route{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+    .a.route{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+    .a.details{background:linear-gradient(135deg,#16a34a,#15803d)}
   </style>
 </head>
 <body>
@@ -115,12 +143,11 @@
     <button class="btn" id="backBtn">←</button>
     <div class="search">
       <span>🔍</span>
-      <input id="searchInput" placeholder="ابحث عن مط��م أو نوع..." />
+      <input id="searchInput" placeholder="ابحث عن مطعم أو نوع..." />
     </div>
-    <button class="gps-btn" id="gpsBtn">📍</button>
   </div>
 
-  <div class="filters" id="filters">
+  <div class="chips" id="chips">
     <button class="chip active" data-cat="all">الكل</button>
     <button class="chip" data-cat="grill">🥩 مشاوي</button>
     <button class="chip" data-cat="seafood">🐟 بحري</button>
@@ -129,47 +156,76 @@
     <button class="chip" data-cat="cafe">☕ كافيه</button>
   </div>
 
+  <button class="fab layers" id="layerBtn" title="تبديل شكل الخريطة">🗺️</button>
+  <button class="fab gps" id="gpsBtn" title="موقعي الحالي">
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+      <circle cx="12" cy="12" r="8"></circle>
+    </svg>
+  </button>
+
   <div class="counter" id="counter"></div>
   <div class="toast" id="toast"></div>
   <div id="map"></div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    let map, infoWindow, directionsService, directionsRenderer;
-    let userMarker = null;
-    let userPos = null;
-    let markers = [];
-    let selectedCategory = "all";
-
+    // ===== data =====
     const restaurants = [
-      {id:1, name:"مطعم واد مديني", type:"مشاوي وأطباق تقليدية", cat:"grill", lat:36.8788, lng:6.9013, rating:8.8, cleanliness:8.7, price:8.9, quality:9.1, serviceSpeed:8.4, status:"open"},
-      {id:2, name:"Le Phare Chez Louiza", type:"مأكولات بحرية", cat:"seafood", lat:36.8810, lng:6.9100, rating:9.0, cleanliness:9.1, price:8.2, quality:9.3, serviceSpeed:8.6, status:"open"},
-      {id:3, name:"مطعم نيو داي", type:"بيتزا ووجبات سريعة", cat:"pizza", lat:36.8752, lng:6.9045, rating:8.5, cleanliness:8.3, price:9.1, quality:8.6, serviceSpeed:8.7, status:"open"},
-      {id:4, name:"مطعم الريف", type:"مشاوي عائلية", cat:"grill", lat:36.8730, lng:6.9110, rating:8.7, cleanliness:8.6, price:8.4, quality:9.0, serviceSpeed:8.3, status:"open"},
-      {id:5, name:"كافيه لا فيستا", type:"كافيه وحلويات", cat:"cafe", lat:36.8802, lng:6.9038, rating:8.3, cleanliness:8.9, price:8.5, quality:8.2, serviceSpeed:8.0, status:"open"},
-      {id:6, name:"مطعم البهجة", type:"وجبات سريعة", cat:"fast", lat:36.8820, lng:6.9070, rating:8.2, cleanliness:8.1, price:9.2, quality:8.3, serviceSpeed:8.4, status:"open"},
-      {id:7, name:"مطعم الساحل", type:"أطباق محلية", cat:"grill", lat:36.8695, lng:6.9060, rating:8.4, cleanliness:8.5, price:8.8, quality:8.6, serviceSpeed:8.1, status:"closed"}
+      {id:1,name:"مطعم واد مديني",type:"مشاوي وأطباق تقليدية",cat:"grill",icon:"🔥",lat:36.8788,lng:6.9013,rating:8.8,cleanliness:8.7,price:8.9,quality:9.1,serviceSpeed:8.4,status:"open"},
+      {id:2,name:"Le Phare Chez Louiza",type:"مأكولات بحرية",cat:"seafood",icon:"🐟",lat:36.8810,lng:6.9100,rating:9.0,cleanliness:9.1,price:8.2,quality:9.3,serviceSpeed:8.6,status:"open"},
+      {id:3,name:"مطعم نيو داي",type:"بيتزا ووجبات سريعة",cat:"pizza",icon:"🍕",lat:36.8752,lng:6.9045,rating:8.5,cleanliness:8.3,price:9.1,quality:8.6,serviceSpeed:8.7,status:"open"},
+      {id:4,name:"مطعم الريف",type:"مشاوي عائلية",cat:"grill",icon:"🥩",lat:36.8730,lng:6.9110,rating:8.7,cleanliness:8.6,price:8.4,quality:9.0,serviceSpeed:8.3,status:"open"},
+      {id:5,name:"كافيه لا فيستا",type:"كافيه وحلويات",cat:"cafe",icon:"☕",lat:36.8802,lng:6.9038,rating:8.3,cleanliness:8.9,price:8.5,quality:8.2,serviceSpeed:8.0,status:"open"},
+      {id:6,name:"مطعم البهجة",type:"وجبات سريعة",cat:"fast",icon:"🍔",lat:36.8820,lng:6.9070,rating:8.2,cleanliness:8.1,price:9.2,quality:8.3,serviceSpeed:8.4,status:"open"},
+      {id:7,name:"مطعم الساحل",type:"أطباق محلية",cat:"grill",icon:"🍖",lat:36.8695,lng:6.9060,rating:8.4,cleanliness:8.5,price:8.8,quality:8.6,serviceSpeed:8.1,status:"closed"}
     ];
 
+    // ===== map =====
+    const map = L.map("map", {
+      center:[36.8765,6.9065],
+      zoom: window.matchMedia("(max-width:600px)").matches ? 13.5 : 14,
+      zoomControl:false,
+      attributionControl:false
+    });
+
+    // أفضل ستايلات مجانية: ملوّن + كلاسيكي فاتح
+    const osmColor = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:19 });
+    const cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { subdomains:"abcd", maxZoom:19 });
+
+    osmColor.addTo(map);
+    let useColor = true;
+
+    // ===== ui refs =====
     const toastEl = document.getElementById("toast");
     const counterEl = document.getElementById("counter");
     const searchInput = document.getElementById("searchInput");
+    const layerBtn = document.getElementById("layerBtn");
+    const gpsBtn = document.getElementById("gpsBtn");
 
     function toast(msg){
       toastEl.textContent = msg;
       toastEl.classList.add("show");
       clearTimeout(toastEl._t);
-      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2300);
+      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2200);
     }
 
-    function bw(v){ return Math.max(0, Math.min(100, (v / 10) * 100)); }
+    function bw(v){ return Math.max(0, Math.min(100, (v/10)*100)); }
 
     function popupHTML(r){
       return `
         <div class="mini">
-          <h4>${r.name}</h4>
-          <div class="type">${r.type}</div>
-          <div class="row"><span>التقييم العام</span><strong>⭐ ${r.rating}</strong></div>
-          <div class="row"><span>الحالة</span><span class="status ${r.status === 'open' ? 'open' : 'closed'}">${r.status === 'open' ? 'مفتوح' : 'مغلق'}</span></div>
+          <div class="mini-head">
+            <div class="mini-icon">${r.icon}</div>
+            <div>
+              <div class="mini-name">${r.name}</div>
+              <div class="mini-type">${r.type}</div>
+            </div>
+          </div>
+
+          <div class="mini-row"><span>التقييم العام</span><strong>⭐ ${r.rating}</strong></div>
+          <div class="mini-row"><span>الحالة</span><span class="status ${r.status === 'open' ? 'open' : 'closed'}">${r.status === 'open' ? 'مفتوح' : 'مغلق'}</span></div>
 
           <div class="rate">
             <div class="ri"><span class="lbl">النظافة</span><span class="bw"><span class="b" style="width:${bw(r.cleanliness)}%"></span></span><span class="n">${r.cleanliness}</span></div>
@@ -178,154 +234,151 @@
             <div class="ri"><span class="lbl">الخدمة والسرعة</span><span class="bw"><span class="b" style="width:${bw(r.serviceSpeed)}%"></span></span><span class="n">${r.serviceSpeed}</span></div>
           </div>
 
-          <div class="popup-actions">
-            <button class="pa details" onclick="openGoogleMaps(${r.lat},${r.lng})">فتح في Google Maps</button>
-            <button class="pa route" onclick="drawRoute(${r.id})">أقصر طريق</button>
+          <div class="actions">
+            <button class="a details" onclick="openG(${r.lat},${r.lng})">فتح Google Maps</button>
+            <button class="a route" onclick="drawRoute(${r.id})">أقصر طريق</button>
           </div>
         </div>
       `;
     }
 
-    function filteredRestaurants(){
+    let selectedCat = "all";
+    let markersLayer = L.layerGroup().addTo(map);
+    let routeLine = null, routeShadow = null;
+    let userLat = null, userLng = null, userMarker = null, gpsWatchId = null;
+
+    function filterData(){
       const q = searchInput.value.trim().toLowerCase();
-      return restaurants.filter(r => {
-        const byText = r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
-        const byCat = selectedCategory === "all" || r.cat === selectedCategory;
-        return byText && byCat;
+      return restaurants.filter(r=>{
+        const txt = r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
+        const cat = selectedCat === "all" || r.cat === selectedCat;
+        return txt && cat;
       });
     }
 
-    function clearMarkers(){
-      markers.forEach(m => m.setMap(null));
-      markers = [];
-    }
+    function render(){
+      const list = filterData();
+      markersLayer.clearLayers();
 
-    function renderMarkers(){
-      const list = filteredRestaurants();
-      clearMarkers();
-
-      list.forEach(r => {
-        const marker = new google.maps.Marker({
-          position: { lat:r.lat, lng:r.lng },
-          map,
-          title: r.name
-        });
-
-        marker.addListener("click", () => {
-          infoWindow.setContent(popupHTML(r));
-          infoWindow.open(map, marker);
-        });
-
-        markers.push(marker);
+      list.forEach(r=>{
+        const m = L.marker([r.lat,r.lng]).addTo(markersLayer);
+        m.bindPopup(popupHTML(r));
       });
 
       counterEl.innerHTML = `تم العثور على <b>${list.length}</b> مكان`;
     }
 
-    function initMap(){
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat:36.8765, lng:6.9065 },
-        zoom: 14,
-        mapTypeId: "roadmap", // ستايل Google Maps العادي
-        streetViewControl: false,
-        fullscreenControl: false,
-        mapTypeControl: false
+    searchInput.addEventListener("input", render);
+
+    document.querySelectorAll(".chip").forEach(ch=>{
+      ch.addEventListener("click", ()=>{
+        document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+        ch.classList.add("active");
+        selectedCat = ch.dataset.cat;
+        render();
       });
+    });
 
-      infoWindow = new google.maps.InfoWindow();
+    layerBtn.addEventListener("click", ()=>{
+      if(useColor){
+        map.removeLayer(osmColor);
+        cartoLight.addTo(map);
+        toast("تم التحويل إلى النمط الكلاسيكي");
+      }else{
+        map.removeLayer(cartoLight);
+        osmColor.addTo(map);
+        toast("تم التحويل إلى النمط الملوّن");
+      }
+      useColor = !useColor;
+    });
 
-      directionsService = new google.maps.DirectionsService();
-      directionsRenderer = new google.maps.DirectionsRenderer({
-        map,
-        suppressMarkers: false,
-        polylineOptions: {
-          strokeColor: "#2563eb",
-          strokeOpacity: 0.9,
-          strokeWeight: 5
-        }
-      });
-
-      renderMarkers();
-      bindEvents();
+    function clearRoute(){
+      if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
+      if(routeShadow){ map.removeLayer(routeShadow); routeShadow = null; }
     }
 
-    function bindEvents(){
-      searchInput.addEventListener("input", renderMarkers);
+    window.drawRoute = function(id){
+      if(userLat === null){
+        toast("فعّل GPS أولاً");
+        return;
+      }
+      const r = restaurants.find(x=>x.id===id);
+      if(!r) return;
 
-      document.querySelectorAll(".chip").forEach(chip => {
-        chip.addEventListener("click", () => {
-          document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-          chip.classList.add("active");
-          selectedCategory = chip.dataset.cat;
-          renderMarkers();
-        });
-      });
+      clearRoute();
+      toast("جاري حساب الطريق...");
 
-      document.getElementById("gpsBtn").addEventListener("click", () => {
-        if(!navigator.geolocation){ toast("المتصفح لا يدعم GPS"); return; }
+      const url = "https://router.project-osrm.org/route/v1/driving/" +
+                  userLng + "," + userLat + ";" + r.lng + "," + r.lat +
+                  "?overview=full&geometries=geojson";
 
-        navigator.geolocation.getCurrentPosition(pos => {
-          userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          map.panTo(userPos);
-          map.setZoom(15);
-
-          if(userMarker) userMarker.setMap(null);
-          userMarker = new google.maps.Marker({
-            position: userPos,
-            map,
-            title: "موقعي الحالي",
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: "#2563eb",
-              fillOpacity: 1,
-              strokeColor: "#ffffff",
-              strokeWeight: 3
-            }
-          });
-
-          toast("تم تحديد موقعك بنجاح");
-        }, () => toast("تعذر تحديد الموقع"), { enableHighAccuracy:true, timeout:10000 });
-      });
-
-      document.getElementById("backBtn").addEventListener("click", () => {
-        if (window.parent && window.parent !== window) {
-          try {
-            window.parent.document.getElementById("mapOverlay").classList.remove("active");
+      fetch(url)
+        .then(res=>res.json())
+        .then(data=>{
+          if(!data.routes || !data.routes.length){
+            toast("لم يتم العثور على طريق");
             return;
-          } catch(e){}
-        }
-        history.back();
-      });
-    }
+          }
+          const coords = data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
 
-    window.openGoogleMaps = function(lat, lng){
+          routeShadow = L.polyline(coords, { color:"rgba(0,0,0,.12)", weight:9, opacity:.5 }).addTo(map);
+          routeLine = L.polyline(coords, { color:"#2563eb", weight:5, opacity:.9 }).addTo(map);
+
+          map.fitBounds(routeLine.getBounds().pad(0.14), { animate:true, duration:0.7 });
+          toast("تم رسم الطريق");
+        })
+        .catch(()=>toast("خطأ في حساب الطريق"));
+    };
+
+    gpsBtn.addEventListener("click", ()=>{
+      if(!navigator.geolocation){ toast("المتصفح لا يدعم GPS"); return; }
+
+      if(gpsWatchId !== null){
+        navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = null;
+        if(userMarker){ map.removeLayer(userMarker); userMarker = null; }
+        userLat = null; userLng = null;
+        clearRoute();
+        toast("تم إيقاف GPS");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(pos=>{
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+
+        if(userMarker) map.removeLayer(userMarker);
+        userMarker = L.circleMarker([userLat,userLng], {
+          radius:8, color:"#fff", weight:3, fillColor:"#2563eb", fillOpacity:1
+        }).addTo(map);
+
+        map.flyTo([userLat,userLng], 15, { duration:0.8 });
+        toast("تم تحديد موقعك");
+
+        gpsWatchId = navigator.geolocation.watchPosition(p=>{
+          userLat = p.coords.latitude;
+          userLng = p.coords.longitude;
+          if(userMarker) userMarker.setLatLng([userLat,userLng]);
+        }, ()=>{}, { enableHighAccuracy:true, maximumAge:10000, timeout:15000 });
+
+      }, ()=>toast("تعذر تحديد الموقع"), { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+    });
+
+    window.openG = function(lat,lng){
       window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
     };
 
-    window.drawRoute = function(id){
-      if(!userPos){ toast("فعّل GPS أولاً"); return; }
-      const r = restaurants.find(x => x.id === id);
-      if(!r) return;
+    document.getElementById("backBtn").addEventListener("click", ()=>{
+      if (window.parent && window.parent !== window) {
+        try {
+          window.parent.document.getElementById("mapOverlay").classList.remove("active");
+          return;
+        } catch(e){}
+      }
+      history.back();
+    });
 
-      directionsService.route({
-        origin: userPos,
-        destination: { lat:r.lat, lng:r.lng },
-        travelMode: google.maps.TravelMode.DRIVING
-      }, (result, status) => {
-        if(status === "OK"){
-          directionsRenderer.setDirections(result);
-          toast("تم رسم الطريق");
-        } else {
-          toast("تعذر رسم الطريق");
-        }
-      });
-    };
-
-    window.initMap = initMap;
+    render();
   </script>
-
-  <!-- بدّل YOUR_API_KEY بمفتاحك -->
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
 </body>
 </html>
