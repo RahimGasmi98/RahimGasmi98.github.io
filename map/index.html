@@ -3,51 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>J3AN Map — Restaurants</title>
+  <title>J3AN Map — نسخة محسّنة</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     :root{
-      --bg:#f7f8fb;
-      --card:#fff;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --line:rgba(0,0,0,.08);
-      --green:#16a34a;
-      --green-dark:#15803d;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --card-2:#f8fafc;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:rgba(2,6,23,.08);
+
+      --primary:#22c55e;
+      --primary-dark:#16a34a;
       --blue:#2563eb;
       --danger:#dc2626;
-      --shadow:0 8px 20px rgba(0,0,0,.10);
+      --gold:#d97706;
+
+      --shadow:0 10px 28px rgba(2,6,23,.10);
+      --radius:12px;
+
+      --pin-size:34px;
+      --pin-half:17px;
+      --pin-font:14px;
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    html,body{width:100%;height:100%;font-family:'Cairo',sans-serif;background:var(--bg);overflow:hidden}
+    html,body{
+      width:100%;height:100%;
+      font-family:'Cairo',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      overflow:hidden;
+      -webkit-tap-highlight-color:transparent;
+    }
+
     #map{width:100%;height:100dvh}
 
     .leaflet-control-attribution,.leaflet-control-zoom{display:none!important}
     .leaflet-div-icon{background:transparent!important;border:none!important}
 
-    .topbar{
+    /* Top controls */
+    .top{
       position:fixed;top:10px;left:10px;right:10px;z-index:1200;
       display:flex;align-items:center;gap:8px;
     }
-    .btn{
-      width:40px;height:40px;border:none;border-radius:10px;cursor:pointer;
+    .btn-icon{
+      width:40px;height:40px;border:none;border-radius:10px;cursor:pointer;flex-shrink:0;
       background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
-      color:#111827;font-size:18px;flex-shrink:0;
+      display:grid;place-items:center;color:#111827;font-size:18px;
     }
+
     .search{
       flex:1;display:flex;align-items:center;gap:8px;
       background:var(--card);border:1px solid var(--line);border-radius:10px;
       padding:8px 10px;box-shadow:var(--shadow);
     }
+    .search .icon{font-size:14px;color:#64748b}
     .search input{
       width:100%;border:none;outline:none;background:transparent;
-      font-size:13px;font-family:'Cairo',sans-serif;color:var(--text);
+      font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);
     }
+    .search input::placeholder{color:#94a3b8}
 
+    /* Filter chips */
     .chips{
       position:fixed;top:60px;left:10px;right:10px;z-index:1200;
       display:flex;gap:6px;overflow:auto;padding-bottom:2px;scrollbar-width:none;
@@ -56,61 +78,107 @@
     .chip{
       border:none;cursor:pointer;white-space:nowrap;
       background:#fff;border:1px solid var(--line);border-radius:999px;
-      padding:7px 12px;font-size:11px;font-weight:700;color:#374151;
-      box-shadow:0 3px 10px rgba(0,0,0,.08);
+      padding:7px 12px;font-size:11px;font-weight:700;color:#334155;
+      box-shadow:0 3px 10px rgba(0,0,0,.07);
     }
     .chip.active{background:#111827;border-color:#111827;color:#fff}
 
+    /* Floating actions */
     .fab{
       position:fixed;right:10px;z-index:1200;
       width:42px;height:42px;border:none;border-radius:50%;cursor:pointer;
       background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);
       display:grid;place-items:center;color:#475569;
     }
-    .fab.gps{bottom:78px}
+    .fab.gps{bottom:130px}
+    .fab.sort{bottom:82px;font-size:16px}
+    .fab.route-clear{bottom:178px;font-size:15px}
     .fab svg{
       width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;
       stroke-linecap:round;stroke-linejoin:round;
     }
 
+    /* Info badges */
     .counter{
       position:fixed;left:10px;bottom:10px;z-index:1200;
       background:#fff;border:1px solid var(--line);border-radius:10px;
       padding:6px 10px;font-size:11px;color:var(--muted);box-shadow:var(--shadow);
     }
+    .counter b{color:var(--primary-dark)}
 
     .toast{
-      position:fixed;top:102px;left:50%;z-index:2000;
-      transform:translateX(-50%) translateY(-8px);
+      position:fixed;top:102px;left:50%;z-index:2500;
+      transform:translateX(-50%) translateY(-10px);
       background:#fff;border:1px solid var(--line);border-radius:10px;
       padding:8px 12px;font-size:12px;box-shadow:var(--shadow);
       opacity:0;pointer-events:none;transition:.2s;
       max-width:calc(100% - 24px);white-space:nowrap;
     }
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.ok{border-color:rgba(34,197,94,.35)}
+    .toast.err{border-color:rgba(220,38,38,.35)}
 
+    /* PIN old style */
+    .pin-wrap{position:relative;width:var(--pin-size);height:var(--pin-size)}
+    .pin-pulse{
+      position:absolute;inset:0;border-radius:50%;
+      background:rgba(34,197,94,.22);
+      animation:pinPulse 2.2s ease-out infinite;
+    }
+    .pin{
+      position:absolute;
+      width:var(--pin-size);height:var(--pin-size);
+      border-radius:50% 50% 50% 0;
+      background:linear-gradient(145deg,var(--primary),var(--primary-dark));
+      transform:rotate(-45deg);
+      box-shadow:0 4px 14px rgba(22,163,74,.35), inset 0 0 0 2px rgba(255,255,255,.28);
+      display:grid;place-items:center;
+    }
+    .pin i{
+      transform:rotate(45deg);
+      font-style:normal;
+      font-size:var(--pin-font);
+      color:#fff;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));
+    }
+    @keyframes pinPulse{
+      0%{transform:scale(.9);opacity:.55}
+      100%{transform:scale(2.4);opacity:0}
+    }
+
+    .user-dot{
+      width:16px;height:16px;border-radius:50%;
+      background:var(--blue);border:3px solid #fff;
+      box-shadow:0 0 0 6px rgba(37,99,235,.22),0 2px 10px rgba(0,0,0,.15);
+    }
+
+    /* Popup */
     .leaflet-popup-content-wrapper{
-      background:#fff;border:1px solid var(--line);border-radius:12px;
-      box-shadow:0 10px 24px rgba(0,0,0,.12);padding:0;
+      background:#fff;border:1px solid var(--line);
+      border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);padding:0;
     }
     .leaflet-popup-tip{background:#fff;border:1px solid var(--line)}
     .leaflet-popup-content{margin:0!important}
-    .leaflet-popup-close-button{left:8px!important;right:auto!important;top:6px!important;color:#94a3b8!important}
+    .leaflet-popup-close-button{
+      left:8px!important;right:auto!important;top:6px!important;
+      color:#94a3b8!important;
+    }
 
-    .mini{min-width:250px;max-width:300px;padding:12px}
+    .mini{min-width:255px;max-width:320px;padding:12px}
     .mini-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
     .mini-icon{
       width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
-      background:linear-gradient(135deg,var(--green),var(--green-dark));
+      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
       color:#fff;font-size:15px;flex-shrink:0;
     }
     .mini-name{font-size:13px;font-weight:800;color:#111827}
     .mini-type{font-size:10px;color:var(--muted)}
+    .mini-dist{margin-top:3px;font-size:10px;color:#2563eb}
+
     .mini-row{
       display:flex;align-items:center;justify-content:space-between;
       font-size:11px;padding:4px 0;border-top:1px solid rgba(0,0,0,.06);
     }
-
     .status{
       font-size:10px;font-weight:800;border-radius:999px;padding:2px 8px;border:1px solid transparent;
     }
@@ -121,9 +189,15 @@
       margin-top:7px;padding:7px;border-radius:8px;background:#f8fafc;border:1px solid rgba(0,0,0,.08);
     }
     .ri{display:flex;align-items:center;gap:6px;font-size:10.5px;padding:2px 0}
-    .lbl{width:88px;color:#475569;flex-shrink:0}
-    .bw{flex:1;height:5px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .b{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16)}
+    .lbl{width:92px;color:#475569;flex-shrink:0}
+    .bw{
+      flex:1;height:6px;background:#e5e7eb;border-radius:999px;overflow:hidden;position:relative;
+    }
+    .b{
+      display:block;height:100%;min-width:6px;
+      background:linear-gradient(90deg,#22c55e,#84cc16)!important;
+      border-radius:999px;
+    }
     .n{width:30px;text-align:left;font-size:10px;font-weight:800;color:#111827}
 
     .actions{display:flex;gap:6px;margin-top:8px}
@@ -134,16 +208,16 @@
     .a.route{background:linear-gradient(135deg,#3b82f6,#2563eb)}
     .a.details{background:linear-gradient(135deg,#16a34a,#15803d)}
 
-    /* Bottom sheet */
+    /* Sheet */
     .overlay{
-      position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.30);
+      position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.30);
       opacity:0;pointer-events:none;transition:.2s;
     }
     .overlay.active{opacity:1;pointer-events:auto}
     .sheet{
-      position:fixed;left:0;right:0;bottom:0;z-index:1600;background:#fff;
+      position:fixed;left:0;right:0;bottom:0;z-index:2100;background:#fff;
       border-top:1px solid var(--line);border-radius:16px 16px 0 0;
-      max-height:86dvh;transform:translateY(100%);transition:.28s;
+      max-height:88dvh;transform:translateY(100%);transition:.28s;
       display:flex;flex-direction:column;overflow:hidden;
     }
     .sheet.active{transform:translateY(0)}
@@ -154,16 +228,26 @@
       border:1px solid var(--line);background:#f1f5f9;color:#64748b;cursor:pointer;
     }
     .sheet-body{overflow:auto;padding:0 12px 18px}
+
     .sh-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
     .sh-icon{
       width:44px;height:44px;border-radius:10px;display:grid;place-items:center;
-      color:#fff;font-size:20px;background:linear-gradient(135deg,var(--green),var(--green-dark));flex-shrink:0;
+      color:#fff;font-size:20px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));flex-shrink:0;
     }
     .sh-name{font-size:16px;font-weight:800;color:#111827}
     .sh-type{font-size:12px;color:var(--muted)}
+    .sh-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;font-size:10px}
+    .chip-mini{
+      padding:2px 8px;border-radius:999px;font-weight:800;border:1px solid transparent;
+    }
+    .chip-mini.open{color:#15803d;background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.25)}
+    .chip-mini.closed{color:var(--danger);background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.24)}
+    .chip-mini.dist{color:#1d4ed8;background:rgba(37,99,235,.09);border-color:rgba(37,99,235,.25)}
+
     .sec{margin-top:13px}
     .sec h4{font-size:13px;color:#0f172a;margin-bottom:7px}
     .desc{font-size:12px;color:#4b5563;line-height:1.8}
+
     .comment{
       background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px;margin-bottom:7px;
     }
@@ -171,22 +255,25 @@
     .comment .t{font-size:11.5px;color:#4b5563;line-height:1.7}
 
     @media (max-width:600px){
-      .topbar{top:8px;left:8px;right:8px}
-      .btn{width:37px;height:37px}
+      :root{--pin-size:30px;--pin-font:12px}
+      .top{top:8px;left:8px;right:8px}
+      .btn-icon{width:37px;height:37px}
       .search{padding:6px 9px}
       .search input{font-size:12px}
       .fab{width:38px;height:38px;right:8px}
-      .fab.gps{bottom:74px}
+      .fab.gps{bottom:122px}
+      .fab.sort{bottom:76px}
+      .fab.route-clear{bottom:168px}
       .counter{left:8px;bottom:8px;font-size:10px}
     }
   </style>
 </head>
 <body>
 
-  <div class="topbar">
-    <button class="btn" id="backBtn">←</button>
+  <div class="top">
+    <button class="btn-icon" id="backBtn">←</button>
     <div class="search">
-      <span>🔍</span>
+      <span class="icon">🔍</span>
       <input id="searchInput" placeholder="ابحث عن مطعم أو نوع..." />
     </div>
   </div>
@@ -200,6 +287,7 @@
     <button class="chip" data-cat="cafe">☕ كافيه</button>
   </div>
 
+  <button class="fab route-clear" id="clearRouteBtn" title="إلغاء الطريق">✕</button>
   <button class="fab gps" id="gpsBtn" title="موقعي الحالي">
     <svg viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="3"></circle>
@@ -207,6 +295,7 @@
       <circle cx="12" cy="12" r="8"></circle>
     </svg>
   </button>
+  <button class="fab sort" id="sortBtn" title="ترتيب حسب الأقرب">↕</button>
 
   <div class="counter" id="counter"></div>
   <div class="toast" id="toast"></div>
@@ -221,52 +310,126 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    /* =========================
+       DATA
+    ========================= */
     const restaurants = [
-      {id:1,name:"مطعم واد مديني",type:"مشاوي وأطباق تقليدية",cat:"grill",icon:"🔥",lat:36.8788,lng:6.9013,rating:8.8,cleanliness:8.7,price:8.9,quality:9.1,serviceSpeed:8.4,status:"open",desc:"مشاوي طازجة وأجواء عائلية ممتازة.",comments:["مشاوي ممتازة","خدمة جيدة وسريعة"]},
-      {id:2,name:"Le Phare Chez Louiza",type:"مأكولات بحرية",cat:"seafood",icon:"🐟",lat:36.8810,lng:6.9100,rating:9.0,cleanliness:9.1,price:8.2,quality:9.3,serviceSpeed:8.6,status:"open",desc:"أسماك طازجة يوميًا مع جلسة جميلة.",comments:["السمك طازج جدًا","إطلالة رائعة"]},
-      {id:3,name:"مطعم نيو داي",type:"بيتزا ووجبات سريعة",cat:"pizza",icon:"🍕",lat:36.8752,lng:6.9045,rating:8.5,cleanliness:8.3,price:9.1,quality:8.6,serviceSpeed:8.7,status:"open",desc:"بيتزا بعجينة طازجة وأسعار مناسبة.",comments:["بيتزا لذيذة","السعر ممتاز"]},
-      {id:4,name:"مطعم الريف",type:"مشاوي عائلية",cat:"grill",icon:"🥩",lat:36.8730,lng:6.9110,rating:8.7,cleanliness:8.6,price:8.4,quality:9.0,serviceSpeed:8.3,status:"open",desc:"كباب وميشوي بطعم رائع.",comments:["أفضل كباب","مكان عائلي"]},
-      {id:5,name:"كافيه لا فيستا",type:"كافيه وحلويات",cat:"cafe",icon:"☕",lat:36.8802,lng:6.9038,rating:8.3,cleanliness:8.9,price:8.5,quality:8.2,serviceSpeed:8.0,status:"open",desc:"قهوة وحلويات في جو هادئ.",comments:["قهوة ممتازة","جلسة مريحة"]}
+      {id:1,name:"مطعم واد مديني",type:"مشاوي وأطباق تقليدية",cat:"grill",icon:"🔥",lat:36.8788,lng:6.9013,rating:8.8,cleanliness:8.7,price:8.9,quality:9.1,serviceSpeed:8.4,status:"open",desc:"مشاوي طازجة وأجواء عائلية مميزة.",comments:["مشاوي ممتازة","خدمة جيدة وسريعة","الأسعار مقبولة"]},
+      {id:2,name:"Le Phare Chez Louiza",type:"مأكولات بحرية",cat:"seafood",icon:"🐟",lat:36.8810,lng:6.9100,rating:9.0,cleanliness:9.1,price:8.2,quality:9.3,serviceSpeed:8.6,status:"open",desc:"أسماك طازجة وإطلالة جميلة.",comments:["السمك طازج جدًا","إطلالة رائعة","الخدمة محترمة"]},
+      {id:3,name:"مطعم نيو داي",type:"بيتزا ووجبات سريع��",cat:"pizza",icon:"🍕",lat:36.8752,lng:6.9045,rating:8.5,cleanliness:8.3,price:9.1,quality:8.6,serviceSpeed:8.7,status:"open",desc:"بيتزا بعجينة طازجة وأسعار مناسبة.",comments:["بيتزا لذيذة","السعر ممتاز"]},
+      {id:4,name:"مطعم الريف",type:"مشاوي عا��لية",cat:"grill",icon:"🥩",lat:36.8730,lng:6.9110,rating:8.7,cleanliness:8.6,price:8.4,quality:9.0,serviceSpeed:8.3,status:"open",desc:"كباب وميشوي بطعم رائع.",comments:["أفضل كباب","مكان عائلي ممتاز"]},
+      {id:5,name:"كافيه لا فيستا",type:"كافيه وحلويات",cat:"cafe",icon:"☕",lat:36.8802,lng:6.9038,rating:8.3,cleanliness:8.9,price:8.5,quality:8.2,serviceSpeed:8.0,status:"open",desc:"قهوة وحلويات في جو هادئ.",comments:["قهوة ممتازة","جلسة مريحة"]},
+      {id:6,name:"مطعم البهجة",type:"وجبات سريعة",cat:"fast",icon:"🍔",lat:36.8820,lng:6.9070,rating:8.2,cleanliness:8.1,price:9.2,quality:8.3,serviceSpeed:8.4,status:"open",desc:"برغر وشاورما وتاكوس.",comments:["سعر مناسب","الخدمة سريعة"]},
+      {id:7,name:"مطعم الساحل",type:"أطباق محلية",cat:"grill",icon:"🍖",lat:36.8695,lng:6.9060,rating:8.4,cleanliness:8.5,price:8.8,quality:8.6,serviceSpeed:8.1,status:"closed",desc:"أكلات تقليدية جزائرية.",comments:["الطاجين رائع"]},
+      {id:8,name:"بيتزا روما",type:"بيتزا إيطالية",cat:"pizza",icon:"🍕",lat:36.8718,lng:6.9022,rating:8.6,cleanliness:8.4,price:8.8,quality:8.9,serviceSpeed:8.3,status:"open",desc:"بيتزا إيطالية حقيقية.",comments:["العجينة ممتازة"]},
+      {id:9,name:"دار الكسكس",type:"تقليدي",cat:"grill",icon:"🍲",lat:36.8689,lng:6.9108,rating:8.9,cleanliness:9.0,price:8.5,quality:9.2,serviceSpeed:8.2,status:"open",desc:"كسكس وشخشوخة ومرق منزلي.",comments:["طعم أصيل","كمية محترمة"]}
     ];
 
-    const map = L.map("map",{center:[36.8765,6.9065],zoom:14,zoomControl:false,attributionControl:false});
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
+    /* =========================
+       STATE
+    ========================= */
+    const state = {
+      search: localStorage.getItem("map.search") || "",
+      cat: localStorage.getItem("map.cat") || "all",
+      sortNearest: localStorage.getItem("map.sortNearest") === "1",
+      userLat: null,
+      userLng: null,
+      gpsWatchId: null
+    };
 
-    const toastEl = document.getElementById("toast");
-    const counterEl = document.getElementById("counter");
+    /* =========================
+       MAP INIT
+    ========================= */
+    const map = L.map("map", {
+      center:[36.8765,6.9065],
+      zoom: window.matchMedia("(max-width:600px)").matches ? 13.5 : 14,
+      zoomControl:false,
+      attributionControl:false
+    });
+
+    // لون الخريطة الحالي الجيد (OSM)
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:19 }).addTo(map);
+
+    /* =========================
+       UI REFS
+    ========================= */
     const searchInput = document.getElementById("searchInput");
+    const counterEl = document.getElementById("counter");
+    const toastEl = document.getElementById("toast");
     const overlay = document.getElementById("overlay");
     const sheet = document.getElementById("sheet");
     const sheetBody = document.getElementById("sheetBody");
+    const gpsBtn = document.getElementById("gpsBtn");
+    const sortBtn = document.getElementById("sortBtn");
+    const clearRouteBtn = document.getElementById("clearRouteBtn");
 
-    function toast(msg){
+    searchInput.value = state.search;
+
+    function toast(msg, type=""){
+      toastEl.className = "toast " + type;
       toastEl.textContent = msg;
       toastEl.classList.add("show");
       clearTimeout(toastEl._t);
-      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"),2200);
+      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2300);
     }
 
     function bw(v){ return Math.max(0, Math.min(100, (v/10)*100)); }
-    let selectedCat = "all";
-    let markersLayer = L.layerGroup().addTo(map);
-    let routeLine = null, routeShadow = null;
-    let userLat = null, userLng = null, userMarker = null, gpsWatchId = null;
+
+    function calcDistance(lat1,lng1,lat2,lng2){
+      const R=6371;
+      const dLat=(lat2-lat1)*Math.PI/180;
+      const dLng=(lng2-lng1)*Math.PI/180;
+      const a=Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+      return R * (2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+    }
+
+    function fmtDist(km){
+      return km < 1 ? Math.round(km*1000)+" م" : km.toFixed(1)+" كم";
+    }
+
+    function markerIcon(icon){
+      return L.divIcon({
+        className:"",
+        iconSize:[34,34],
+        iconAnchor:[17,34],
+        popupAnchor:[0,-28],
+        html:`
+          <div class="pin-wrap">
+            <div class="pin-pulse"></div>
+            <div class="pin"><i>${icon}</i></div>
+          </div>
+        `
+      });
+    }
 
     function popupHTML(r){
+      let distHtml = "";
+      if(state.userLat !== null){
+        const d = calcDistance(state.userLat,state.userLng,r.lat,r.lng);
+        distHtml = `<div class="mini-dist">📍 ${fmtDist(d)} منك</div>`;
+      }
+
       return `
         <div class="mini">
           <div class="mini-head">
             <div class="mini-icon">${r.icon}</div>
-            <div><div class="mini-name">${r.name}</div><div class="mini-type">${r.type}</div></div>
+            <div>
+              <div class="mini-name">${r.name}</div>
+              <div class="mini-type">${r.type}</div>
+              ${distHtml}
+            </div>
           </div>
+
           <div class="mini-row"><span>التقييم العام</span><strong>⭐ ${r.rating}</strong></div>
           <div class="mini-row"><span>الحالة</span><span class="status ${r.status==='open'?'open':'closed'}">${r.status==='open'?'مفتوح':'مغلق'}</span></div>
+
           <div class="rate">
             <div class="ri"><span class="lbl">النظافة</span><span class="bw"><span class="b" style="width:${bw(r.cleanliness)}%"></span></span><span class="n">${r.cleanliness}</span></div>
             <div class="ri"><span class="lbl">السعر</span><span class="bw"><span class="b" style="width:${bw(r.price)}%"></span></span><span class="n">${r.price}</span></div>
             <div class="ri"><span class="lbl">الجودة</span><span class="bw"><span class="b" style="width:${bw(r.quality)}%"></span></span><span class="n">${r.quality}</span></div>
             <div class="ri"><span class="lbl">الخدمة والسرعة</span><span class="bw"><span class="b" style="width:${bw(r.serviceSpeed)}%"></span></span><span class="n">${r.serviceSpeed}</span></div>
           </div>
+
           <div class="actions">
             <button class="a details" onclick="openDetails(${r.id})">عرض التفاصيل</button>
             <button class="a route" onclick="drawRoute(${r.id})">أقصر طريق</button>
@@ -275,64 +438,21 @@
       `;
     }
 
-    function filterData(){
-      const q = searchInput.value.trim().toLowerCase();
-      return restaurants.filter(r=>{
-        const txt = r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
-        const cat = selectedCat === "all" || r.cat === selectedCat;
-        return txt && cat;
-      });
-    }
+    const names = ["أحمد","سارة","يوسف","ليلى","كريم","هدى","عمر","نادية"];
 
-    function render(){
-      const list = filterData();
-      markersLayer.clearLayers();
-      list.forEach(r=>{
-        L.marker([r.lat,r.lng]).addTo(markersLayer).bindPopup(popupHTML(r));
-      });
-      counterEl.innerHTML = `تم العثور على <b>${list.length}</b> مكان`;
-    }
+    function openSheetFor(r){
+      let distChip = "";
+      if(state.userLat !== null){
+        const d = calcDistance(state.userLat,state.userLng,r.lat,r.lng);
+        distChip = `<span class="chip-mini dist">📍 ${fmtDist(d)}</span>`;
+      }
 
-    document.querySelectorAll(".chip").forEach(ch=>{
-      ch.addEventListener("click",()=>{
-        document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
-        ch.classList.add("active");
-        selectedCat = ch.dataset.cat;
-        render();
-      });
-    });
-
-    searchInput.addEventListener("input", render);
-
-    function clearRoute(){
-      if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
-      if(routeShadow){ map.removeLayer(routeShadow); routeShadow = null; }
-    }
-
-    window.drawRoute = function(id){
-      if(userLat === null){ toast("فعّل GPS أولاً"); return; }
-      const r = restaurants.find(x=>x.id===id);
-      if(!r) return;
-
-      clearRoute();
-      const url = "https://router.project-osrm.org/route/v1/driving/" + userLng + "," + userLat + ";" + r.lng + "," + r.lat + "?overview=full&geometries=geojson";
-
-      fetch(url).then(res=>res.json()).then(data=>{
-        if(!data.routes || !data.routes.length){ toast("لم يتم العثور على طريق"); return; }
-        const coords = data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
-        routeShadow = L.polyline(coords,{color:"rgba(0,0,0,.12)",weight:9,opacity:.5}).addTo(map);
-        routeLine = L.polyline(coords,{color:"#2563eb",weight:5,opacity:.9}).addTo(map);
-        map.fitBounds(routeLine.getBounds().pad(0.14),{animate:true,duration:0.7});
-        toast("تم رسم الطريق");
-      }).catch(()=>toast("خطأ في حساب الطريق"));
-    };
-
-    window.openDetails = function(id){
-      const r = restaurants.find(x=>x.id===id);
-      if(!r) return;
-
-      const names = ["أحمد","سارة","يوسف","ليلى","كريم","هدى"];
-      const comments = (r.comments||[]).map((c,i)=>`<div class="comment"><div class="h">👤 ${names[i%names.length]}</div><div class="t">${c}</div></div>`).join("");
+      const comments = (r.comments || []).map((c,i)=>`
+        <div class="comment">
+          <div class="h">👤 ${names[i % names.length]}</div>
+          <div class="t">${c}</div>
+        </div>
+      `).join("");
 
       sheetBody.innerHTML = `
         <div class="sh-head">
@@ -340,12 +460,17 @@
           <div>
             <div class="sh-name">${r.name}</div>
             <div class="sh-type">${r.type}</div>
+            <div class="sh-meta">
+              <span class="chip-mini ${r.status==='open'?'open':'closed'}">${r.status==='open'?'مفتوح':'مغلق'}</span>
+              <span class="chip-mini">⭐ ${r.rating}</span>
+              ${distChip}
+            </div>
           </div>
         </div>
 
-        <div class="sec"><h4>نبذة</h4><div class="desc">${r.desc || ""}</div></div>
+        <div class="sec"><h4>نبذة</h4><div class="desc">${r.desc || "لا توجد نبذة حالياً."}</div></div>
 
-        <div class="sec"><h4>التقييمات</h4>
+        <div class="sec"><h4>التقييمات التفصيلية</h4>
           <div class="rate">
             <div class="ri"><span class="lbl">النظافة</span><span class="bw"><span class="b" style="width:${bw(r.cleanliness)}%"></span></span><span class="n">${r.cleanliness}</span></div>
             <div class="ri"><span class="lbl">السعر</span><span class="bw"><span class="b" style="width:${bw(r.price)}%"></span></span><span class="n">${r.price}</span></div>
@@ -359,47 +484,223 @@
 
       overlay.classList.add("active");
       sheet.classList.add("active");
-    };
+    }
 
-    overlay.addEventListener("click",()=>{ overlay.classList.remove("active"); sheet.classList.remove("active"); });
-    document.getElementById("sheetClose").addEventListener("click",()=>{ overlay.classList.remove("active"); sheet.classList.remove("active"); });
+    function closeSheet(){
+      overlay.classList.remove("active");
+      sheet.classList.remove("active");
+    }
 
-    document.getElementById("gpsBtn").addEventListener("click",()=>{
-      if(!navigator.geolocation){ toast("المتصفح لا يدعم GPS"); return; }
+    overlay.addEventListener("click", closeSheet);
+    document.getElementById("sheetClose").addEventListener("click", closeSheet);
 
-      if(gpsWatchId !== null){
-        navigator.geolocation.clearWatch(gpsWatchId);
-        gpsWatchId = null;
-        if(userMarker){ map.removeLayer(userMarker); userMarker = null; }
-        userLat = null; userLng = null;
-        clearRoute();
-        toast("تم إيقاف GPS");
+    /* =========================
+       FILTER + RENDER
+    ========================= */
+    let markersLayer = L.layerGroup().addTo(map);
+    let userMarker = null;
+    let routeLine = null;
+    let routeShadow = null;
+
+    function getFiltered(){
+      const q = state.search.trim().toLowerCase();
+      let arr = restaurants.filter(r=>{
+        const txt = r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
+        const cat = state.cat === "all" || r.cat === state.cat;
+        return txt && cat;
+      });
+
+      if(state.sortNearest && state.userLat !== null){
+        arr = arr.slice().sort((a,b)=>{
+          const da = calcDistance(state.userLat,state.userLng,a.lat,a.lng);
+          const db = calcDistance(state.userLat,state.userLng,b.lat,b.lng);
+          return da - db;
+        });
+      }
+
+      return arr;
+    }
+
+    function render(){
+      const list = getFiltered();
+      markersLayer.clearLayers();
+
+      list.forEach(r=>{
+        const m = L.marker([r.lat,r.lng], { icon: markerIcon(r.icon) }).addTo(markersLayer);
+        m.bindPopup(popupHTML(r), { autoPan:true });
+      });
+
+      counterEl.innerHTML = `تم العثور على <b>${list.length}</b> مكان`;
+      localStorage.setItem("map.search", state.search);
+      localStorage.setItem("map.cat", state.cat);
+      localStorage.setItem("map.sortNearest", state.sortNearest ? "1":"0");
+    }
+
+    searchInput.addEventListener("input", ()=>{
+      state.search = searchInput.value;
+      render();
+    });
+
+    document.querySelectorAll(".chip").forEach(ch=>{
+      if(ch.dataset.cat === state.cat) ch.classList.add("active");
+      else ch.classList.remove("active");
+
+      ch.addEventListener("click", ()=>{
+        document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+        ch.classList.add("active");
+        state.cat = ch.dataset.cat;
+        render();
+      });
+    });
+
+    sortBtn.addEventListener("click", ()=>{
+      state.sortNearest = !state.sortNearest;
+      sortBtn.style.color = state.sortNearest ? "#2563eb" : "#475569";
+      if(state.sortNearest && state.userLat === null){
+        toast("فعّل GPS لفرز الأقرب", "err");
+      } else {
+        toast(state.sortNearest ? "تم تفعيل ترتيب الأقرب" : "تم إلغاء ترتيب الأقرب", "ok");
+      }
+      render();
+    });
+
+    /* =========================
+       GPS
+    ========================= */
+    function startGPS(){
+      if(!navigator.geolocation){
+        toast("المتصفح لا يدعم GPS", "err");
         return;
       }
 
+      if(state.gpsWatchId !== null){
+        navigator.geolocation.clearWatch(state.gpsWatchId);
+        state.gpsWatchId = null;
+        if(userMarker){ map.removeLayer(userMarker); userMarker = null; }
+        state.userLat = null; state.userLng = null;
+        clearRoute();
+        toast("تم إيقاف GPS");
+        render();
+        return;
+      }
+
+      toast("جاري تحديد موقعك...");
       navigator.geolocation.getCurrentPosition(pos=>{
-        userLat = pos.coords.latitude; userLng = pos.coords.longitude;
+        state.userLat = pos.coords.latitude;
+        state.userLng = pos.coords.longitude;
+
         if(userMarker) map.removeLayer(userMarker);
-        userMarker = L.circleMarker([userLat,userLng],{radius:8,color:"#fff",weight:3,fillColor:"#2563eb",fillOpacity:1}).addTo(map);
-        map.flyTo([userLat,userLng],15,{duration:0.8});
-        toast("تم تحديد موقعك");
+        userMarker = L.marker([state.userLat,state.userLng], {
+          icon: L.divIcon({
+            className:"",
+            iconSize:[16,16],
+            iconAnchor:[8,8],
+            html:`<div class="user-dot"></div>`
+          }),
+          zIndexOffset:1000
+        }).addTo(map);
 
-        gpsWatchId = navigator.geolocation.watchPosition(p=>{
-          userLat = p.coords.latitude; userLng = p.coords.longitude;
-          if(userMarker) userMarker.setLatLng([userLat,userLng]);
-        },()=>{}, {enableHighAccuracy:true,maximumAge:10000,timeout:15000});
+        map.flyTo([state.userLat,state.userLng], 15, { duration:.8 });
+        toast("تم تحديد موقعك بنجاح", "ok");
+        render();
 
-      },()=>toast("تعذر تحديد الموقع"), {enableHighAccuracy:true,timeout:10000,maximumAge:0});
+        state.gpsWatchId = navigator.geolocation.watchPosition(p=>{
+          state.userLat = p.coords.latitude;
+          state.userLng = p.coords.longitude;
+          if(userMarker) userMarker.setLatLng([state.userLat,state.userLng]);
+          if(state.sortNearest) render();
+        }, ()=>{}, {
+          enableHighAccuracy:true, maximumAge:10000, timeout:15000
+        });
+
+      }, err=>{
+        toast("تعذر تحديد الموقع", "err");
+      }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+    }
+
+    gpsBtn.addEventListener("click", startGPS);
+
+    /* =========================
+       ROUTING
+    ========================= */
+    function clearRoute(){
+      if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
+      if(routeShadow){ map.removeLayer(routeShadow); routeShadow = null; }
+    }
+
+    clearRouteBtn.addEventListener("click", ()=>{
+      clearRoute();
+      toast("تم حذف الطريق");
     });
 
-    document.getElementById("backBtn").addEventListener("click",()=>{
-      if (window.parent && window.parent !== window) {
-        try { window.parent.document.getElementById("mapOverlay").classList.remove("active"); return; } catch(e){}
+    window.drawRoute = function(id){
+      if(state.userLat === null){
+        toast("فعّل GPS أولاً ثم اختر مطعم", "err");
+        return;
+      }
+
+      const r = restaurants.find(x=>x.id===id);
+      if(!r) return;
+
+      clearRoute();
+      map.closePopup();
+      toast("جاري حساب أقصر طريق...");
+
+      const url = "https://router.project-osrm.org/route/v1/driving/" +
+        state.userLng + "," + state.userLat + ";" + r.lng + "," + r.lat +
+        "?overview=full&geometries=geojson";
+
+      fetch(url)
+        .then(res=>res.json())
+        .then(data=>{
+          if(!data.routes || !data.routes.length){
+            toast("لم يتم العثور على طريق", "err");
+            return;
+          }
+
+          const route = data.routes[0];
+          const coords = route.geometry.coordinates.map(c=>[c[1],c[0]]);
+
+          routeShadow = L.polyline(coords,{ color:"rgba(0,0,0,.12)", weight:9, opacity:.5 }).addTo(map);
+          routeLine = L.polyline(coords,{ color:"#2563eb", weight:5, opacity:.9, lineCap:"round", lineJoin:"round" }).addTo(map);
+
+          map.fitBounds(routeLine.getBounds().pad(0.14), { animate:true, duration:.7 });
+
+          const km = route.distance/1000;
+          const min = Math.round(route.duration/60);
+          toast(`المسافة ${fmtDist(km)} • ~${min} د`, "ok");
+        })
+        .catch(()=>toast("خطأ أثناء حساب الطريق", "err"));
+    };
+
+    /* =========================
+       DETAILS
+    ========================= */
+    window.openDetails = function(id){
+      const r = restaurants.find(x=>x.id===id);
+      if(!r) return;
+      map.closePopup();
+      openSheetFor(r);
+    };
+
+    /* =========================
+       BACK
+    ========================= */
+    document.getElementById("backBtn").addEventListener("click", ()=>{
+      if(window.parent && window.parent !== window){
+        try{
+          window.parent.document.getElementById("mapOverlay").classList.remove("active");
+          return;
+        }catch(e){}
       }
       history.back();
     });
 
+    /* =========================
+       INIT
+    ========================= */
     render();
+    if(state.sortNearest) sortBtn.style.color = "#2563eb";
   </script>
 </body>
 </html>
