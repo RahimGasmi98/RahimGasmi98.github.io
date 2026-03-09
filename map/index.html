@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>J3AN Map — OpenStreetMap + Leaflet</title>
+  <title>J3AN Map — Restaurants</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -68,7 +68,6 @@
       display:grid;place-items:center;color:#475569;
     }
     .fab.gps{bottom:78px}
-    .fab.layers{bottom:126px;font-size:17px}
     .fab svg{
       width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;
       stroke-linecap:round;stroke-linejoin:round;
@@ -90,7 +89,6 @@
     }
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    /* popup */
     .leaflet-popup-content-wrapper{
       background:#fff;border:1px solid var(--line);border-radius:12px;
       box-shadow:0 10px 24px rgba(0,0,0,.12);padding:0;
@@ -135,6 +133,52 @@
     }
     .a.route{background:linear-gradient(135deg,#3b82f6,#2563eb)}
     .a.details{background:linear-gradient(135deg,#16a34a,#15803d)}
+
+    /* Bottom sheet */
+    .overlay{
+      position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.30);
+      opacity:0;pointer-events:none;transition:.2s;
+    }
+    .overlay.active{opacity:1;pointer-events:auto}
+    .sheet{
+      position:fixed;left:0;right:0;bottom:0;z-index:1600;background:#fff;
+      border-top:1px solid var(--line);border-radius:16px 16px 0 0;
+      max-height:86dvh;transform:translateY(100%);transition:.28s;
+      display:flex;flex-direction:column;overflow:hidden;
+    }
+    .sheet.active{transform:translateY(0)}
+    .sheet-handle{padding:9px 0 6px;display:flex;justify-content:center}
+    .sheet-handle i{width:36px;height:4px;border-radius:999px;background:#cbd5e1}
+    .sheet-close{
+      position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;
+      border:1px solid var(--line);background:#f1f5f9;color:#64748b;cursor:pointer;
+    }
+    .sheet-body{overflow:auto;padding:0 12px 18px}
+    .sh-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .sh-icon{
+      width:44px;height:44px;border-radius:10px;display:grid;place-items:center;
+      color:#fff;font-size:20px;background:linear-gradient(135deg,var(--green),var(--green-dark));flex-shrink:0;
+    }
+    .sh-name{font-size:16px;font-weight:800;color:#111827}
+    .sh-type{font-size:12px;color:var(--muted)}
+    .sec{margin-top:13px}
+    .sec h4{font-size:13px;color:#0f172a;margin-bottom:7px}
+    .desc{font-size:12px;color:#4b5563;line-height:1.8}
+    .comment{
+      background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px;margin-bottom:7px;
+    }
+    .comment .h{font-size:11px;font-weight:700;color:#111827;margin-bottom:3px}
+    .comment .t{font-size:11.5px;color:#4b5563;line-height:1.7}
+
+    @media (max-width:600px){
+      .topbar{top:8px;left:8px;right:8px}
+      .btn{width:37px;height:37px}
+      .search{padding:6px 9px}
+      .search input{font-size:12px}
+      .fab{width:38px;height:38px;right:8px}
+      .fab.gps{bottom:74px}
+      .counter{left:8px;bottom:8px;font-size:10px}
+    }
   </style>
 </head>
 <body>
@@ -147,7 +191,7 @@
     </div>
   </div>
 
-  <div class="chips" id="chips">
+  <div class="chips">
     <button class="chip active" data-cat="all">الكل</button>
     <button class="chip" data-cat="grill">🥩 مشاوي</button>
     <button class="chip" data-cat="seafood">🐟 بحري</button>
@@ -156,7 +200,6 @@
     <button class="chip" data-cat="cafe">☕ كافيه</button>
   </div>
 
-  <button class="fab layers" id="layerBtn" title="تبديل شكل الخريطة">🗺️</button>
   <button class="fab gps" id="gpsBtn" title="موقعي الحالي">
     <svg viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="3"></circle>
@@ -169,83 +212,68 @@
   <div class="toast" id="toast"></div>
   <div id="map"></div>
 
+  <div class="overlay" id="overlay"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"><i></i></div>
+    <button class="sheet-close" id="sheetClose">✕</button>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ===== data =====
     const restaurants = [
-      {id:1,name:"مطعم واد مديني",type:"مشاوي وأطباق تقليدية",cat:"grill",icon:"🔥",lat:36.8788,lng:6.9013,rating:8.8,cleanliness:8.7,price:8.9,quality:9.1,serviceSpeed:8.4,status:"open"},
-      {id:2,name:"Le Phare Chez Louiza",type:"مأكولات بحرية",cat:"seafood",icon:"🐟",lat:36.8810,lng:6.9100,rating:9.0,cleanliness:9.1,price:8.2,quality:9.3,serviceSpeed:8.6,status:"open"},
-      {id:3,name:"مطعم نيو داي",type:"بيتزا ووجبات سريعة",cat:"pizza",icon:"🍕",lat:36.8752,lng:6.9045,rating:8.5,cleanliness:8.3,price:9.1,quality:8.6,serviceSpeed:8.7,status:"open"},
-      {id:4,name:"مطعم الريف",type:"مشاوي عائلية",cat:"grill",icon:"🥩",lat:36.8730,lng:6.9110,rating:8.7,cleanliness:8.6,price:8.4,quality:9.0,serviceSpeed:8.3,status:"open"},
-      {id:5,name:"كافيه لا فيستا",type:"كافيه وحلويات",cat:"cafe",icon:"☕",lat:36.8802,lng:6.9038,rating:8.3,cleanliness:8.9,price:8.5,quality:8.2,serviceSpeed:8.0,status:"open"},
-      {id:6,name:"مطعم البهجة",type:"وجبات سريعة",cat:"fast",icon:"🍔",lat:36.8820,lng:6.9070,rating:8.2,cleanliness:8.1,price:9.2,quality:8.3,serviceSpeed:8.4,status:"open"},
-      {id:7,name:"مطعم الساحل",type:"أطباق محلية",cat:"grill",icon:"🍖",lat:36.8695,lng:6.9060,rating:8.4,cleanliness:8.5,price:8.8,quality:8.6,serviceSpeed:8.1,status:"closed"}
+      {id:1,name:"مطعم واد مديني",type:"مشاوي وأطباق تقليدية",cat:"grill",icon:"🔥",lat:36.8788,lng:6.9013,rating:8.8,cleanliness:8.7,price:8.9,quality:9.1,serviceSpeed:8.4,status:"open",desc:"مشاوي طازجة وأجواء عائلية ممتازة.",comments:["مشاوي ممتازة","خدمة جيدة وسريعة"]},
+      {id:2,name:"Le Phare Chez Louiza",type:"مأكولات بحرية",cat:"seafood",icon:"🐟",lat:36.8810,lng:6.9100,rating:9.0,cleanliness:9.1,price:8.2,quality:9.3,serviceSpeed:8.6,status:"open",desc:"أسماك طازجة يوميًا مع جلسة جميلة.",comments:["السمك طازج جدًا","إطلالة رائعة"]},
+      {id:3,name:"مطعم نيو داي",type:"بيتزا ووجبات سريعة",cat:"pizza",icon:"🍕",lat:36.8752,lng:6.9045,rating:8.5,cleanliness:8.3,price:9.1,quality:8.6,serviceSpeed:8.7,status:"open",desc:"بيتزا بعجينة طازجة وأسعار مناسبة.",comments:["بيتزا لذيذة","السعر ممتاز"]},
+      {id:4,name:"مطعم الريف",type:"مشاوي عائلية",cat:"grill",icon:"🥩",lat:36.8730,lng:6.9110,rating:8.7,cleanliness:8.6,price:8.4,quality:9.0,serviceSpeed:8.3,status:"open",desc:"كباب وميشوي بطعم رائع.",comments:["أفضل كباب","مكان عائلي"]},
+      {id:5,name:"كافيه لا فيستا",type:"كافيه وحلويات",cat:"cafe",icon:"☕",lat:36.8802,lng:6.9038,rating:8.3,cleanliness:8.9,price:8.5,quality:8.2,serviceSpeed:8.0,status:"open",desc:"قهوة وحلويات في جو هادئ.",comments:["قهوة ممتازة","جلسة مريحة"]}
     ];
 
-    // ===== map =====
-    const map = L.map("map", {
-      center:[36.8765,6.9065],
-      zoom: window.matchMedia("(max-width:600px)").matches ? 13.5 : 14,
-      zoomControl:false,
-      attributionControl:false
-    });
+    const map = L.map("map",{center:[36.8765,6.9065],zoom:14,zoomControl:false,attributionControl:false});
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
 
-    // أفضل ستايلات مجانية: ملوّن + كلاسيكي فاتح
-    const osmColor = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:19 });
-    const cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { subdomains:"abcd", maxZoom:19 });
-
-    osmColor.addTo(map);
-    let useColor = true;
-
-    // ===== ui refs =====
     const toastEl = document.getElementById("toast");
     const counterEl = document.getElementById("counter");
     const searchInput = document.getElementById("searchInput");
-    const layerBtn = document.getElementById("layerBtn");
-    const gpsBtn = document.getElementById("gpsBtn");
+    const overlay = document.getElementById("overlay");
+    const sheet = document.getElementById("sheet");
+    const sheetBody = document.getElementById("sheetBody");
 
     function toast(msg){
       toastEl.textContent = msg;
       toastEl.classList.add("show");
       clearTimeout(toastEl._t);
-      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2200);
+      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"),2200);
     }
 
     function bw(v){ return Math.max(0, Math.min(100, (v/10)*100)); }
+    let selectedCat = "all";
+    let markersLayer = L.layerGroup().addTo(map);
+    let routeLine = null, routeShadow = null;
+    let userLat = null, userLng = null, userMarker = null, gpsWatchId = null;
 
     function popupHTML(r){
       return `
         <div class="mini">
           <div class="mini-head">
             <div class="mini-icon">${r.icon}</div>
-            <div>
-              <div class="mini-name">${r.name}</div>
-              <div class="mini-type">${r.type}</div>
-            </div>
+            <div><div class="mini-name">${r.name}</div><div class="mini-type">${r.type}</div></div>
           </div>
-
           <div class="mini-row"><span>التقييم العام</span><strong>⭐ ${r.rating}</strong></div>
-          <div class="mini-row"><span>الحالة</span><span class="status ${r.status === 'open' ? 'open' : 'closed'}">${r.status === 'open' ? 'مفتوح' : 'مغلق'}</span></div>
-
+          <div class="mini-row"><span>الحالة</span><span class="status ${r.status==='open'?'open':'closed'}">${r.status==='open'?'مفتوح':'مغلق'}</span></div>
           <div class="rate">
             <div class="ri"><span class="lbl">النظافة</span><span class="bw"><span class="b" style="width:${bw(r.cleanliness)}%"></span></span><span class="n">${r.cleanliness}</span></div>
             <div class="ri"><span class="lbl">السعر</span><span class="bw"><span class="b" style="width:${bw(r.price)}%"></span></span><span class="n">${r.price}</span></div>
             <div class="ri"><span class="lbl">الجودة</span><span class="bw"><span class="b" style="width:${bw(r.quality)}%"></span></span><span class="n">${r.quality}</span></div>
             <div class="ri"><span class="lbl">الخدمة والسرعة</span><span class="bw"><span class="b" style="width:${bw(r.serviceSpeed)}%"></span></span><span class="n">${r.serviceSpeed}</span></div>
           </div>
-
           <div class="actions">
-            <button class="a details" onclick="openG(${r.lat},${r.lng})">فتح Google Maps</button>
+            <button class="a details" onclick="openDetails(${r.id})">عرض التفاصيل</button>
             <button class="a route" onclick="drawRoute(${r.id})">أقصر طريق</button>
           </div>
         </div>
       `;
     }
-
-    let selectedCat = "all";
-    let markersLayer = L.layerGroup().addTo(map);
-    let routeLine = null, routeShadow = null;
-    let userLat = null, userLng = null, userMarker = null, gpsWatchId = null;
 
     function filterData(){
       const q = searchInput.value.trim().toLowerCase();
@@ -259,19 +287,14 @@
     function render(){
       const list = filterData();
       markersLayer.clearLayers();
-
       list.forEach(r=>{
-        const m = L.marker([r.lat,r.lng]).addTo(markersLayer);
-        m.bindPopup(popupHTML(r));
+        L.marker([r.lat,r.lng]).addTo(markersLayer).bindPopup(popupHTML(r));
       });
-
       counterEl.innerHTML = `تم العثور على <b>${list.length}</b> مكان`;
     }
 
-    searchInput.addEventListener("input", render);
-
     document.querySelectorAll(".chip").forEach(ch=>{
-      ch.addEventListener("click", ()=>{
+      ch.addEventListener("click",()=>{
         document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
         ch.classList.add("active");
         selectedCat = ch.dataset.cat;
@@ -279,18 +302,7 @@
       });
     });
 
-    layerBtn.addEventListener("click", ()=>{
-      if(useColor){
-        map.removeLayer(osmColor);
-        cartoLight.addTo(map);
-        toast("تم التحويل إلى النمط الكلاسيكي");
-      }else{
-        map.removeLayer(cartoLight);
-        osmColor.addTo(map);
-        toast("تم التحويل إلى النمط الملوّن");
-      }
-      useColor = !useColor;
-    });
+    searchInput.addEventListener("input", render);
 
     function clearRoute(){
       if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
@@ -298,39 +310,61 @@
     }
 
     window.drawRoute = function(id){
-      if(userLat === null){
-        toast("فعّل GPS أولاً");
-        return;
-      }
+      if(userLat === null){ toast("فعّل GPS أولاً"); return; }
       const r = restaurants.find(x=>x.id===id);
       if(!r) return;
 
       clearRoute();
-      toast("جاري حساب الطريق...");
+      const url = "https://router.project-osrm.org/route/v1/driving/" + userLng + "," + userLat + ";" + r.lng + "," + r.lat + "?overview=full&geometries=geojson";
 
-      const url = "https://router.project-osrm.org/route/v1/driving/" +
-                  userLng + "," + userLat + ";" + r.lng + "," + r.lat +
-                  "?overview=full&geometries=geojson";
-
-      fetch(url)
-        .then(res=>res.json())
-        .then(data=>{
-          if(!data.routes || !data.routes.length){
-            toast("لم يتم العثور على طريق");
-            return;
-          }
-          const coords = data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
-
-          routeShadow = L.polyline(coords, { color:"rgba(0,0,0,.12)", weight:9, opacity:.5 }).addTo(map);
-          routeLine = L.polyline(coords, { color:"#2563eb", weight:5, opacity:.9 }).addTo(map);
-
-          map.fitBounds(routeLine.getBounds().pad(0.14), { animate:true, duration:0.7 });
-          toast("تم رسم الطريق");
-        })
-        .catch(()=>toast("خطأ في حساب الطريق"));
+      fetch(url).then(res=>res.json()).then(data=>{
+        if(!data.routes || !data.routes.length){ toast("لم يتم العثور على طريق"); return; }
+        const coords = data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+        routeShadow = L.polyline(coords,{color:"rgba(0,0,0,.12)",weight:9,opacity:.5}).addTo(map);
+        routeLine = L.polyline(coords,{color:"#2563eb",weight:5,opacity:.9}).addTo(map);
+        map.fitBounds(routeLine.getBounds().pad(0.14),{animate:true,duration:0.7});
+        toast("تم رسم الطريق");
+      }).catch(()=>toast("خطأ في حساب الطريق"));
     };
 
-    gpsBtn.addEventListener("click", ()=>{
+    window.openDetails = function(id){
+      const r = restaurants.find(x=>x.id===id);
+      if(!r) return;
+
+      const names = ["أحمد","سارة","يوسف","ليلى","كريم","هدى"];
+      const comments = (r.comments||[]).map((c,i)=>`<div class="comment"><div class="h">👤 ${names[i%names.length]}</div><div class="t">${c}</div></div>`).join("");
+
+      sheetBody.innerHTML = `
+        <div class="sh-head">
+          <div class="sh-icon">${r.icon}</div>
+          <div>
+            <div class="sh-name">${r.name}</div>
+            <div class="sh-type">${r.type}</div>
+          </div>
+        </div>
+
+        <div class="sec"><h4>نبذة</h4><div class="desc">${r.desc || ""}</div></div>
+
+        <div class="sec"><h4>التقييمات</h4>
+          <div class="rate">
+            <div class="ri"><span class="lbl">النظافة</span><span class="bw"><span class="b" style="width:${bw(r.cleanliness)}%"></span></span><span class="n">${r.cleanliness}</span></div>
+            <div class="ri"><span class="lbl">السعر</span><span class="bw"><span class="b" style="width:${bw(r.price)}%"></span></span><span class="n">${r.price}</span></div>
+            <div class="ri"><span class="lbl">الجودة</span><span class="bw"><span class="b" style="width:${bw(r.quality)}%"></span></span><span class="n">${r.quality}</span></div>
+            <div class="ri"><span class="lbl">الخدمة والسرعة</span><span class="bw"><span class="b" style="width:${bw(r.serviceSpeed)}%"></span></span><span class="n">${r.serviceSpeed}</span></div>
+          </div>
+        </div>
+
+        <div class="sec"><h4>تعليقات الزوار</h4>${comments || '<div class="desc">لا توجد تعليقات حالياً</div>'}</div>
+      `;
+
+      overlay.classList.add("active");
+      sheet.classList.add("active");
+    };
+
+    overlay.addEventListener("click",()=>{ overlay.classList.remove("active"); sheet.classList.remove("active"); });
+    document.getElementById("sheetClose").addEventListener("click",()=>{ overlay.classList.remove("active"); sheet.classList.remove("active"); });
+
+    document.getElementById("gpsBtn").addEventListener("click",()=>{
       if(!navigator.geolocation){ toast("المتصفح لا يدعم GPS"); return; }
 
       if(gpsWatchId !== null){
@@ -344,36 +378,23 @@
       }
 
       navigator.geolocation.getCurrentPosition(pos=>{
-        userLat = pos.coords.latitude;
-        userLng = pos.coords.longitude;
-
+        userLat = pos.coords.latitude; userLng = pos.coords.longitude;
         if(userMarker) map.removeLayer(userMarker);
-        userMarker = L.circleMarker([userLat,userLng], {
-          radius:8, color:"#fff", weight:3, fillColor:"#2563eb", fillOpacity:1
-        }).addTo(map);
-
-        map.flyTo([userLat,userLng], 15, { duration:0.8 });
+        userMarker = L.circleMarker([userLat,userLng],{radius:8,color:"#fff",weight:3,fillColor:"#2563eb",fillOpacity:1}).addTo(map);
+        map.flyTo([userLat,userLng],15,{duration:0.8});
         toast("تم تحديد موقعك");
 
         gpsWatchId = navigator.geolocation.watchPosition(p=>{
-          userLat = p.coords.latitude;
-          userLng = p.coords.longitude;
+          userLat = p.coords.latitude; userLng = p.coords.longitude;
           if(userMarker) userMarker.setLatLng([userLat,userLng]);
-        }, ()=>{}, { enableHighAccuracy:true, maximumAge:10000, timeout:15000 });
+        },()=>{}, {enableHighAccuracy:true,maximumAge:10000,timeout:15000});
 
-      }, ()=>toast("تعذر تحديد الموقع"), { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+      },()=>toast("تعذر تحديد الموقع"), {enableHighAccuracy:true,timeout:10000,maximumAge:0});
     });
 
-    window.openG = function(lat,lng){
-      window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
-    };
-
-    document.getElementById("backBtn").addEventListener("click", ()=>{
+    document.getElementById("backBtn").addEventListener("click",()=>{
       if (window.parent && window.parent !== window) {
-        try {
-          window.parent.document.getElementById("mapOverlay").classList.remove("active");
-          return;
-        } catch(e){}
+        try { window.parent.document.getElementById("mapOverlay").classList.remove("active"); return; } catch(e){}
       }
       history.back();
     });
