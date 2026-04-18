@@ -3,113 +3,1058 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="J3AN - اكتشف أفضل المطاعم والكافيهات والمشاوي في مدينتك" />
   <title>J3AN — اكتشف أفضل الأماكن</title>
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /**************************************
+     * 1) CSS Reset + Tokens
+     **************************************/
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --line: #e5e7eb;
+      --line-soft: #f1f5f9;
+
+      --green: #16a34a;
+      --green-2: #22c55e;
+      --green-3: #15803d;
+
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.2);
+
+      --r-8: 8px;
+      --r-10: 10px;
+      --r-12: 12px;
+      --r-16: 16px;
+      --r-pill: 999px;
+
+      --ease: ease-in-out;
+      --t-fast: 0.2s;
+      --t-mid: 0.3s;
+      --t-slow: 0.4s;
+
+      --container-x: 28px;
+      --nav-h: 72px;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Cairo", sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Helpers */
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      border: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    /**************************************
+     * 2) Navbar
+     **************************************/
+    .site-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .brand-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 16px;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.28);
+    }
+
+    .brand-text {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.2px;
+      color: #0f172a;
+      line-height: 1;
+    }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f5f5f5;
+      border: 1px solid #e5e5e5;
+      border-radius: 40px;
+      padding: 6px 8px;
+      cursor: pointer;
+      transition:
+        box-shadow var(--t-fast) var(--ease),
+        transform var(--t-fast) var(--ease),
+        background var(--t-fast) var(--ease);
+      max-width: 100%;
+    }
+
+    .nav-center:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+      background: #f8fafc;
+    }
+
+    .search-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .search-copy {
+      display: grid;
+      line-height: 1.2;
+      min-width: 0;
+    }
+
+    .search-text {
+      padding: 0 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-sub {
+      font-size: 12px;
+      color: #999;
+      font-weight: 400;
+      padding-inline: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /**************************************
+     * 3) Map Overlay
+     **************************************/
+    .map-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 220;
+      background: #fff;
+      display: none;
+      flex-direction: column;
+      animation: fadeIn 0.3s var(--ease);
+    }
+
+    .map-overlay.active {
+      display: flex;
+    }
+
+    .map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 24px;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+      min-height: 64px;
+    }
+
+    .map-header h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111;
+      margin: 0;
+    }
+
+    .map-close-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f5f5f5;
+      border: 1px solid #e5e5e5;
+      font-size: 18px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition:
+        background var(--t-fast) var(--ease),
+        transform var(--t-fast) var(--ease);
+    }
+
+    .map-close-btn:hover {
+      background: #eee;
+      transform: scale(1.03);
+    }
+
+    .map-overlay iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: #fff;
+    }
+
+    /**************************************
+     * 4) Categories
+     **************************************/
+    .categories-bar {
+      margin-top: var(--nav-h);
+      padding: 16px var(--container-x) 0;
+      border-bottom: 1px solid #f0f0f0;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      background: #fff;
+      position: relative;
+      z-index: 2;
+    }
+
+    .categories-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-list {
+      display: inline-flex;
+      gap: 28px;
+      padding-bottom: 12px;
+    }
+
+    .cat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+      border-bottom: 2px solid transparent;
+      padding-bottom: 8px;
+      min-width: 56px;
+      user-select: none;
+    }
+
+    .cat-item:hover,
+    .cat-item.active {
+      opacity: 1;
+      border-bottom-color: #111;
+    }
+
+    .cat-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .cat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      white-space: nowrap;
+    }
+
+    /**************************************
+     * 5) Content + Sections
+     **************************************/
+    .content {
+      padding: 0 0 60px;
+    }
+
+    .section-row {
+      padding: 32px 0 0;
+    }
+
+    .section-row .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 var(--container-x) 16px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #111;
+      margin: 0;
+    }
+
+    .section-see-all {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--green);
+      text-decoration: underline;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /**************************************
+     * 6) Horizontal Cards
+     **************************************/
+    .scroll-row {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 0 var(--container-x) 8px;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .scroll-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .place-card {
+      flex: 0 0 280px;
+      scroll-snap-align: start;
+      border-radius: var(--r-16);
+      overflow: hidden;
+      background: #fff;
+      cursor: pointer;
+      transition:
+        transform var(--t-mid) var(--ease),
+        box-shadow var(--t-mid) var(--ease),
+        filter var(--t-mid) var(--ease);
+      will-change: transform;
+    }
+
+    .place-card:hover {
+      transform: translateY(-4px) scale(1.015);
+      box-shadow: var(--shadow-md);
+      filter: saturate(1.02);
+    }
+
+    .card-img-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--r-16);
+    }
+
+    .card-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: var(--r-16);
+      transition: transform var(--t-mid) var(--ease);
+    }
+
+    .place-card:hover .card-img {
+      transform: scale(1.02);
+    }
+
+    .card-fav {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.88);
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+      border: none;
+      z-index: 2;
+    }
+
+    .card-fav:hover {
+      transform: scale(1.12);
+      background: #fff;
+    }
+
+    .card-fav.liked {
+      color: #ef4444;
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #fff;
+      border-radius: var(--r-8);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+      padding: 12px 4px 0;
+    }
+
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111;
+      flex-shrink: 0;
+    }
+
+    .card-rating .star {
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .card-type {
+      font-size: 13px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .card-price {
+      font-size: 14px;
+      color: #333;
+      margin-top: 4px;
+    }
+
+    .card-price b {
+      font-weight: 800;
+    }
+
+    /**************************************
+     * 7) Details Popup (Modal)
+     **************************************/
+    .details-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .details-modal.active {
+      display: flex;
+    }
+
+    .details-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      opacity: 0;
+      transition: opacity var(--t-mid) var(--ease);
+      backdrop-filter: blur(1px);
+    }
+
+    .details-dialog {
+      position: relative;
+      width: min(100%, 430px);
+      background: #fff;
+      border-radius: var(--r-16);
+      padding: 18px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+      transition:
+        opacity var(--t-mid) var(--ease),
+        transform var(--t-mid) var(--ease);
+    }
+
+    .details-modal.active .details-backdrop {
+      opacity: 1;
+    }
+
+    .details-modal.active .details-dialog {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .details-close {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background var(--t-fast) var(--ease);
+    }
+
+    .details-close:hover {
+      background: #eef2f7;
+    }
+
+    .details-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111827;
+      margin: 0 0 10px;
+      padding-left: 42px;
+      line-height: 1.35;
+    }
+
+    .details-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: #334155;
+    }
+
+    .details-list b {
+      color: #0f172a;
+    }
+
+    .details-map-btn {
+      width: 100%;
+      border: none;
+      border-radius: var(--r-12);
+      padding: 12px 14px;
+      color: #fff;
+      font-family: "Cairo", sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+      transition:
+        transform var(--t-fast) var(--ease),
+        filter var(--t-fast) var(--ease);
+    }
+
+    .details-map-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .details-map-btn:active {
+      transform: scale(0.985);
+    }
+
+    /**************************************
+     * 8) Footer
+     **************************************/
+    .site-footer {
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid #eee;
+      color: #999;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .site-footer span {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .support-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      border: 1px solid var(--green);
+      padding: 8px 14px;
+      border-radius: var(--r-10);
+      transition: all var(--t-fast) var(--ease);
+    }
+
+    .support-link:hover {
+      background: var(--green);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /**************************************
+     * 9) Animations
+     **************************************/
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /**************************************
+     * 10) Responsive
+     **************************************/
+    @media (max-width: 860px) {
+      :root {
+        --container-x: 16px;
+      }
+
+      .brand-text {
+        font-size: 18px;
+      }
+
+      .section-title {
+        font-size: 20px;
+      }
+
+      .place-card {
+        flex-basis: 250px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .site-nav {
+        padding: 10px 12px;
+        height: 68px;
+      }
+
+      .brand-badge {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+
+      .brand-text {
+        font-size: 16px;
+      }
+
+      .nav-center {
+        padding: 6px 7px;
+      }
+
+      .search-text {
+        font-size: 13px;
+      }
+
+      .search-sub {
+        font-size: 11px;
+      }
+
+      .categories-bar {
+        margin-top: 68px;
+        padding: 12px 16px 0;
+      }
+
+      .cat-list {
+        gap: 20px;
+      }
+
+      .section-row .section-header {
+        padding: 0 16px 12px;
+      }
+
+      .section-title {
+        font-size: 18px;
+      }
+
+      .scroll-row {
+        padding: 0 16px 8px;
+        gap: 12px;
+      }
+
+      .place-card {
+        flex: 0 0 240px;
+      }
+
+      .card-img {
+        height: 170px;
+      }
+
+      .details-dialog {
+        border-radius: 14px;
+      }
+
+      .details-title {
+        font-size: 18px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-  <!-- Navbar -->
-  <nav>
-    <div class="logo">
-      <img src="https://rahimgasmi98.github.io/assets/Picsart_26-04-10_09-55-34-889.png" alt="J3AN Logo" class="logo-img" />
-    </div>
-
-    <div class="nav-center" onclick="document.getElementById('mapOverlay').classList.add('active')">
-      <div class="search-icon">🔍</div>
-      <div>
-        <div class="search-text">استكشف الأماكن</div>
-        <div class="search-sub">مطاعم · كافيهات · مشويات</div>
+  <!-- ======================================
+       Header / Navbar
+  ======================================= -->
+  <header>
+    <nav class="site-nav" aria-label="التنقل الرئيسي">
+      <div class="brand" aria-label="J3AN">
+        <div class="brand-badge" aria-hidden="true">🍽️</div>
+        <div class="brand-text">J3AN</div>
       </div>
-    </div>
-  </nav>
 
-  <!-- Map Overlay -->
-  <div class="map-overlay" id="mapOverlay">
+      <button
+        class="nav-center"
+        type="button"
+        id="openMapFromSearch"
+        aria-label="فتح الخريطة"
+      >
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <span class="search-copy">
+          <span class="search-text">استكشف الأماكن</span>
+          <span class="search-sub">مطاعم · كافيهات · مشويات</span>
+        </span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ======================================
+       Map Overlay
+  ======================================= -->
+  <section class="map-overlay" id="mapOverlay" aria-hidden="true">
     <div class="map-header">
       <h2>🗺️ خريطة الأماكن</h2>
-      <button class="map-close-btn" onclick="document.getElementById('mapOverlay').classList.remove('active')">✕</button>
+      <button
+        class="map-close-btn"
+        id="closeMapOverlay"
+        type="button"
+        aria-label="إغلاق الخريطة"
+      >
+        ✕
+      </button>
     </div>
     <iframe src="/map" loading="lazy" title="خريطة الأماكن"></iframe>
-  </div>
+  </section>
 
-  <!-- Popup -->
-  <div class="details-modal" id="detailsModal">
+  <!-- ======================================
+       Details Modal
+  ======================================= -->
+  <section class="details-modal" id="detailsModal" aria-hidden="true">
     <div class="details-backdrop" id="detailsBackdrop"></div>
-    <div class="details-dialog">
-      <button class="details-close" id="detailsClose">✕</button>
+
+    <article
+      class="details-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="detailsTitle"
+    >
+      <button class="details-close" id="detailsClose" aria-label="إغلاق">
+        ✕
+      </button>
+
       <h3 class="details-title" id="detailsTitle">تفاصيل المطعم</h3>
+
       <div class="details-list">
         <div>⭐ <b>التقييم:</b> <span id="detailsRating">-</span></div>
         <div>🍽️ <b>النوع:</b> <span id="detailsType">-</span></div>
         <div>💳 <b>السعر:</b> <span id="detailsPrice">-</span></div>
       </div>
-      <button class="details-map-btn" id="goToMapBtn">الذهاب إلى الخريطة</button>
+
+      <button class="details-map-btn" id="goToMapBtn" type="button">
+        الذهاب إلى الخريطة
+      </button>
+    </article>
+  </section>
+
+  <!-- ======================================
+       Categories
+  ======================================= -->
+  <section class="categories-bar" aria-label="التصنيفات">
+    <div class="cat-list" role="tablist" aria-label="قائمة التصنيفات">
+      <button class="cat-item active" data-cat="all" type="button" role="tab" aria-selected="true">
+        <span class="cat-icon">🔥</span><span class="cat-label">الكل</span>
+      </button>
+      <button class="cat-item" data-cat="fast" type="button" role="tab" aria-selected="false">
+        <span class="cat-icon">🍔</span><span class="cat-label">مأكولات سريعة</span>
+      </button>
+      <button class="cat-item" data-cat="restaurant" type="button" role="tab" aria-selected="false">
+        <span class="cat-icon">🍽️</span><span class="cat-label">مطاعم</span>
+      </button>
+      <button class="cat-item" data-cat="grill" type="button" role="tab" aria-selected="false">
+        <span class="cat-icon">🥩</span><span class="cat-label">مشويات</span>
+      </button>
+      <button class="cat-item" data-cat="cafe" type="button" role="tab" aria-selected="false">
+        <span class="cat-icon">☕</span><span class="cat-label">كافيهات</span>
+      </button>
+      <button class="cat-item" data-cat="pizza" type="button" role="tab" aria-selected="false">
+        <span class="cat-icon">🍕</span><span class="cat-label">بيتزا</span>
+      </button>
+      <button class="cat-item" data-cat="seafood" type="button" role="tab" aria-selected="false">
+        <span class="cat-icon">🐟</span><span class="cat-label">مأكولات بحرية</span>
+      </button>
+      <button class="cat-item" data-cat="sweets" type="button" role="tab" aria-selected="false">
+        <span class="cat-icon">🍰</span><span class="cat-label">حلويات</span>
+      </button>
     </div>
-  </div>
+  </section>
 
-  <!-- Categories -->
-  <div class="categories-bar">
-    <div class="cat-list">
-      <div class="cat-item active" onclick="filterCategory(this,'all')"><span class="cat-icon">🔥</span><span class="cat-label">الكل</span></div>
-      <div class="cat-item" onclick="filterCategory(this,'fast')"><span class="cat-icon">🍔</span><span class="cat-label">مأكولات سريعة</span></div>
-      <div class="cat-item" onclick="filterCategory(this,'restaurant')"><span class="cat-icon">🍽️</span><span class="cat-label">مطاعم</span></div>
-      <div class="cat-item" onclick="filterCategory(this,'grill')"><span class="cat-icon">🥩</span><span class="cat-label">مشويات</span></div>
-      <div class="cat-item" onclick="filterCategory(this,'cafe')"><span class="cat-icon">☕</span><span class="cat-label">كافيهات</span></div>
-      <div class="cat-item" onclick="filterCategory(this,'pizza')"><span class="cat-icon">🍕</span><span class="cat-label">بيتزا</span></div>
-      <div class="cat-item" onclick="filterCategory(this,'seafood')"><span class="cat-icon">🐟</span><span class="cat-label">مأكولات بحرية</span></div>
-      <div class="cat-item" onclick="filterCategory(this,'sweets')"><span class="cat-icon">🍰</span><span class="cat-label">حلويات</span></div>
-    </div>
-  </div>
-
-  <div class="content" id="content">
-
-    <!-- اقتراحات لك -->
-    <div class="section-row" data-category="all,restaurant">
+  <!-- ======================================
+       Content
+  ======================================= -->
+  <main class="content" id="content">
+    <!-- ===== اقتراحات لك ===== -->
+    <section class="section-row" data-category="all,restaurant" data-recommendations="true">
       <div class="section-header">
         <h2 class="section-title">🌟 اقتراحات لك</h2>
-        <span class="section-see-all">عرض الكل</span>
+        <span class="section-see-all" role="button" tabindex="0">عرض الكل</span>
       </div>
+
       <div class="scroll-row">
-        <div class="place-card">
+        <!-- Card 1 -->
+        <article class="place-card">
           <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
+            <img class="card-img" src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop" alt="مطعم النخيل">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
             <div class="card-badge">⭐ مميز</div>
           </div>
           <div class="card-body">
-            <div class="card-top-row"><span class="card-name">مطعم النخيل</span><span class="card-rating"><span class="star">★</span> 4.8</span></div>
+            <div class="card-top-row">
+              <span class="card-name">مطعم النخيل</span>
+              <span class="card-rating"><span class="star">★</span> 4.8</span>
+            </div>
             <div class="card-type">مطعم عائلي · سكيكدة</div>
             <div class="card-price"><b>800 دج</b> / للشخص</div>
           </div>
-        </div>
+        </article>
 
-        <div class="place-card">
+        <!-- Card 2 -->
+        <article class="place-card">
           <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
+            <img class="card-img" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop" alt="مطعم الأندلس">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
           </div>
           <div class="card-body">
-            <div class="card-top-row"><span class="card-name">مطعم الأندلس</span><span class="card-rating"><span class="star">★</span> 4.6</span></div>
+            <div class="card-top-row">
+              <span class="card-name">مطعم الأندلس</span>
+              <span class="card-rating"><span class="star">★</span> 4.6</span>
+            </div>
             <div class="card-type">مأكولات تقليدية · وسط المدينة</div>
             <div class="card-price"><b>1200 دج</b> / للشخص</div>
           </div>
-        </div>
-      </div>
-    </div>
+        </article>
 
-    <!-- قسم إضافي -->
-    <div class="section-row" data-category="all,cafe">
+        <!-- Card 3 -->
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=600&h=400&fit=crop" alt="مطعم البحر">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">مطعم البحر</span>
+              <span class="card-rating"><span class="star">★</span> 4.9</span>
+            </div>
+            <div class="card-type">مأكولات بحرية · الكورنيش</div>
+            <div class="card-price"><b>1500 دج</b> / للشخص</div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop" alt="لو جاردان">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">لو جاردان</span>
+              <span class="card-rating"><span class="star">★</span> 4.7</span>
+            </div>
+            <div class="card-type">مطعم راقي · حي الزهور</div>
+            <div class="card-price"><b>2000 دج</b> / للشخص</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== مأكولات سريعة ===== -->
+    <section class="section-row" data-category="all,fast">
+      <div class="section-header">
+        <h2 class="section-title">🍔 مأكولات سريعة</h2>
+        <span class="section-see-all" role="button" tabindex="0">عرض الكل</span>
+      </div>
+
+      <div class="scroll-row">
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop" alt="بيرغر كينغ">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">بيرغر كينغ</span><span class="card-rating"><span class="star">★</span> 4.3</span></div>
+            <div class="card-type">برغر · ساندويتشات</div>
+            <div class="card-price"><b>500 دج</b> / ساندويتش</div>
+          </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop" alt="بيتزا هاوس">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">بيتزا هاوس</span><span class="card-rating"><span class="star">★</span> 4.5</span></div>
+            <div class="card-type">بيتزا · فاست فود</div>
+            <div class="card-price"><b>600 دج</b> / بيتزا</div>
+          </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=600&h=400&fit=crop" alt="تاكوس ديليس">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">تاكوس ديليس</span><span class="card-rating"><span class="star">★</span> 4.4</span></div>
+            <div class="card-type">تاكوس · راب</div>
+            <div class="card-price"><b>450 دج</b> / تاكوس</div>
+          </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&h=400&fit=crop" alt="شاورما الشام">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">شاورما الشام</span><span class="card-rating"><span class="star">★</span> 4.6</span></div>
+            <div class="card-type">شاورما · فلافل</div>
+            <div class="card-price"><b>400 دج</b> / شاورما</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== مشويات ===== -->
+    <section class="section-row" data-category="all,grill">
+      <div class="section-header">
+        <h2 class="section-title">🥩 مشويات</h2>
+        <span class="section-see-all" role="button" tabindex="0">عرض الكل</span>
+      </div>
+
+      <div class="scroll-row">
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop" alt="مشوي الريم">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+            <div class="card-badge">🔥 الأكثر طلباً</div>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">مشوي الريم</span><span class="card-rating"><span class="star">★</span> 4.9</span></div>
+            <div class="card-type">مشويات · كباب</div>
+            <div class="card-price"><b>1000 دج</b> / طبق</div>
+          </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop" alt="دار الشواء">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">دار الشواء</span><span class="card-rating"><span class="star">★</span> 4.7</span></div>
+            <div class="card-type">مشويات تركية · كفتة</div>
+            <div class="card-price"><b>1200 دج</b> / طبق</div>
+          </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1558030006-450675393462?w=600&h=400&fit=crop" alt="الفحم الذهبي">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">الفحم الذهبي</span><span class="card-rating"><span class="star">★</span> 4.5</span></div>
+            <div class="card-type">دجاج مشوي · أضلاع</div>
+            <div class="card-price"><b>900 دج</b> / طبق</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== كافيهات ===== -->
+    <section class="section-row" data-category="all,cafe">
       <div class="section-header">
         <h2 class="section-title">☕ كافيهات</h2>
-        <span class="section-see-all">عرض الكل</span>
+        <span class="section-see-all" role="button" tabindex="0">عرض الكل</span>
       </div>
+
       <div class="scroll-row">
-        <div class="place-card">
+        <article class="place-card">
           <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+            <img class="card-img" src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&h=400&fit=crop" alt="كافيه لاتيه">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
             <div class="card-badge">✨ جديد</div>
           </div>
           <div class="card-body">
@@ -117,83 +1062,229 @@
             <div class="card-type">قهوة مختصة · حلويات</div>
             <div class="card-price"><b>300 دج</b> / قهوة</div>
           </div>
-        </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=400&fit=crop" alt="أروما كافيه">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">أروما كافيه</span><span class="card-rating"><span class="star">★</span> 4.6</span></div>
+            <div class="card-type">كابتشينو · عصائر</div>
+            <div class="card-price"><b>350 دج</b> / مشروب</div>
+          </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop" alt="ذا لاونج">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">ذا لاونج</span><span class="card-rating"><span class="star">★</span> 4.9</span></div>
+            <div class="card-type">شيشة · مشروبات ساخنة</div>
+            <div class="card-price"><b>500 دج</b> / جلسة</div>
+          </div>
+        </article>
+
+        <article class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&h=400&fit=crop" alt="بريزا كوفي">
+            <button class="card-fav" type="button" aria-label="إضافة إلى المفضلة">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row"><span class="card-name">بريزا كوفي</span><span class="card-rating"><span class="star">★</span> 4.4</span></div>
+            <div class="card-type">إسبريسو · كرواسون</div>
+            <div class="card-price"><b>250 دج</b> / قهوة</div>
+          </div>
+        </article>
       </div>
-    </div>
+    </section>
+  </main>
 
-  </div>
-
-  <footer>
+  <!-- ======================================
+       Footer
+  ======================================= -->
+  <footer class="site-footer">
     <div>MADE WITH ❤️ BY <span>GASMI ABDERRAHIM</span> — © 2025</div>
     <a href="/support" class="support-link">🛟 SUPPORT</a>
   </footer>
 
   <script>
-    function filterCategory(el, cat) {
-      document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      document.querySelectorAll('.section-row').forEach(section => {
-        const cats = section.dataset.category.split(',');
-        if (cat === 'all' || cats.includes(cat)) {
-          section.style.display = '';
-          section.style.animation = 'fadeIn .3s ease';
-        } else {
-          section.style.display = 'none';
-        }
+    /************************************************
+     * App State
+     ************************************************/
+    const appState = {
+      selectedCategory: "all"
+    };
+
+    /************************************************
+     * DOM References
+     ************************************************/
+    const mapOverlay = document.getElementById("mapOverlay");
+    const openMapFromSearchBtn = document.getElementById("openMapFromSearch");
+    const closeMapOverlayBtn = document.getElementById("closeMapOverlay");
+
+    const catButtons = Array.from(document.querySelectorAll(".cat-item"));
+    const sectionRows = Array.from(document.querySelectorAll(".section-row"));
+
+    const detailsModal = document.getElementById("detailsModal");
+    const detailsBackdrop = document.getElementById("detailsBackdrop");
+    const detailsCloseBtn = document.getElementById("detailsClose");
+    const detailsTitle = document.getElementById("detailsTitle");
+    const detailsRating = document.getElementById("detailsRating");
+    const detailsType = document.getElementById("detailsType");
+    const detailsPrice = document.getElementById("detailsPrice");
+    const goToMapBtn = document.getElementById("goToMapBtn");
+
+    const recommendationSection = document.querySelector('.section-row[data-recommendations="true"]');
+
+    /************************************************
+     * Map Overlay Module
+     ************************************************/
+    function openMapOverlay() {
+      mapOverlay.classList.add("active");
+      mapOverlay.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeMapOverlay() {
+      mapOverlay.classList.remove("active");
+      mapOverlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    openMapFromSearchBtn.addEventListener("click", openMapOverlay);
+    closeMapOverlayBtn.addEventListener("click", closeMapOverlay);
+
+    /************************************************
+     * Category Filter Module
+     ************************************************/
+    function updateCategoryButtons(activeCat) {
+      catButtons.forEach(btn => {
+        const isActive = btn.dataset.cat === activeCat;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
       });
     }
 
-    const modal = document.getElementById('detailsModal');
-    const backdrop = document.getElementById('detailsBackdrop');
-    const closeBtn = document.getElementById('detailsClose');
-    const titleEl = document.getElementById('detailsTitle');
-    const ratingEl = document.getElementById('detailsRating');
-    const typeEl = document.getElementById('detailsType');
-    const priceEl = document.getElementById('detailsPrice');
-    const goToMapBtn = document.getElementById('goToMapBtn');
+    function applyCategoryFilter(cat) {
+      appState.selectedCategory = cat;
 
-    function openModal(data) {
-      titleEl.textContent = data.name || 'مطعم';
-      ratingEl.textContent = data.rating || '-';
-      typeEl.textContent = data.type || '-';
-      priceEl.textContent = data.price || '-';
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      sectionRows.forEach(section => {
+        const categories = (section.dataset.category || "").split(",");
+        const visible = cat === "all" || categories.includes(cat);
+
+        section.style.display = visible ? "" : "none";
+
+        if (visible) {
+          section.style.animation = "fadeIn .3s ease";
+        }
+      });
+
+      updateCategoryButtons(cat);
     }
 
-    function closeModal() {
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-
-    backdrop.addEventListener('click', closeModal);
-    closeBtn.addEventListener('click', closeModal);
-
-    goToMapBtn.addEventListener('click', () => {
-      closeModal();
-      window.location.href = '/map';
+    catButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        applyCategoryFilter(btn.dataset.cat);
+      });
     });
 
-    const recommendationSection = document.querySelector('.section-row[data-category="all,restaurant"]');
-    if (recommendationSection) {
-      recommendationSection.querySelectorAll('.place-card').forEach(card => {
-        card.addEventListener('click', function (e) {
-          if (e.target.closest('.card-fav')) return;
-          const name = this.querySelector('.card-name')?.textContent?.trim() || '-';
-          const rating = this.querySelector('.card-rating')?.textContent?.replace('★','').trim() || '-';
-          const type = this.querySelector('.card-type')?.textContent?.trim() || '-';
-          const price = this.querySelector('.card-price')?.textContent?.trim() || '-';
-          openModal({ name, rating, type, price });
+    /************************************************
+     * Favorites (Heart) Module
+     ************************************************/
+    function initFavoriteButtons() {
+      const favButtons = document.querySelectorAll(".card-fav");
+
+      favButtons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          // حتى لا يفتح popup عند الضغط على القلب
+          e.stopPropagation();
+          btn.classList.toggle("liked");
         });
       });
     }
 
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        document.getElementById('mapOverlay').classList.remove('active');
-        closeModal();
+    /************************************************
+     * Details Modal Module
+     ************************************************/
+    function openDetailsModal({ name, rating, type, price }) {
+      detailsTitle.textContent = name || "مطعم";
+      detailsRating.textContent = rating || "-";
+      detailsType.textContent = type || "-";
+      detailsPrice.textContent = price || "-";
+
+      detailsModal.classList.add("active");
+      detailsModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeDetailsModal() {
+      detailsModal.classList.remove("active");
+      detailsModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    detailsBackdrop.addEventListener("click", closeDetailsModal);
+    detailsCloseBtn.addEventListener("click", closeDetailsModal);
+
+    goToMapBtn.addEventListener("click", () => {
+      closeDetailsModal();
+      // يمكنك تبديل هذا للسطر التالي إذا أردت فتح overlay بدل الانتقال:
+      // openMapOverlay();
+      window.location.href = "/map";
+    });
+
+    function initRecommendationCardsPopup() {
+      if (!recommendationSection) return;
+
+      const cards = recommendationSection.querySelectorAll(".place-card");
+
+      cards.forEach(card => {
+        card.addEventListener("click", (e) => {
+          // إذا الضغط كان على زر القلب لا تفتح popup
+          if (e.target.closest(".card-fav")) return;
+
+          const name = card.querySelector(".card-name")?.textContent?.trim() || "-";
+          const ratingRaw = card.querySelector(".card-rating")?.textContent || "";
+          const rating = ratingRaw.replace("★", "").trim() || "-";
+          const type = card.querySelector(".card-type")?.textContent?.trim() || "-";
+          const price = card.querySelector(".card-price")?.textContent?.trim() || "-";
+
+          openDetailsModal({ name, rating, type, price });
+        });
+      });
+    }
+
+    /************************************************
+     * Keyboard Shortcuts / Escape handling
+     ************************************************/
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (mapOverlay.classList.contains("active")) {
+          closeMapOverlay();
+        }
+        if (detailsModal.classList.contains("active")) {
+          closeDetailsModal();
+        }
       }
     });
+
+    /************************************************
+     * Init
+     ************************************************/
+    (function init() {
+      // الحالة الابتدائية
+      applyCategoryFilter("all");
+
+      // تفعيل المفضلة
+      initFavoriteButtons();
+
+      // تفعيل popup للاقتراحات
+      initRecommendationCardsPopup();
+    })();
   </script>
 </body>
 </html>
