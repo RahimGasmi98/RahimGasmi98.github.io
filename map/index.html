@@ -46,7 +46,6 @@
     .leaflet-control-attribution,.leaflet-control-zoom{display:none!important}
     .leaflet-div-icon{background:transparent!important;border:none!important}
 
-    /* Top controls */
     .top{
       position:fixed;top:10px;left:10px;right:10px;z-index:1200;
       display:flex;align-items:center;gap:8px;
@@ -69,7 +68,6 @@
     }
     .search input::placeholder{color:#94a3b8}
 
-    /* Filter chips */
     .chips{
       position:fixed;top:60px;left:10px;right:10px;z-index:1200;
       display:flex;gap:6px;overflow:auto;padding-bottom:2px;scrollbar-width:none;
@@ -83,7 +81,6 @@
     }
     .chip.active{background:#111827;border-color:#111827;color:#fff}
 
-    /* Floating actions */
     .fab{
       position:fixed;right:10px;z-index:1200;
       width:42px;height:42px;border:none;border-radius:50%;cursor:pointer;
@@ -98,7 +95,6 @@
       stroke-linecap:round;stroke-linejoin:round;
     }
 
-    /* Info badges */
     .counter{
       position:fixed;left:10px;bottom:10px;z-index:1200;
       background:#fff;border:1px solid var(--line);border-radius:10px;
@@ -118,7 +114,6 @@
     .toast.ok{border-color:rgba(34,197,94,.35)}
     .toast.err{border-color:rgba(220,38,38,.35)}
 
-    /* PIN old style */
     .pin-wrap{position:relative;width:var(--pin-size);height:var(--pin-size)}
     .pin-pulse{
       position:absolute;inset:0;border-radius:50%;
@@ -152,7 +147,6 @@
       box-shadow:0 0 0 6px rgba(37,99,235,.22),0 2px 10px rgba(0,0,0,.15);
     }
 
-    /* Popup */
     .leaflet-popup-content-wrapper{
       background:#fff;border:1px solid var(--line);
       border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.12);padding:0;
@@ -178,6 +172,13 @@
     .mini-row{
       display:flex;align-items:center;justify-content:space-between;
       font-size:11px;padding:4px 0;border-top:1px solid rgba(0,0,0,.06);
+      gap:8px;
+    }
+    .mini-row strong{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:150px;
     }
     .status{
       font-size:10px;font-weight:800;border-radius:999px;padding:2px 8px;border:1px solid transparent;
@@ -208,7 +209,6 @@
     .a.route{background:linear-gradient(135deg,#3b82f6,#2563eb)}
     .a.details{background:linear-gradient(135deg,#16a34a,#15803d)}
 
-    /* Sheet */
     .overlay{
       position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.30);
       opacity:0;pointer-events:none;transition:.2s;
@@ -310,24 +310,72 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    /* =========================
-       DATA
-    ========================= */
     const restaurants = [
-      {id:1,name:"مطعم واد مديني",type:"مشاوي وأطباق تقليدية",cat:"grill",icon:"🔥",lat:36.8788,lng:6.9013,rating:8.8,cleanliness:8.7,price:8.9,quality:9.1,serviceSpeed:8.4,status:"open",desc:"مشاوي طازجة وأجواء عائلية مميزة.",comments:["مشاوي ممتازة","خدمة جيدة وسريعة","الأسعار مقبولة"]},
-      {id:2,name:"Le Phare Chez Louiza",type:"مأكولات بحرية",cat:"seafood",icon:"🐟",lat:36.8810,lng:6.9100,rating:9.0,cleanliness:9.1,price:8.2,quality:9.3,serviceSpeed:8.6,status:"open",desc:"أسماك طازجة وإطلالة جميلة.",comments:["السمك طازج جدًا","إطلالة رائعة","الخدمة محترمة"]},
-      {id:3,name:"مطعم نيو داي",type:"بيتزا ووجبات سريع��",cat:"pizza",icon:"🍕",lat:36.8752,lng:6.9045,rating:8.5,cleanliness:8.3,price:9.1,quality:8.6,serviceSpeed:8.7,status:"open",desc:"بيتزا بعجينة طازجة وأسعار مناسبة.",comments:["بيتزا لذيذة","السعر ممتاز"]},
-      {id:4,name:"مطعم الريف",type:"مشاوي عا��لية",cat:"grill",icon:"🥩",lat:36.8730,lng:6.9110,rating:8.7,cleanliness:8.6,price:8.4,quality:9.0,serviceSpeed:8.3,status:"open",desc:"كباب وميشوي بطعم رائع.",comments:["أفضل كباب","مكان عائلي ممتاز"]},
-      {id:5,name:"كافيه لا فيستا",type:"كافيه وحلويات",cat:"cafe",icon:"☕",lat:36.8802,lng:6.9038,rating:8.3,cleanliness:8.9,price:8.5,quality:8.2,serviceSpeed:8.0,status:"open",desc:"قهوة وحلويات في جو هادئ.",comments:["قهوة ممتازة","جلسة مريحة"]},
-      {id:6,name:"مطعم البهجة",type:"وجبات سريعة",cat:"fast",icon:"🍔",lat:36.8820,lng:6.9070,rating:8.2,cleanliness:8.1,price:9.2,quality:8.3,serviceSpeed:8.4,status:"open",desc:"برغر وشاورما وتاكوس.",comments:["سعر مناسب","الخدمة سريعة"]},
-      {id:7,name:"مطعم الساحل",type:"أطباق محلية",cat:"grill",icon:"🍖",lat:36.8695,lng:6.9060,rating:8.4,cleanliness:8.5,price:8.8,quality:8.6,serviceSpeed:8.1,status:"closed",desc:"أكلات تقليدية جزائرية.",comments:["الطاجين رائع"]},
-      {id:8,name:"بيتزا روما",type:"بيتزا إيطالية",cat:"pizza",icon:"🍕",lat:36.8718,lng:6.9022,rating:8.6,cleanliness:8.4,price:8.8,quality:8.9,serviceSpeed:8.3,status:"open",desc:"بيتزا إيطالية حقيقية.",comments:["العجينة ممتازة"]},
-      {id:9,name:"دار الكسكس",type:"تقليدي",cat:"grill",icon:"🍲",lat:36.8689,lng:6.9108,rating:8.9,cleanliness:9.0,price:8.5,quality:9.2,serviceSpeed:8.2,status:"open",desc:"كسكس وشخشوخة ومرق منزلي.",comments:["طعم أصيل","كمية محترمة"]}
+      {
+        id:1,name:"مطعم واد مديني",type:"مشاوي وأطباق تقليدية",cat:"grill",icon:"🔥",
+        lat:36.8788,lng:6.9013,rating:8.8,cleanliness:8.7,price:8.9,quality:9.1,serviceSpeed:8.6,
+        status:"open",phone:"+213 555 12 34 56",hours:"09:00 - 23:30",
+        desc:"مطعم مشهور بالأكلات التقليدية والمشاوي الطازجة.",
+        comments:["خدمة ممتازة", "الأكل لذيذ", "المكان نظيف ومريح"]
+      },
+      {
+        id:2,name:"Le Phare Chez Louiza",type:"مأكولات بحرية",cat:"seafood",icon:"🐟",
+        lat:36.8810,lng:6.9100,rating:9.0,cleanliness:9.1,price:8.2,quality:9.3,serviceSpeed:8.6,
+        status:"open",phone:"+213 661 20 10 22",hours:"10:00 - 00:00",
+        desc:"أفضل أطباق السمك والمأكولات البحرية الطازجة.",
+        comments:["سمك ممتاز", "أسعار جيدة مقابل الجودة"]
+      },
+      {
+        id:3,name:"مطعم نيو داي",type:"بيتزا ووجبات سريعة",cat:"pizza",icon:"🍕",
+        lat:36.8752,lng:6.9045,rating:8.5,cleanliness:8.3,price:9.1,quality:8.6,serviceSpeed:8.7,
+        status:"open",phone:"+213 770 44 55 66",hours:"11:00 - 01:00",
+        desc:"بيتزا سريعة ولذيذة مع خيارات متعددة.",
+        comments:["بيتزا شهية", "خدمة سريعة"]
+      },
+      {
+        id:4,name:"مطعم الريف",type:"مشاوي عائلية",cat:"grill",icon:"🥩",
+        lat:36.8730,lng:6.9110,rating:8.7,cleanliness:8.6,price:8.4,quality:9.0,serviceSpeed:8.3,
+        status:"open",phone:"+213 551 00 22 11",hours:"12:00 - 23:00",
+        desc:"مطعم عائلي يقدم أطباق مشاوي متنوعة.",
+        comments:["جلسة عائلية رائعة", "لحم طري وممتاز"]
+      },
+      {
+        id:5,name:"كافيه لا فيستا",type:"كافيه وحلويات",cat:"cafe",icon:"☕",
+        lat:36.8802,lng:6.9038,rating:8.3,cleanliness:8.9,price:8.5,quality:8.2,serviceSpeed:8.0,
+        status:"open",phone:"+213 699 10 10 10",hours:"08:00 - 22:30",
+        desc:"كافيه هادئ مع مشروبات وحلويات طازجة.",
+        comments:["قهوة ممتازة", "أجواء رايقة"]
+      },
+      {
+        id:6,name:"مطعم البهجة",type:"وجبات سريعة",cat:"fast",icon:"🍔",
+        lat:36.8820,lng:6.9070,rating:8.2,cleanliness:8.1,price:9.2,quality:8.3,serviceSpeed:8.4,
+        status:"open",phone:"+213 560 90 80 70",hours:"10:30 - 00:30",
+        desc:"وجبات سريعة بأسعار مناسبة للجميع.",
+        comments:["سعر مناسب", "برغر جيد"]
+      },
+      {
+        id:7,name:"مطعم الساحل",type:"أطباق محلية",cat:"grill",icon:"🍖",
+        lat:36.8695,lng:6.9060,rating:8.4,cleanliness:8.5,price:8.8,quality:8.6,serviceSpeed:8.1,
+        status:"closed",phone:"+213 555 77 88 99",hours:"12:00 - 22:00",
+        desc:"مطعم يقدم أطباق محلية بطابع تقليدي.",
+        comments:["أكل محلي ممتاز", "يحتاج وقت انتظار قليل"]
+      },
+      {
+        id:8,name:"بيتزا روما",type:"بيتزا إيطالية",cat:"pizza",icon:"🍕",
+        lat:36.8718,lng:6.9022,rating:8.6,cleanliness:8.4,price:8.8,quality:8.9,serviceSpeed:8.3,
+        status:"open",phone:"+213 662 33 44 77",hours:"11:00 - 23:45",
+        desc:"بيتزا إيطالية أصلية مع مكونات طازجة.",
+        comments:["طعم ممتاز", "عجينة خفيفة ولذيذة"]
+      },
+      {
+        id:9,name:"دار الكسكس",type:"تقليدي",cat:"grill",icon:"🍲",
+        lat:36.8689,lng:6.9108,rating:8.9,cleanliness:9.0,price:8.5,quality:9.2,serviceSpeed:8.2,
+        status:"open",phone:"+213 557 44 33 22",hours:"12:30 - 22:30",
+        desc:"متخصص في الكسكس والأطباق التقليدية الجزائرية.",
+        comments:["كسكس رائع", "نكهة تقليدية أصيلة"]
+      }
     ];
 
-    /* =========================
-       STATE
-    ========================= */
     const state = {
       search: localStorage.getItem("map.search") || "",
       cat: localStorage.getItem("map.cat") || "all",
@@ -337,9 +385,6 @@
       gpsWatchId: null
     };
 
-    /* =========================
-       MAP INIT
-    ========================= */
     const map = L.map("map", {
       center:[36.8765,6.9065],
       zoom: window.matchMedia("(max-width:600px)").matches ? 13.5 : 14,
@@ -347,12 +392,8 @@
       attributionControl:false
     });
 
-    // لون الخريطة الحالي الجيد (OSM)
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:19 }).addTo(map);
 
-    /* =========================
-       UI REFS
-    ========================= */
     const searchInput = document.getElementById("searchInput");
     const counterEl = document.getElementById("counter");
     const toastEl = document.getElementById("toast");
@@ -422,6 +463,8 @@
 
           <div class="mini-row"><span>التقييم العام</span><strong>⭐ ${r.rating}</strong></div>
           <div class="mini-row"><span>الحالة</span><span class="status ${r.status==='open'?'open':'closed'}">${r.status==='open'?'مفتوح':'مغلق'}</span></div>
+          <div class="mini-row"><span>رقم الهاتف</span><strong>${r.phone || "غير متوفر"}</strong></div>
+          <div class="mini-row"><span>أوقات العمل</span><strong>${r.hours || "غير متوفرة"}</strong></div>
 
           <div class="rate">
             <div class="ri"><span class="lbl">النظافة</span><span class="bw"><span class="b" style="width:${bw(r.cleanliness)}%"></span></span><span class="n">${r.cleanliness}</span></div>
@@ -468,6 +511,11 @@
           </div>
         </div>
 
+        <div class="sec"><h4>معلومات التواصل</h4>
+          <div class="desc">📞 ${r.phone || "غير متوفر"}</div>
+          <div class="desc">🕒 ${r.hours || "غير متوفرة"}</div>
+        </div>
+
         <div class="sec"><h4>نبذة</h4><div class="desc">${r.desc || "لا توجد نبذة حالياً."}</div></div>
 
         <div class="sec"><h4>التقييمات التفصيلية</h4>
@@ -494,9 +542,6 @@
     overlay.addEventListener("click", closeSheet);
     document.getElementById("sheetClose").addEventListener("click", closeSheet);
 
-    /* =========================
-       FILTER + RENDER
-    ========================= */
     let markersLayer = L.layerGroup().addTo(map);
     let userMarker = null;
     let routeLine = null;
@@ -564,9 +609,6 @@
       render();
     });
 
-    /* =========================
-       GPS
-    ========================= */
     function startGPS(){
       if(!navigator.geolocation){
         toast("المتصفح لا يدعم GPS", "err");
@@ -613,16 +655,13 @@
           enableHighAccuracy:true, maximumAge:10000, timeout:15000
         });
 
-      }, err=>{
+      }, ()=>{
         toast("تعذر تحديد الموقع", "err");
       }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
     }
 
     gpsBtn.addEventListener("click", startGPS);
 
-    /* =========================
-       ROUTING
-    ========================= */
     function clearRoute(){
       if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
       if(routeShadow){ map.removeLayer(routeShadow); routeShadow = null; }
@@ -673,9 +712,6 @@
         .catch(()=>toast("خطأ أثناء حساب الطريق", "err"));
     };
 
-    /* =========================
-       DETAILS
-    ========================= */
     window.openDetails = function(id){
       const r = restaurants.find(x=>x.id===id);
       if(!r) return;
@@ -683,9 +719,6 @@
       openSheetFor(r);
     };
 
-    /* =========================
-       BACK
-    ========================= */
     document.getElementById("backBtn").addEventListener("click", ()=>{
       if(window.parent && window.parent !== window){
         try{
@@ -696,9 +729,6 @@
       history.back();
     });
 
-    /* =========================
-       INIT
-    ========================= */
     render();
     if(state.sortNearest) sortBtn.style.color = "#2563eb";
   </script>
