@@ -8,6 +8,12 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root {
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+      --fast: .25s;
+      --medium: .35s;
+    }
+
     body {
       font-family: 'Cairo', sans-serif;
       background: #fff;
@@ -24,16 +30,20 @@
       background: #fff;
       border-bottom: 1px solid #eee;
       box-shadow: 0 2px 12px rgba(0,0,0,.04);
-      gap: 12px;
     }
 
     .nav-center {
       display: flex; align-items: center; gap: 6px;
       background: #f5f5f5; border: 1px solid #e5e5e5;
       border-radius: 40px; padding: 6px 8px;
-      cursor: pointer; transition: box-shadow .2s;
+      cursor: pointer;
+      transition: box-shadow var(--fast) var(--ease-smooth), transform var(--fast) var(--ease-smooth);
+      will-change: transform;
     }
-    .nav-center:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+    .nav-center:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+      transform: translateY(-1px);
+    }
     .nav-center .search-icon {
       width: 36px; height: 36px; border-radius: 50%;
       background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -51,7 +61,7 @@
       position: fixed; inset: 0; z-index: 200;
       background: #fff;
       display: none; flex-direction: column;
-      animation: fadeIn .3s ease;
+      animation: fadeIn .3s var(--ease-smooth);
     }
     .map-overlay.active { display: flex; }
     .map-header {
@@ -65,7 +75,7 @@
       width: 40px; height: 40px; border-radius: 50%;
       background: #f5f5f5; border: 1px solid #e5e5e5;
       font-size: 18px; cursor: pointer; display: grid; place-items: center;
-      transition: background .2s;
+      transition: background var(--fast) var(--ease-smooth);
     }
     .map-close-btn:hover { background: #eee; }
     .map-overlay iframe { flex: 1; width: 100%; border: none; }
@@ -90,7 +100,7 @@
     }
     .cat-item {
       display: flex; flex-direction: column; align-items: center; gap: 6px;
-      cursor: pointer; opacity: .6; transition: opacity .2s;
+      cursor: pointer; opacity: .6; transition: opacity .2s var(--ease-smooth);
       border-bottom: 2px solid transparent; padding-bottom: 8px;
       min-width: 56px;
     }
@@ -130,14 +140,26 @@
       overflow: hidden;
       background: #fff;
       cursor: pointer;
-      transition: transform .2s, box-shadow .2s;
+      transition:
+        transform var(--fast) var(--ease-smooth),
+        box-shadow var(--fast) var(--ease-smooth),
+        filter var(--fast) var(--ease-smooth);
+      will-change: transform;
     }
-    .place-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,.1); }
+    .place-card:hover {
+      transform: translateY(-4px) scale(1.015);
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+      filter: saturate(1.02);
+    }
+
     .place-card .card-img {
       width: 100%; height: 200px;
       object-fit: cover;
       border-radius: 16px;
+      transition: transform var(--medium) var(--ease-smooth);
     }
+    .place-card:hover .card-img { transform: scale(1.02); }
+
     .place-card .card-img-wrapper {
       position: relative; overflow: hidden; border-radius: 16px;
     }
@@ -147,7 +169,7 @@
       background: rgba(255,255,255,.85);
       display: grid; place-items: center;
       font-size: 16px; cursor: pointer;
-      transition: transform .2s;
+      transition: transform .2s var(--ease-smooth);
       border: none;
       z-index: 2;
     }
@@ -173,6 +195,102 @@
     .card-price { font-size: 14px; color: #333; margin-top: 4px; }
     .card-price b { font-weight: 800; }
 
+    /* ══════ Details Popup ══════ */
+    .details-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .details-modal.active { display: flex; }
+
+    .details-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, .45);
+      opacity: 0;
+      transition: opacity var(--medium) ease-in-out;
+      backdrop-filter: blur(1.5px);
+    }
+
+    .details-dialog {
+      position: relative;
+      width: min(100%, 420px);
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+      opacity: 0;
+      transform: translateY(12px) scale(.96);
+      transition:
+        opacity var(--medium) ease-in-out,
+        transform var(--medium) ease-in-out;
+    }
+
+    .details-modal.active .details-backdrop { opacity: 1; }
+    .details-modal.active .details-dialog {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .details-close {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 34px;
+      height: 34px;
+      border: 1px solid #e5e7eb;
+      border-radius: 50%;
+      background: #f8fafc;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background var(--fast) var(--ease-smooth);
+    }
+    .details-close:hover { background: #eef2f7; }
+
+    .details-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 10px;
+      padding-left: 42px;
+    }
+    .details-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+      color: #334155;
+      font-size: 14px;
+    }
+    .details-list b {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    .details-map-btn {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      cursor: pointer;
+      transition:
+        transform var(--fast) var(--ease-smooth),
+        filter var(--fast) var(--ease-smooth);
+    }
+    .details-map-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+    .details-map-btn:active { transform: scale(.98); }
+
     /* ══════ Footer ══════ */
     footer {
       text-align: center; padding: 32px 24px;
@@ -192,6 +310,9 @@
       .scroll-row { padding: 0 16px 8px; gap: 12px; }
       .categories-bar { padding: 12px 16px 0; }
       .cat-list { gap: 20px; }
+
+      .details-dialog { padding: 16px; border-radius: 16px; }
+      .details-title { font-size: 18px; }
     }
   </style>
 </head>
@@ -199,6 +320,8 @@
 
   <!-- ══════ Navbar ══════ -->
   <nav>
+    <!-- تم حذف اسم J3AN -->
+    <!-- تم حذف زر الخريطة -->
     <div class="nav-center" onclick="document.getElementById('mapOverlay').classList.add('active')">
       <div class="search-icon">🔍</div>
       <div>
@@ -215,6 +338,21 @@
       <button class="map-close-btn" onclick="document.getElementById('mapOverlay').classList.remove('active')">✕</button>
     </div>
     <iframe src="/map" loading="lazy" title="خريطة الأماكن"></iframe>
+  </div>
+
+  <!-- ══════ Details Popup ══════ -->
+  <div class="details-modal" id="detailsModal" aria-hidden="true">
+    <div class="details-backdrop" id="detailsBackdrop"></div>
+    <div class="details-dialog" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
+      <button class="details-close" id="detailsCloseBtn" aria-label="إغلاق">✕</button>
+      <h3 class="details-title" id="detailsTitle">تفاصيل المطعم</h3>
+      <div class="details-list">
+        <div>⭐ <b>التقييم:</b> <span id="detailsRating">-</span></div>
+        <div>🍽️ <b>النوع:</b> <span id="detailsType">-</span></div>
+        <div>💳 <b>السعر:</b> <span id="detailsPrice">-</span></div>
+      </div>
+      <button class="details-map-btn" id="goToMapBtn">الذهاب إلى الخريطة</button>
+    </div>
   </div>
 
   <!-- ══════ Categories ══════ -->
@@ -272,11 +410,237 @@
             <div class="card-price"><b>800 دج</b> / للشخص</div>
           </div>
         </div>
-        <!-- ... باقي البطاقات بدون تغيير -->
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">مطعم الأندلس</span>
+              <span class="card-rating"><span class="star">★</span> 4.6</span>
+            </div>
+            <div class="card-type">مأكولات تقليدية · وسط المدينة</div>
+            <div class="card-price"><b>1200 دج</b> / للشخص</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">مطعم البحر</span>
+              <span class="card-rating"><span class="star">★</span> 4.9</span>
+            </div>
+            <div class="card-type">مأكولات بحرية · الكورنيش</div>
+            <div class="card-price"><b>1500 دج</b> / للشخص</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">لو جاردان</span>
+              <span class="card-rating"><span class="star">★</span> 4.7</span>
+            </div>
+            <div class="card-type">مطعم راقي · حي الزهور</div>
+            <div class="card-price"><b>2000 دج</b> / للشخص</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- يمكنك الإبقاء على باقي الأقسام كما هي -->
+    <!-- ═══ مأكولات سريعة ═══ -->
+    <div class="section-row" data-category="all,fast">
+      <div class="section-header">
+        <h2 class="section-title">🍔 مأكولات سريعة</h2>
+        <span class="section-see-all">عرض الكل</span>
+      </div>
+      <div class="scroll-row">
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">بيرغر كينغ</span>
+              <span class="card-rating"><span class="star">★</span> 4.3</span>
+            </div>
+            <div class="card-type">برغر · ساندويتشات</div>
+            <div class="card-price"><b>500 دج</b> / ساندويتش</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">بيتزا هاوس</span>
+              <span class="card-rating"><span class="star">★</span> 4.5</span>
+            </div>
+            <div class="card-type">بيتزا · فاست فود</div>
+            <div class="card-price"><b>600 دج</b> / بيتزا</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">تاكوس ديليس</span>
+              <span class="card-rating"><span class="star">★</span> 4.4</span>
+            </div>
+            <div class="card-type">تاكوس · راب</div>
+            <div class="card-price"><b>450 دج</b> / تاكوس</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">شاورما الشام</span>
+              <span class="card-rating"><span class="star">★</span> 4.6</span>
+            </div>
+            <div class="card-type">شاورما · فلافل</div>
+            <div class="card-price"><b>400 دج</b> / شاورما</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ مشويات ═══ -->
+    <div class="section-row" data-category="all,grill">
+      <div class="section-header">
+        <h2 class="section-title">🥩 مشويات</h2>
+        <span class="section-see-all">عرض الكل</span>
+      </div>
+      <div class="scroll-row">
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+            <div class="card-badge">🔥 الأكثر طلباً</div>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">مشوي الريم</span>
+              <span class="card-rating"><span class="star">★</span> 4.9</span>
+            </div>
+            <div class="card-type">مشويات · كباب</div>
+            <div class="card-price"><b>1000 دج</b> / طبق</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">دار الشواء</span>
+              <span class="card-rating"><span class="star">★</span> 4.7</span>
+            </div>
+            <div class="card-type">مشويات تركية · كفتة</div>
+            <div class="card-price"><b>1200 دج</b> / طبق</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1558030006-450675393462?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">الفحم الذهبي</span>
+              <span class="card-rating"><span class="star">★</span> 4.5</span>
+            </div>
+            <div class="card-type">دجاج مشوي · أضلاع</div>
+            <div class="card-price"><b>900 دج</b> / طبق</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ كافيهات ═══ -->
+    <div class="section-row" data-category="all,cafe">
+      <div class="section-header">
+        <h2 class="section-title">☕ كافيهات</h2>
+        <span class="section-see-all">عرض الكل</span>
+      </div>
+      <div class="scroll-row">
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+            <div class="card-badge">✨ جديد</div>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">كافيه لاتيه</span>
+              <span class="card-rating"><span class="star">★</span> 4.8</span>
+            </div>
+            <div class="card-type">قهوة مختصة · حلويات</div>
+            <div class="card-price"><b>300 دج</b> / قهوة</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">أروما كافيه</span>
+              <span class="card-rating"><span class="star">★</span> 4.6</span>
+            </div>
+            <div class="card-type">كابتشينو · عصائر</div>
+            <div class="card-price"><b>350 دج</b> / مشروب</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">ذا لاونج</span>
+              <span class="card-rating"><span class="star">★</span> 4.9</span>
+            </div>
+            <div class="card-type">شيشة · مشروبات ساخنة</div>
+            <div class="card-price"><b>500 دج</b> / جلسة</div>
+          </div>
+        </div>
+        <div class="place-card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&h=400&fit=crop" alt="">
+            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-name">بريزا كوفي</span>
+              <span class="card-rating"><span class="star">★</span> 4.4</span>
+            </div>
+            <div class="card-type">إسبريسو · كرواسون</div>
+            <div class="card-price"><b>250 دج</b> / قهوة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ══════ Footer ══════ -->
@@ -300,28 +664,75 @@
       });
     }
 
-    // تفاعل بسيط عند الضغط على البطاقة
-    document.querySelectorAll('.place-card').forEach(card => {
-      card.addEventListener('click', function () {
-        const name = this.querySelector('.card-name')?.textContent?.trim() || 'مكان';
-        const rating = this.querySelector('.card-rating')?.textContent?.replace('★', '').trim() || '-';
-        alert(`تم اختيار: ${name}\nالتقييم: ${rating}`);
-      });
-    });
-
-    // تفاعل بسيط لعرض الكل
-    document.querySelectorAll('.section-see-all').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const sectionTitle = this.closest('.section-header')?.querySelector('.section-title')?.textContent?.trim() || 'القسم';
-        alert(`عرض كل الأماكن في قسم: ${sectionTitle}`);
-      });
-    });
-
+    // إغلاق الخريطة بزر ESC
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         document.getElementById('mapOverlay').classList.remove('active');
+        closeDetailsModal();
       }
     });
+
+    // Popup logic (Modular)
+    const detailsModal = document.getElementById('detailsModal');
+    const detailsBackdrop = document.getElementById('detailsBackdrop');
+    const detailsCloseBtn = document.getElementById('detailsCloseBtn');
+    const detailsTitle = document.getElementById('detailsTitle');
+    const detailsRating = document.getElementById('detailsRating');
+    const detailsType = document.getElementById('detailsType');
+    const detailsPrice = document.getElementById('detailsPrice');
+    const goToMapBtn = document.getElementById('goToMapBtn');
+
+    function openDetailsModal(data) {
+      detailsTitle.textContent = data.name || 'مطعم';
+      detailsRating.textContent = data.rating || '-';
+      detailsType.textContent = data.type || '-';
+      detailsPrice.textContent = data.price || '-';
+
+      detailsModal.classList.add('active');
+      detailsModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailsModal() {
+      detailsModal.classList.remove('active');
+      detailsModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    detailsBackdrop.addEventListener('click', closeDetailsModal);
+    detailsCloseBtn.addEventListener('click', closeDetailsModal);
+
+    goToMapBtn.addEventListener('click', () => {
+      closeDetailsModal();
+
+      // إذا في صفحة /map نحول إليها
+      // لو تريد فتح الـ overlay بدل التحويل، بدل السطرين أسفل بهذا:
+      // document.getElementById('mapOverlay').classList.add('active');
+      window.location.href = '/map';
+    });
+
+    // تفعيل الـ popup فقط لقسم "اقتراحات لك" بدون التأثير على بقية الأقسام
+    const recommendationSection = document.querySelector('.section-row[data-category="all,restaurant"]');
+    if (recommendationSection) {
+      recommendationSection.querySelectorAll('.place-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+          // لو ضغط على زر المفضلة، لا تفتح popup
+          if (e.target.closest('.card-fav')) return;
+
+          const name = this.querySelector('.card-name')?.textContent?.trim() || '-';
+          const ratingRaw = this.querySelector('.card-rating')?.textContent?.replace('★', '').trim() || '-';
+          const type = this.querySelector('.card-type')?.textContent?.trim() || '-';
+          const price = this.querySelector('.card-price')?.textContent?.trim() || '-';
+
+          openDetailsModal({
+            name,
+            rating: ratingRaw,
+            type,
+            price
+          });
+        });
+      });
+    }
   </script>
 
 </body>
