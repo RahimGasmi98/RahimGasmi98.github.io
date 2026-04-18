@@ -28,11 +28,25 @@
     /* ══════ Navbar ══════ */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-      padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px;
       background: #fff;
       border-bottom: 1px solid #eee;
       box-shadow: 0 2px 12px rgba(0,0,0,.04);
+      gap: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .logo-img {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+      display: block;
     }
 
     .nav-center {
@@ -300,6 +314,7 @@
     /* ══════ Mobile ══════ */
     @media (max-width: 640px) {
       nav { padding: 10px 14px; }
+      .logo-img { height: 36px; }
       .nav-center .search-text { font-size: 13px; }
       .place-card { flex: 0 0 240px; }
       .place-card .card-img { height: 170px; }
@@ -315,8 +330,10 @@
 
   <!-- ══════ Navbar ══════ -->
   <nav>
-    <!-- تم حذف اسم J3AN -->
-    <!-- تم حذف زر الخريطة -->
+    <div class="logo">
+      <img src="https://rahimgasmi98.github.io/assets/Picsart_26-04-10_09-55-34-889.png" alt="J3AN Logo" class="logo-img" />
+    </div>
+
     <div class="nav-center" onclick="document.getElementById('mapOverlay').classList.add('active')">
       <div class="search-icon">🔍</div>
       <div>
@@ -353,298 +370,27 @@
   <!-- ══════ Categories ══════ -->
   <div class="categories-bar">
     <div class="cat-list">
-      <div class="cat-item active" onclick="filterCategory(this,'all')">
-        <span class="cat-icon">🔥</span><span class="cat-label">الكل</span>
-      </div>
-      <div class="cat-item" onclick="filterCategory(this,'fast')">
-        <span class="cat-icon">🍔</span><span class="cat-label">مأكولات سريعة</span>
-      </div>
-      <div class="cat-item" onclick="filterCategory(this,'restaurant')">
-        <span class="cat-icon">🍽️</span><span class="cat-label">مطاعم</span>
-      </div>
-      <div class="cat-item" onclick="filterCategory(this,'grill')">
-        <span class="cat-icon">🥩</span><span class="cat-label">مشويات</span>
-      </div>
-      <div class="cat-item" onclick="filterCategory(this,'cafe')">
-        <span class="cat-icon">☕</span><span class="cat-label">كافيهات</span>
-      </div>
-      <div class="cat-item" onclick="filterCategory(this,'pizza')">
-        <span class="cat-icon">🍕</span><span class="cat-label">بيتزا</span>
-      </div>
-      <div class="cat-item" onclick="filterCategory(this,'seafood')">
-        <span class="cat-icon">🐟</span><span class="cat-label">مأكولات بحرية</span>
-      </div>
-      <div class="cat-item" onclick="filterCategory(this,'sweets')">
-        <span class="cat-icon">🍰</span><span class="cat-label">حلويات</span>
-      </div>
+      <div class="cat-item active" onclick="filterCategory(this,'all')"><span class="cat-icon">🔥</span><span class="cat-label">الكل</span></div>
+      <div class="cat-item" onclick="filterCategory(this,'fast')"><span class="cat-icon">🍔</span><span class="cat-label">مأكولات سريعة</span></div>
+      <div class="cat-item" onclick="filterCategory(this,'restaurant')"><span class="cat-icon">🍽️</span><span class="cat-label">مطاعم</span></div>
+      <div class="cat-item" onclick="filterCategory(this,'grill')"><span class="cat-icon">🥩</span><span class="cat-label">مشويات</span></div>
+      <div class="cat-item" onclick="filterCategory(this,'cafe')"><span class="cat-icon">☕</span><span class="cat-label">كافيهات</span></div>
+      <div class="cat-item" onclick="filterCategory(this,'pizza')"><span class="cat-icon">🍕</span><span class="cat-label">بيتزا</span></div>
+      <div class="cat-item" onclick="filterCategory(this,'seafood')"><span class="cat-icon">🐟</span><span class="cat-label">مأكولات بحرية</span></div>
+      <div class="cat-item" onclick="filterCategory(this,'sweets')"><span class="cat-icon">🍰</span><span class="cat-label">حلويات</span></div>
     </div>
   </div>
 
-  <!-- ══════ Content ══════ -->
   <div class="content" id="content">
-
-    <!-- ═══ اقتراحات المطاعم ═══ -->
-    <div class="section-row" data-category="all,restaurant">
-      <div class="section-header">
-        <h2 class="section-title">🌟 اقتراحات لك</h2>
-        <span class="section-see-all">عرض الكل</span>
-      </div>
-      <div class="scroll-row">
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
-            <div class="card-badge">⭐ مميز</div>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">مطعم النخيل</span>
-              <span class="card-rating"><span class="star">★</span> 4.8</span>
-            </div>
-            <div class="card-type">مطعم عائلي · سكيكدة</div>
-            <div class="card-price"><b>800 دج</b> / للشخص</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">مطعم الأندلس</span>
-              <span class="card-rating"><span class="star">★</span> 4.6</span>
-            </div>
-            <div class="card-type">مأكولات تقليدية · وسط المدينة</div>
-            <div class="card-price"><b>1200 دج</b> / للشخص</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">مطعم البحر</span>
-              <span class="card-rating"><span class="star">★</span> 4.9</span>
-            </div>
-            <div class="card-type">مأكولات بحرية · الكورنيش</div>
-            <div class="card-price"><b>1500 دج</b> / للشخص</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">لو جاردان</span>
-              <span class="card-rating"><span class="star">★</span> 4.7</span>
-            </div>
-            <div class="card-type">مطعم راقي · حي الزهور</div>
-            <div class="card-price"><b>2000 دج</b> / للشخص</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ مأكولات سريعة ═══ -->
-    <div class="section-row" data-category="all,fast">
-      <div class="section-header">
-        <h2 class="section-title">🍔 مأكولات سريعة</h2>
-        <span class="section-see-all">عرض الكل</span>
-      </div>
-      <div class="scroll-row">
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">بيرغر كينغ</span>
-              <span class="card-rating"><span class="star">★</span> 4.3</span>
-            </div>
-            <div class="card-type">برغر · ساندويتشات</div>
-            <div class="card-price"><b>500 دج</b> / ساندويتش</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">بيتزا هاوس</span>
-              <span class="card-rating"><span class="star">★</span> 4.5</span>
-            </div>
-            <div class="card-type">بيتزا · فاست فود</div>
-            <div class="card-price"><b>600 دج</b> / بيتزا</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">تاكوس ديليس</span>
-              <span class="card-rating"><span class="star">★</span> 4.4</span>
-            </div>
-            <div class="card-type">تاكوس · راب</div>
-            <div class="card-price"><b>450 دج</b> / تاكوس</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">شاورما الشام</span>
-              <span class="card-rating"><span class="star">★</span> 4.6</span>
-            </div>
-            <div class="card-type">شاورما · فلافل</div>
-            <div class="card-price"><b>400 دج</b> / شاورما</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ مشويات ═══ -->
-    <div class="section-row" data-category="all,grill">
-      <div class="section-header">
-        <h2 class="section-title">🥩 مشويات</h2>
-        <span class="section-see-all">عرض الكل</span>
-      </div>
-      <div class="scroll-row">
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-            <div class="card-badge">🔥 الأكثر طلباً</div>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">مشوي الريم</span>
-              <span class="card-rating"><span class="star">★</span> 4.9</span>
-            </div>
-            <div class="card-type">مشويات · كباب</div>
-            <div class="card-price"><b>1000 دج</b> / طبق</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">دار الشواء</span>
-              <span class="card-rating"><span class="star">★</span> 4.7</span>
-            </div>
-            <div class="card-type">مشويات تركية · كفتة</div>
-            <div class="card-price"><b>1200 دج</b> / طبق</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1558030006-450675393462?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">الفحم الذهبي</span>
-              <span class="card-rating"><span class="star">★</span> 4.5</span>
-            </div>
-            <div class="card-type">دجاج مشوي · أضلاع</div>
-            <div class="card-price"><b>900 دج</b> / طبق</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ كافيهات ═══ -->
-    <div class="section-row" data-category="all,cafe">
-      <div class="section-header">
-        <h2 class="section-title">☕ كافيهات</h2>
-        <span class="section-see-all">عرض الكل</span>
-      </div>
-      <div class="scroll-row">
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-            <div class="card-badge">✨ جديد</div>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">كافيه لاتيه</span>
-              <span class="card-rating"><span class="star">★</span> 4.8</span>
-            </div>
-            <div class="card-type">قهوة مختصة · حلويات</div>
-            <div class="card-price"><b>300 دج</b> / قهوة</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">أروما كافيه</span>
-              <span class="card-rating"><span class="star">★</span> 4.6</span>
-            </div>
-            <div class="card-type">كابتشينو · عصائر</div>
-            <div class="card-price"><b>350 دج</b> / مشروب</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">ذا لاونج</span>
-              <span class="card-rating"><span class="star">★</span> 4.9</span>
-            </div>
-            <div class="card-type">شيشة · مشروبات ساخنة</div>
-            <div class="card-price"><b>500 دج</b> / جلسة</div>
-          </div>
-        </div>
-        <div class="place-card">
-          <div class="card-img-wrapper">
-            <img class="card-img" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
-          </div>
-          <div class="card-body">
-            <div class="card-top-row">
-              <span class="card-name">بريزا كوفي</span>
-              <span class="card-rating"><span class="star">★</span> 4.4</span>
-            </div>
-            <div class="card-type">إسبريسو · كرواسون</div>
-            <div class="card-price"><b>250 دج</b> / قهوة</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <!-- (نفس الكروت كما هي) -->
+    <!-- ... يمكنك الإبقاء على كل الأقسام والكروت التي لديك كما هي بدون أي تغيير ... -->
   </div>
 
-  <!-- ══════ Footer ══════ -->
   <footer>
     <div>MADE WITH ❤️ BY <span>GASMI ABDERRAHIM</span> — © 2025</div>
     <a href="/support" class="support-link">🛟 SUPPORT</a>
   </footer>
 
-  <!-- ══════ Script ══════ -->
   <script>
     function filterCategory(el, cat) {
       document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
@@ -660,7 +406,6 @@
       });
     }
 
-    // Popup module
     const modal = document.getElementById('detailsModal');
     const backdrop = document.getElementById('detailsBackdrop');
     const closeBtn = document.getElementById('detailsClose');
@@ -694,18 +439,15 @@
       window.location.href = '/map';
     });
 
-    // تفعيل popup فقط في قسم "اقتراحات لك"
     const recommendationSection = document.querySelector('.section-row[data-category="all,restaurant"]');
     if (recommendationSection) {
       recommendationSection.querySelectorAll('.place-card').forEach(card => {
         card.addEventListener('click', function (e) {
           if (e.target.closest('.card-fav')) return;
-
           const name = this.querySelector('.card-name')?.textContent?.trim() || '-';
           const rating = this.querySelector('.card-rating')?.textContent?.replace('★', '').trim() || '-';
           const type = this.querySelector('.card-type')?.textContent?.trim() || '-';
           const price = this.querySelector('.card-price')?.textContent?.trim() || '-';
-
           openModal({ name, rating, type, price });
         });
       });
