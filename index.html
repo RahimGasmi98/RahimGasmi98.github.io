@@ -8,6 +8,15 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root{
+      --ease: ease-in-out;
+      --fast: .2s;
+      --mid: .3s;
+      --slow: .4s;
+      --green:#16a34a;
+      --green2:#22c55e;
+    }
+
     body {
       font-family: 'Cairo', sans-serif;
       background: #fff;
@@ -19,28 +28,24 @@
     /* ══════ Navbar ══════ */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: center;
       padding: 14px 28px;
       background: #fff;
       border-bottom: 1px solid #eee;
       box-shadow: 0 2px 12px rgba(0,0,0,.04);
     }
 
-    /* إصلاح خطأ CSS السابق */
-    .logo {
-      font-size: 26px;
-      font-weight: 900;
-      color: #16a34a;
-      letter-spacing: .5px;
-    }
-
     .nav-center {
       display: flex; align-items: center; gap: 6px;
       background: #f5f5f5; border: 1px solid #e5e5e5;
       border-radius: 40px; padding: 6px 8px;
-      cursor: pointer; transition: box-shadow .2s;
+      cursor: pointer;
+      transition: box-shadow var(--fast) var(--ease), transform var(--fast) var(--ease);
     }
-    .nav-center:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+    .nav-center:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+      transform: translateY(-1px);
+    }
     .nav-center .search-icon {
       width: 36px; height: 36px; border-radius: 50%;
       background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -52,18 +57,6 @@
     .nav-center .search-sub {
       font-size: 12px; color: #999; font-weight: 400;
     }
-    .nav-right { display: flex; align-items: center; gap: 12px; }
-    .nav-explore-btn {
-      padding: 10px 24px;
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #fff; border: none; border-radius: 12px;
-      font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700;
-      cursor: pointer; text-decoration: none;
-      transition: filter .2s, transform .15s;
-      display: inline-flex; align-items: center; gap: 8px;
-    }
-    .nav-explore-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .nav-explore-btn:active { transform: scale(.97); }
 
     /* ══════ Map Overlay ══════ */
     .map-overlay {
@@ -149,14 +142,21 @@
       overflow: hidden;
       background: #fff;
       cursor: pointer;
-      transition: transform .2s, box-shadow .2s;
+      transition: transform var(--mid) var(--ease), box-shadow var(--mid) var(--ease);
+      will-change: transform;
     }
-    .place-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,.1); }
+    .place-card:hover {
+      transform: translateY(-4px) scale(1.015);
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    }
     .place-card .card-img {
       width: 100%; height: 200px;
       object-fit: cover;
       border-radius: 16px;
+      transition: transform var(--mid) var(--ease);
     }
+    .place-card:hover .card-img { transform: scale(1.02); }
+
     .place-card .card-img-wrapper {
       position: relative; overflow: hidden; border-radius: 16px;
     }
@@ -168,6 +168,7 @@
       font-size: 16px; cursor: pointer;
       transition: transform .2s;
       border: none;
+      z-index: 2;
     }
     .card-fav:hover { transform: scale(1.15); }
     .card-fav.liked { color: #ef4444; }
@@ -191,6 +192,87 @@
     .card-price { font-size: 14px; color: #333; margin-top: 4px; }
     .card-price b { font-weight: 800; }
 
+    /* ══════ Popup ══════ */
+    .details-modal{
+      position:fixed;
+      inset:0;
+      z-index:300;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+    .details-modal.active{ display:flex; }
+
+    .details-backdrop{
+      position:absolute; inset:0;
+      background:rgba(15,23,42,.45);
+      opacity:0;
+      transition:opacity var(--mid) var(--ease);
+    }
+
+    .details-dialog{
+      position:relative;
+      width:min(100%, 420px);
+      background:#fff;
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 20px 50px rgba(0,0,0,.2);
+      opacity:0;
+      transform:translateY(10px) scale(.96);
+      transition:opacity var(--mid) var(--ease), transform var(--mid) var(--ease);
+    }
+
+    .details-modal.active .details-backdrop{ opacity:1; }
+    .details-modal.active .details-dialog{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+
+    .details-close{
+      position:absolute;
+      left:10px; top:10px;
+      width:34px; height:34px;
+      border-radius:50%;
+      border:1px solid #e2e8f0;
+      background:#f8fafc;
+      cursor:pointer;
+      font-size:16px;
+    }
+    .details-title{
+      font-size:20px;
+      font-weight:800;
+      color:#111827;
+      margin-bottom:10px;
+      padding-left:40px;
+    }
+    .details-list{
+      display:grid;
+      gap:8px;
+      margin-bottom:14px;
+      font-size:14px;
+      color:#334155;
+    }
+    .details-list b{ color:#0f172a; }
+
+    .details-map-btn{
+      width:100%;
+      border:none;
+      border-radius:12px;
+      padding:12px;
+      color:#fff;
+      font-family:'Cairo',sans-serif;
+      font-weight:800;
+      font-size:15px;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--green2),var(--green));
+      transition:transform var(--fast) var(--ease), filter var(--fast) var(--ease);
+    }
+    .details-map-btn:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.05);
+    }
+
     /* ══════ Footer ══════ */
     footer {
       text-align: center; padding: 32px 24px;
@@ -198,30 +280,27 @@
       color: #999; font-size: 13px;
     }
     footer span { color: #16a34a; font-weight: 700; }
-
-    .support-link {
-      display: inline-block;
-      margin-top: 10px;
-      color: #16a34a;
-      font-size: 14px;
-      font-weight: 800;
-      text-decoration: none;
-      border: 1px solid #16a34a;
-      padding: 8px 14px;
-      border-radius: 10px;
-      transition: all .2s ease;
+    .support-link{
+      display:inline-block;
+      margin-top:10px;
+      color:#16a34a;
+      font-size:14px;
+      font-weight:800;
+      text-decoration:none;
+      border:1px solid #16a34a;
+      padding:8px 14px;
+      border-radius:10px;
+      transition:all .2s ease-in-out;
     }
-    .support-link:hover {
-      background: #16a34a;
-      color: #fff;
+    .support-link:hover{
+      background:#16a34a;
+      color:#fff;
     }
 
     /* ══════ Mobile ══════ */
     @media (max-width: 640px) {
       nav { padding: 10px 14px; }
-      .logo { font-size: 22px; }
       .nav-center .search-text { font-size: 13px; }
-      .nav-explore-btn { padding: 8px 16px; font-size: 12px; }
       .place-card { flex: 0 0 240px; }
       .place-card .card-img { height: 170px; }
       .section-row .section-title { font-size: 18px; }
@@ -236,18 +315,14 @@
 
   <!-- ══════ Navbar ══════ -->
   <nav>
-    <div class="logo">J3AN</div>
+    <!-- تم حذف اسم J3AN -->
+    <!-- تم حذف زر الخريطة -->
     <div class="nav-center" onclick="document.getElementById('mapOverlay').classList.add('active')">
       <div class="search-icon">🔍</div>
       <div>
         <div class="search-text">استكشف الأماكن</div>
         <div class="search-sub">مطاعم · كافيهات · مشويات</div>
       </div>
-    </div>
-    <div class="nav-right">
-      <button class="nav-explore-btn" onclick="document.getElementById('mapOverlay').classList.add('active')">
-        🗺️ الخريطة
-      </button>
     </div>
   </nav>
 
@@ -258,6 +333,21 @@
       <button class="map-close-btn" onclick="document.getElementById('mapOverlay').classList.remove('active')">✕</button>
     </div>
     <iframe src="/map" loading="lazy" title="خريطة الأماكن"></iframe>
+  </div>
+
+  <!-- ══════ Popup Details ══════ -->
+  <div class="details-modal" id="detailsModal" aria-hidden="true">
+    <div class="details-backdrop" id="detailsBackdrop"></div>
+    <div class="details-dialog" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
+      <button class="details-close" id="detailsClose" aria-label="إغلاق">✕</button>
+      <h3 class="details-title" id="detailsTitle">تفاصيل المطعم</h3>
+      <div class="details-list">
+        <div>⭐ <b>التقييم:</b> <span id="detailsRating">-</span></div>
+        <div>🍽️ <b>النوع:</b> <span id="detailsType">-</span></div>
+        <div>💳 <b>السعر:</b> <span id="detailsPrice">-</span></div>
+      </div>
+      <button class="details-map-btn" id="goToMapBtn">الذهاب إلى الخريطة</button>
+    </div>
   </div>
 
   <!-- ══════ Categories ══════ -->
@@ -303,7 +393,7 @@
         <div class="place-card">
           <div class="card-img-wrapper">
             <img class="card-img" src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
             <div class="card-badge">⭐ مميز</div>
           </div>
           <div class="card-body">
@@ -318,7 +408,7 @@
         <div class="place-card">
           <div class="card-img-wrapper">
             <img class="card-img" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
           </div>
           <div class="card-body">
             <div class="card-top-row">
@@ -332,7 +422,7 @@
         <div class="place-card">
           <div class="card-img-wrapper">
             <img class="card-img" src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
           </div>
           <div class="card-body">
             <div class="card-top-row">
@@ -346,7 +436,7 @@
         <div class="place-card">
           <div class="card-img-wrapper">
             <img class="card-img" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop" alt="">
-            <button class="card-fav" onclick="this.classList.toggle('liked')">♡</button>
+            <button class="card-fav" onclick="event.stopPropagation(); this.classList.toggle('liked')">♡</button>
           </div>
           <div class="card-body">
             <div class="card-top-row">
@@ -551,7 +641,7 @@
   <!-- ══════ Footer ══════ -->
   <footer>
     <div>MADE WITH ❤️ BY <span>GASMI ABDERRAHIM</span> — © 2025</div>
-    <a href="/support" class="support-link">🛟 Support</a>
+    <a href="/support" class="support-link">🛟 SUPPORT</a>
   </footer>
 
   <!-- ══════ Script ══════ -->
@@ -569,12 +659,64 @@
         }
       });
     }
+
+    // Popup module
+    const modal = document.getElementById('detailsModal');
+    const backdrop = document.getElementById('detailsBackdrop');
+    const closeBtn = document.getElementById('detailsClose');
+    const titleEl = document.getElementById('detailsTitle');
+    const ratingEl = document.getElementById('detailsRating');
+    const typeEl = document.getElementById('detailsType');
+    const priceEl = document.getElementById('detailsPrice');
+    const goToMapBtn = document.getElementById('goToMapBtn');
+
+    function openModal(data) {
+      titleEl.textContent = data.name || 'مطعم';
+      ratingEl.textContent = data.rating || '-';
+      typeEl.textContent = data.type || '-';
+      priceEl.textContent = data.price || '-';
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    backdrop.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    goToMapBtn.addEventListener('click', () => {
+      closeModal();
+      window.location.href = '/map';
+    });
+
+    // تفعيل popup فقط في قسم "اقتراحات لك"
+    const recommendationSection = document.querySelector('.section-row[data-category="all,restaurant"]');
+    if (recommendationSection) {
+      recommendationSection.querySelectorAll('.place-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+          if (e.target.closest('.card-fav')) return;
+
+          const name = this.querySelector('.card-name')?.textContent?.trim() || '-';
+          const rating = this.querySelector('.card-rating')?.textContent?.replace('★', '').trim() || '-';
+          const type = this.querySelector('.card-type')?.textContent?.trim() || '-';
+          const price = this.querySelector('.card-price')?.textContent?.trim() || '-';
+
+          openModal({ name, rating, type, price });
+        });
+      });
+    }
+
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         document.getElementById('mapOverlay').classList.remove('active');
+        closeModal();
       }
     });
   </script>
-
 </body>
 </html>
