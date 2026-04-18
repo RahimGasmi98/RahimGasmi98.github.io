@@ -3,41 +3,540 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>الدعم | J3AN</title>
+  <title>الدعم الفني | J3AN Tickets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    body{
-      font-family: Arial, sans-serif;
-      background:#f8fafc;
-      margin:0;
-      padding:40px 20px;
-      color:#0f172a;
+    :root{
+      --bg:#f7fafc;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --green:#16a34a;
+      --green2:#22c55e;
+      --danger:#dc2626;
+      --warning:#d97706;
+      --info:#2563eb;
+      --radius:14px;
+      --shadow:0 10px 24px rgba(2,6,23,.08);
     }
-    .box{
-      max-width:700px;
-      margin:auto;
-      background:#fff;
-      border:1px solid #e2e8f0;
-      border-radius:12px;
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Cairo',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
       padding:24px;
     }
-    h1{margin-top:0}
-    .btn{
-      display:inline-block;
-      margin-top:12px;
-      background:#16a34a;
+
+    .container{
+      max-width:1050px;
+      margin:0 auto;
+      display:grid;
+      gap:18px;
+      grid-template-columns: 1.05fr .95fr;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .form-card{padding:18px}
+    .list-card{padding:18px}
+
+    .title{
+      font-size:22px;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+    .sub{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:16px;
+    }
+
+    .grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns:1fr 1fr;
+    }
+
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:12px;color:#334155;font-weight:700}
+    .field input,.field select,.field textarea{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:10px;
+      padding:10px 12px;
+      font-family:'Cairo',sans-serif;
+      font-size:14px;
+      outline:none;
+      transition:.2s;
+    }
+    .field input:focus,.field select:focus,.field textarea:focus{
+      border-color:#86efac;
+      box-shadow:0 0 0 3px rgba(34,197,94,.15);
+    }
+    .field textarea{min-height:110px;resize:vertical}
+
+    .full{grid-column:1/-1}
+
+    .btns{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;
+    }
+    button{
+      border:none;cursor:pointer;border-radius:10px;
+      padding:10px 14px;font-family:'Cairo',sans-serif;font-weight:800;
+    }
+    .btn-primary{
       color:#fff;
-      text-decoration:none;
-      padding:10px 16px;
+      background:linear-gradient(135deg,var(--green2),var(--green));
+    }
+    .btn-ghost{
+      color:#0f172a;background:#f1f5f9;border:1px solid var(--line);
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-bottom:14px;
+    }
+    .stat{
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:10px;
+      text-align:center;
+      background:#fff;
+    }
+    .stat b{display:block;font-size:18px}
+    .stat span{font-size:11px;color:var(--muted)}
+
+    .toolbar{
+      display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;
+    }
+    .toolbar input,.toolbar select{
+      border:1px solid var(--line);
+      border-radius:9px;
+      padding:8px 10px;
+      font-family:'Cairo',sans-serif;
+      font-size:12px;
+      background:#fff;
+    }
+
+    .tickets{
+      display:flex;flex-direction:column;gap:10px;
+      max-height:62vh;
+      overflow:auto;
+      padding-right:2px;
+    }
+    .ticket{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+    }
+    .ticket-head{
+      display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
+      margin-bottom:6px;
+    }
+    .ticket-id{
+      font-size:11px;color:var(--muted);font-weight:700;
+    }
+    .ticket-title{
+      font-size:15px;font-weight:800;color:#111827;line-height:1.3;
+    }
+    .meta{
+      display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px;
+    }
+    .chip{
+      font-size:10px;font-weight:800;
+      border-radius:999px;padding:2px 8px;border:1px solid transparent;
+    }
+    .st-open{background:rgba(37,99,235,.1);color:var(--info);border-color:rgba(37,99,235,.25)}
+    .st-progress{background:rgba(217,119,6,.1);color:var(--warning);border-color:rgba(217,119,6,.25)}
+    .st-closed{background:rgba(220,38,38,.1);color:var(--danger);border-color:rgba(220,38,38,.25)}
+
+    .pr-low{background:rgba(34,197,94,.1);color:#15803d;border-color:rgba(34,197,94,.25)}
+    .pr-medium{background:rgba(245,158,11,.12);color:#b45309;border-color:rgba(245,158,11,.3)}
+    .pr-high{background:rgba(220,38,38,.1);color:#b91c1c;border-color:rgba(220,38,38,.25)}
+
+    .ticket p{
+      font-size:12px;color:#475569;line-height:1.7;
+      margin-bottom:8px;
+      white-space:pre-wrap;
+    }
+
+    .ticket-actions{
+      display:flex;gap:8px;flex-wrap:wrap;
+    }
+    .ticket-actions button{
+      padding:6px 10px;font-size:11px;font-weight:700;
       border-radius:8px;
+    }
+    .act-progress{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
+    .act-close{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+    .act-open{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+    .act-del{background:#f8fafc;color:#334155;border:1px solid #e2e8f0}
+
+    .empty{
+      border:1px dashed #cbd5e1;
+      border-radius:10px;
+      padding:18px;
+      text-align:center;
+      color:#64748b;
+      font-size:13px;
+      background:#fff;
+    }
+
+    .top-link{
+      display:inline-flex;
+      margin-bottom:12px;
+      font-size:13px;
+      text-decoration:none;
+      color:#166534;
+      font-weight:700;
+    }
+
+    .toast{
+      position:fixed;
+      bottom:14px;left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:#111827;color:#fff;
+      padding:9px 14px;
+      border-radius:10px;
+      font-size:12px;
+      opacity:0;pointer-events:none;
+      transition:.25s;
+      z-index:9999;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 980px){
+      .container{grid-template-columns:1fr}
+      .tickets{max-height:none}
+    }
+
+    @media (max-width: 640px){
+      body{padding:12px}
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr 1fr}
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>صفحة الدعم</h1>
-    <p>إذا واجهت أي مشكلة، تواصل معنا عبر البريد:</p>
-    <p><b>support@j3an.com</b></p>
-    <a class="btn" href="/">العودة للرئيسية</a>
+
+  <a class="top-link" href="/">← الرجوع إلى الرئيسية</a>
+
+  <div class="container">
+    <!-- Create Ticket -->
+    <section class="card form-card">
+      <h1 class="title">🎫 نظام الدعم (Tickets)</h1>
+      <p class="sub">أنشئ تذكرة دعم، وتابع حالتها (مفتوح / قيد المعالجة / مغلق)</p>
+
+      <form id="ticketForm">
+        <div class="grid">
+          <div class="field">
+            <label>الاسم</label>
+            <input type="text" id="name" placeholder="اسمك" required />
+          </div>
+
+          <div class="field">
+            <label>رقم الهاتف (اختياري)</label>
+            <input type="text" id="phone" placeholder="+213..." />
+          </div>
+
+          <div class="field">
+            <label>نوع المشكلة</label>
+            <select id="category" required>
+              <option value="طلب عام">طلب عام</option>
+              <option value="مشكلة تقنية">مشكلة تقنية</option>
+              <option value="مشكلة في الخريطة">مشكلة في الخريطة</option>
+              <option value="اقتراح">اقتراح</option>
+              <option value="بلاغ">بلاغ</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>الأولوية</label>
+            <select id="priority" required>
+              <option value="low">منخفضة</option>
+              <option value="medium">متوسطة</option>
+              <option value="high">مرتفعة</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>عنوان التذكرة</label>
+            <input type="text" id="title" placeholder="مثال: لا تظهر المطاعم في الخريطة" required />
+          </div>
+
+          <div class="field full">
+            <label>وصف المشكلة</label>
+            <textarea id="message" placeholder="اكتب التفاصيل هنا..." required></textarea>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button type="submit" class="btn-primary">إرسال التذكرة</button>
+          <button type="button" class="btn-ghost" id="clearAllBtn">حذف كل التذاكر</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Tickets List -->
+    <section class="card list-card">
+      <div class="stats">
+        <div class="stat"><b id="countAll">0</b><span>كل التذاكر</span></div>
+        <div class="stat"><b id="countOpen">0</b><span>مفتوحة</span></div>
+        <div class="stat"><b id="countClosed">0</b><span>مغلقة</span></div>
+      </div>
+
+      <div class="toolbar">
+        <input id="search" placeholder="بحث بالعنوان أو رقم التذكرة..." />
+        <select id="filterStatus">
+          <option value="all">كل الحالات</option>
+          <option value="open">مفتوح</option>
+          <option value="progress">قيد المعالجة</option>
+          <option value="closed">مغلق</option>
+        </select>
+        <select id="filterPriority">
+          <option value="all">كل الأولويات</option>
+          <option value="low">منخفضة</option>
+          <option value="medium">متوسطة</option>
+          <option value="high">مرتفعة</option>
+        </select>
+      </div>
+
+      <div id="tickets" class="tickets"></div>
+      <div id="empty" class="empty" style="display:none;">لا توجد تذاكر حالياً</div>
+    </section>
   </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "j3an.support.tickets.v1";
+
+    const ticketForm = document.getElementById("ticketForm");
+    const ticketsEl = document.getElementById("tickets");
+    const emptyEl = document.getElementById("empty");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+
+    const searchEl = document.getElementById("search");
+    const filterStatusEl = document.getElementById("filterStatus");
+    const filterPriorityEl = document.getElementById("filterPriority");
+
+    const countAll = document.getElementById("countAll");
+    const countOpen = document.getElementById("countOpen");
+    const countClosed = document.getElementById("countClosed");
+    const toastEl = document.getElementById("toast");
+
+    let tickets = loadTickets();
+
+    function showToast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toastEl.classList.remove("show"), 1800);
+    }
+
+    function loadTickets(){
+      try{
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      }catch{
+        return [];
+      }
+    }
+
+    function saveTickets(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+    }
+
+    function generateId(){
+      const n = Math.floor(1000 + Math.random()*9000);
+      return "TCK-" + new Date().getFullYear() + "-" + n;
+    }
+
+    function statusLabel(status){
+      if(status === "open") return "مفتوح";
+      if(status === "progress") return "قيد المعالجة";
+      return "مغلق";
+    }
+
+    function priorityLabel(p){
+      if(p === "low") return "منخفضة";
+      if(p === "medium") return "متوسطة";
+      return "مرتفعة";
+    }
+
+    function createTicketCard(t){
+      const div = document.createElement("div");
+      div.className = "ticket";
+
+      div.innerHTML = `
+        <div class="ticket-head">
+          <div>
+            <div class="ticket-id">${t.id}</div>
+            <div class="ticket-title">${escapeHtml(t.title)}</div>
+          </div>
+          <small style="color:#94a3b8;font-size:11px">${formatDate(t.createdAt)}</small>
+        </div>
+
+        <div class="meta">
+          <span class="chip st-${t.status}">${statusLabel(t.status)}</span>
+          <span class="chip pr-${t.priority}">أولوية: ${priorityLabel(t.priority)}</span>
+          <span class="chip" style="border-color:#e2e8f0;color:#334155;background:#f8fafc">${escapeHtml(t.category)}</span>
+        </div>
+
+        <p>${escapeHtml(t.message)}</p>
+
+        <div class="meta" style="margin-bottom:8px">
+          <span class="chip" style="border-color:#e2e8f0;color:#334155;background:#fff">👤 ${escapeHtml(t.name)}</span>
+          ${t.phone ? `<span class="chip" style="border-color:#e2e8f0;color:#334155;background:#fff">📞 ${escapeHtml(t.phone)}</span>` : ""}
+        </div>
+
+        <div class="ticket-actions">
+          ${t.status !== "progress" ? `<button class="act-progress" data-act="progress" data-id="${t.id}">قيد المعالجة</button>` : ""}
+          ${t.status !== "closed" ? `<button class="act-close" data-act="closed" data-id="${t.id}">إغلاق</button>` : ""}
+          ${t.status !== "open" ? `<button class="act-open" data-act="open" data-id="${t.id}">إعادة فتح</button>` : ""}
+          <button class="act-del" data-act="delete" data-id="${t.id}">حذف</button>
+        </div>
+      `;
+      return div;
+    }
+
+    function formatDate(iso){
+      const d = new Date(iso);
+      return d.toLocaleString("ar-DZ", {
+        year:"numeric", month:"2-digit", day:"2-digit",
+        hour:"2-digit", minute:"2-digit"
+      });
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderStats(){
+      countAll.textContent = tickets.length;
+      countOpen.textContent = tickets.filter(t=>t.status==="open" || t.status==="progress").length;
+      countClosed.textContent = tickets.filter(t=>t.status==="closed").length;
+    }
+
+    function getFilteredTickets(){
+      const q = searchEl.value.trim().toLowerCase();
+      const st = filterStatusEl.value;
+      const pr = filterPriorityEl.value;
+
+      return tickets
+        .filter(t => {
+          const matchQ =
+            t.title.toLowerCase().includes(q) ||
+            t.id.toLowerCase().includes(q) ||
+            t.message.toLowerCase().includes(q);
+
+          const matchStatus = st === "all" ? true : t.status === st;
+          const matchPriority = pr === "all" ? true : t.priority === pr;
+          return matchQ && matchStatus && matchPriority;
+        })
+        .sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    function renderTickets(){
+      renderStats();
+
+      const list = getFilteredTickets();
+      ticketsEl.innerHTML = "";
+
+      if(!list.length){
+        emptyEl.style.display = "block";
+        return;
+      }
+      emptyEl.style.display = "none";
+
+      list.forEach(t => ticketsEl.appendChild(createTicketCard(t)));
+    }
+
+    ticketForm.addEventListener("submit", (e)=>{
+      e.preventDefault();
+
+      const newTicket = {
+        id: generateId(),
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        category: document.getElementById("category").value,
+        priority: document.getElementById("priority").value,
+        title: document.getElementById("title").value.trim(),
+        message: document.getElementById("message").value.trim(),
+        status: "open",
+        createdAt: new Date().toISOString()
+      };
+
+      if(!newTicket.name || !newTicket.title || !newTicket.message){
+        showToast("يرجى تعبئة الحقول المطلوبة");
+        return;
+      }
+
+      tickets.push(newTicket);
+      saveTickets();
+      renderTickets();
+      ticketForm.reset();
+      showToast("تم إنشاء التذكرة بنجاح ✅");
+    });
+
+    ticketsEl.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button[data-act]");
+      if(!btn) return;
+
+      const id = btn.getAttribute("data-id");
+      const act = btn.getAttribute("data-act");
+      const idx = tickets.findIndex(t=>t.id===id);
+      if(idx === -1) return;
+
+      if(act === "delete"){
+        if(!confirm("هل أنت متأكد من حذف هذه التذكرة؟")) return;
+        tickets.splice(idx,1);
+        showToast("تم حذف التذكرة");
+      }else{
+        tickets[idx].status = act;
+        showToast("تم تحديث حالة التذكرة");
+      }
+
+      saveTickets();
+      renderTickets();
+    });
+
+    [searchEl, filterStatusEl, filterPriorityEl].forEach(el=>{
+      el.addEventListener("input", renderTickets);
+      el.addEventListener("change", renderTickets);
+    });
+
+    clearAllBtn.addEventListener("click", ()=>{
+      if(!tickets.length){
+        showToast("لا توجد تذاكر للحذف");
+        return;
+      }
+      if(!confirm("سيتم حذف جميع التذاكر، هل تريد المتابعة؟")) return;
+      tickets = [];
+      saveTickets();
+      renderTickets();
+      showToast("تم حذف كل التذاكر");
+    });
+
+    renderTickets();
+  </script>
 </body>
 </html>
